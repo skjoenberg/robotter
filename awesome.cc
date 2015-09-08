@@ -8,9 +8,9 @@ using namespace PlayerCc;
 #define MIN_DISTANCE 1.0
 
 void back_the_fuck_up(Position2dProxy* pp, PlayerClient* robert) {
-    pp->setSpeed(-0.3, 0.0);
+    pp->SetSpeed(-0.3, 0.0);
     sleep(2);
-    pp->setSpeed(0.0, 0.0);
+    pp->SetSpeed(0.0, 0.0);
 }
 
 bool obsFront(IrProxy* ir) {
