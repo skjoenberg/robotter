@@ -13,6 +13,10 @@ void back_the_fuck_up(Position2dProxy* pp, PlayerClient* robert) {
     pp->SetSpeed(0.0, 0.0);
 }
 
+void go_bot_go(Position2dProxy* pp) {
+    pp->SetSpeed(0.3, 0.0);
+}
+
 bool obsFront(IrProxy* ir) {
     return (ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) ||
         (ir->GetRange(SCORPION_IR_TE_NNW) < MIN_DISTANCE) ||
@@ -30,28 +34,10 @@ bool obsRight(IrProxy* ir) {
 
 void turnRight(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
     pp->SetSpeed(0.0, -0.5);
-    while((ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) &&
-          (ir->GetRange(SCORPION_IR_BN_NE) < MIN_DISTANCE)) {
-        robert->Read();
-    }
-    pp->SetSpeed(0.0, 0.0);
 }
 
 void turnLeft(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
     pp->SetSpeed(0.0, 0.5);
-    while((ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) &&
-          (ir->GetRange(SCORPION_IR_BN_NW) < MIN_DISTANCE)) {
-        robert->Read();
-    }
-    pp->SetSpeed(0.0, 0.0);
-}
-
-void frontAction(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
-    pp->SetSpeed(0.0, 0.5);
-    while(obsFront(ir)) {
-        robert->Read();
-    }
-    pp->SetSpeed(0.0, 0.0);
 }
 
 int main(int argc, char** argv) {
@@ -71,21 +57,20 @@ int main(int argc, char** argv) {
     while (1) {
         robert.Read();
 
-        pp.SetSpeed(0.3, 0.0);
-
         // handle object in front
         if (bumper.IsAnyBumped()) {
             back_the_fuck_up(&pp, &robert);
         }
-        if (obsLeft(&ir)){
+        else if (obsLeft(&ir)){
             turnRight(&pp, &ir, &robert);
         }
-        if (obsRight(&ir)) {
+        else if (obsRight(&ir)) {
             turnLeft(&pp, &ir, &robert);
         }
-        if (obsFront(&ir)) {
-            frontAction(&pp, &ir, &robert);
+        else if (obsFront(&ir)) {
+            turnLeft(&pp, &ir, &robert);
+        } else {
+            go_bot_go(&pp);
         }
-
     }
 }
