@@ -45,7 +45,7 @@ void turnLeft(Position2dProxy* pp, IrProxy* ir, PlayerClient* robot) {
 void frontAction(Position2dProxy* pp, IrProxy* ir, PlayerClient* robot) {
     pp->SetSpeed(0.0, 0.5);
     while(obsFront(&ir)) {
-        robot->read();
+        robot->Read();
         sleep(1);
     }
     pp->SetSpeed(0.0, 0.0);
