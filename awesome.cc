@@ -33,7 +33,6 @@ void turnRight(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
     while((ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) &&
           (ir->GetRange(SCORPION_IR_BN_NE) < MIN_DISTANCE)) {
         robert->Read();
-        sleep(1);
     }
     pp->SetSpeed(0.0, 0.0);
 }
@@ -43,7 +42,6 @@ void turnLeft(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
     while((ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) &&
           (ir->GetRange(SCORPION_IR_BN_NW) < MIN_DISTANCE)) {
         robert->Read();
-        sleep(1);
     }
     pp->SetSpeed(0.0, 0.0);
 }
@@ -52,7 +50,6 @@ void frontAction(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
     pp->SetSpeed(0.0, 0.5);
     while(obsFront(ir)) {
         robert->Read();
-        sleep(1);
     }
     pp->SetSpeed(0.0, 0.0);
 }
