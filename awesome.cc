@@ -7,6 +7,21 @@ using namespace PlayerCc;
 
 #define MIN_DISTANCE 1.0
 
+bool obsFront(IrProxy* ir) {
+    return (ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) ||
+        (ir->GetRange(SCORPION_IR_TE_NW) < MIN_DISTANCE) ||
+        (ir->GetRange(SCORPION_IR_TE_NE) < MIN_DISTANCE);
+
+}
+
+bool obsLeft(IrProxy* ir) {
+    return (ir->GetRange(SCORPION_IR_BN_NW) < MIN_DISTANCE);
+}
+
+bool obsright(IrProxy* ir) {
+    return (ir->GetRange(SCORPION_IR_BN_NE) < MIN_DISTANCE);
+}
+
 void turnRight(Position2dProxy* pp, IrProxy* ir, PlayerClient* robot) {
     pp->SetSpeed(0.0, -0.5);
     while((ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) &&
@@ -27,10 +42,17 @@ void turnLeft(Position2dProxy* pp, IrProxy* ir, PlayerClient* robot) {
     pp->SetSpeed(0.0, 0.0);
 }
 
+void frontAction(Position2dProxy* pp, IrProxy* ir, PlayerClient* robot) {
+    pp->SetSpeed(0.0, 0.5);
+    while(obsFront(&ir)) {
+        robot->read();
+        sleep(1);
+    }
+    pp->SetSpeed(0.0, 0.0);
+}
+
 int main(int argc, char** argv) {
     printf("Starter\n");
-
-
 
     // Objekter
     PlayerClient robot(gHostname, gPort);
@@ -41,25 +63,21 @@ int main(int argc, char** argv) {
     robot.SetDataMode(PLAYER_DATAMODE_PULL);
     robot.SetReplaceRule(true, PLAYER_MSGTYPE_DATA, -1);
 
-    bool obs_front = false;
-    bool obs_right = false;
-    bool obs_left = false;
-
     // LÃÂS LASER!
     while (1) {
         robot.Read();
 
         pp.SetSpeed(0.3, 0.0);
-        obs_front = (ir.GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE);
-        obs_right = (ir.GetRange(SCORPION_IR_BN_NE) < MIN_DISTANCE);
-        obs_left = (ir.GetRange(SCORPION_IR_BN_NW) < MIN_DISTANCE);
 
         // handle object in front
-        if (obs_left){
-                turnRight(&pp, &ir, &robot);
+        if (obsLeft(&ir)){
+            turnRight(&pp, &ir, &robot);
         }
-        if (obs_right) {
-                turnLeft(&pp, &ir, &robot);
+        if (obsRight(&ir)) {
+            turnLeft(&pp, &ir, &robot);
+        }
+        if (obsFront(&ir)) {
+            frontAction(&pp, &ir, &robot);
         }
 
     }
