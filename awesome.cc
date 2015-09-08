@@ -9,8 +9,8 @@ using namespace PlayerCc;
 
 bool obsFront(IrProxy* ir) {
     return (ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) ||
-        (ir->GetRange(SCORPION_IR_TE_NW) < MIN_DISTANCE) ||
-        (ir->GetRange(SCORPION_IR_TE_NE) < MIN_DISTANCE);
+        (ir->GetRange(SCORPION_IR_TE_NNW) < MIN_DISTANCE) ||
+        (ir->GetRange(SCORPION_IR_TW_NNE) < MIN_DISTANCE);
 
 }
 
@@ -18,7 +18,7 @@ bool obsLeft(IrProxy* ir) {
     return (ir->GetRange(SCORPION_IR_BN_NW) < MIN_DISTANCE);
 }
 
-bool obsright(IrProxy* ir) {
+bool obsRight(IrProxy* ir) {
     return (ir->GetRange(SCORPION_IR_BN_NE) < MIN_DISTANCE);
 }
 
