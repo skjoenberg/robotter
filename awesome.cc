@@ -21,7 +21,6 @@ bool obsFront(IrProxy* ir) {
     return (ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) ||
         (ir->GetRange(SCORPION_IR_TE_NNW) < MIN_DISTANCE) ||
         (ir->GetRange(SCORPION_IR_TW_NNE) < MIN_DISTANCE);
-
 }
 
 bool obsLeft(IrProxy* ir) {
@@ -40,6 +39,10 @@ void turnLeft(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
     pp->SetSpeed(0.0, 0.5);
 }
 
+void frontAction(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
+    pp->SetSpeed(0.0, 0.5);
+}
+
 int main(int argc, char** argv) {
     printf("Starter\n");
 
@@ -49,7 +52,7 @@ int main(int argc, char** argv) {
     IrProxy ir(&robert, gIndex);
     BumperProxy bumper(&robert);
 
-    //streaming data instead of buffering
+    // Streaming data instead of buffering
     robert.SetDataMode(PLAYER_DATAMODE_PULL);
     robert.SetReplaceRule(true, PLAYER_MSGTYPE_DATA, -1);
 
