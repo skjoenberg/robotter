@@ -5,22 +5,6 @@
 #include <scorpion.h>
 using namespace PlayerCc;
 
-bool obsFront(IrProxy* ir) {
-    return (ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) ||
-        (ir->GetRange(SCORPION_IR_TE_NNW) < MIN_DISTANCE) ||
-        (ir->GetRange(SCORPION_IR_TW_NNE) < MIN_DISTANCE);
-}
-
-bool obsLeft(IrProxy* ir) {
-    return (ir->GetRange(SCORPION_IR_BN_NW) < MIN_DISTANCE ||
-            ir->GetRange(SCORPION_IR_TW_NNW));
-}
-
-bool obsRight(IrProxy* ir) {
-    return (ir->GetRange(SCORPION_IR_BN_NE) < MIN_DISTANCE ||
-            ir->GetRange(SCORPION_IR_TE_NNE));
-}
-
 int main(int argc, char** argv) {
      // Objekter
     PlayerClient robert(gHostname, gPort);
