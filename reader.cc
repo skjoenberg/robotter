@@ -33,8 +33,8 @@ int main(int argc, char** argv) {
     robert.SetReplaceRule(true, PLAYER_MSGTYPE_DATA, -1);
 
     while(1) {
-        cout << SCORPION_IR_TE_NNW << "   "
-             << SCORPION_IR_BN_N << "   "
-             << SCORPION_IR_TW_NNE;
+        printf("%f   %f    %f", SCORPION_IR_TE_NNW, SCORPION_IR_BN_N, SCORPION_IR_TW_NNE);
+
+
     }
 }
