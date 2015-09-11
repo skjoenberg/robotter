@@ -5,7 +5,7 @@
 #include <scorpion.h>
 using namespace PlayerCc;
 
-#define MIN_DISTANCE 1.0
+#define MIN_DISTANCE 0.70
 
 void back_the_fuck_up(Position2dProxy* pp, PlayerClient* robert) {
     pp->SetSpeed(-0.3, 0.0);
@@ -24,11 +24,13 @@ bool obsFront(IrProxy* ir) {
 }
 
 bool obsLeft(IrProxy* ir) {
-    return (ir->GetRange(SCORPION_IR_BN_NW) < MIN_DISTANCE);
+    return (ir->GetRange(SCORPION_IR_BN_NW) < MIN_DISTANCE ||
+            ir->GetRange(SCORPION_IR_TW_NNW));
 }
 
 bool obsRight(IrProxy* ir) {
-    return (ir->GetRange(SCORPION_IR_BN_NE) < MIN_DISTANCE);
+    return (ir->GetRange(SCORPION_IR_BN_NE) < MIN_DISTANCE ||
+            ir->GetRange(SCORPION_IR_TE_NNE));
 }
 
 void turnRight(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
