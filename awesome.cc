@@ -9,7 +9,7 @@ using namespace PlayerCc;
 #define SPEED 0.2
 
 void forward(Position2dProxy* pp) {
-    pp->SetSpeed(SPEED, 0.0);
+        pp->SetSpeed(SPEED, 0.0);
 }
 
 bool obsFront(IrProxy* ir) {
@@ -31,6 +31,16 @@ bool obsLeft(IrProxy* ir) {
 bool obsRight(IrProxy* ir) {
     return (ir->GetRange(SCORPION_IR_BN_NE) < (MIN_DISTANCE-0.1) ||
             ir->GetRange(SCORPION_IR_TE_NNE) < (MIN_DISTANCE-0.1));
+}
+
+bool obsWeakLeft(IrProxy* ir) {
+    return (ir->GetRange(SCORPION_IR_BN_NW) < (MIN_DISTANCE-0.2) ||
+            ir->GetRange(SCORPION_IR_TW_NNW) < (MIN_DISTANCE-0.2));
+}
+
+bool obsWeakRight(IrProxy* ir) {
+    return (ir->GetRange(SCORPION_IR_BN_NE) < (MIN_DISTANCE-0.2) ||
+            ir->GetRange(SCORPION_IR_TE_NNE) < (MIN_DISTANCE-0.2));
 }
 
 void turnRight(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
@@ -69,7 +79,7 @@ int main(int argc, char** argv) {
 
     // Variables
     int turns = 0;
-
+    bool turning = 0;
 
     // Player objects
     PlayerClient robert(gHostname, gPort);
@@ -88,14 +98,30 @@ int main(int argc, char** argv) {
         robert.Read();
         printf("Turns: %d.\n", turns);
 
+        if (turning) {
+            printf("Turning mode activate!\n");
+            while (obsRight(&ir) || obsLeft(&ir)) {
+                robert.Read();
+                if (obsWeakRight(&ir)) {
+                    turnLeft(&pp, &ir, &robert);
+                }
+                else if (obsWeakLeft(&ir)) {
+                    turnRight(&pp, &ir, &robert);
+                }
+                else {
+                    pp.SetSpeed(0.1, 0.0); // FIX
+                }
+            }
+            printf("Turning mode deactive!\n");
+            turns = 0;
+            turning = 0;
+        }
         // Check bumper
-        if (bumper.IsAnyBumped()) {
+        else if (bumper.IsAnyBumped()) {
             reverse(&pp, &ir, &robert);
         }
-        else if (turns > 60) {
-            turns = 0;
-            pp.SetSpeed(-SPEED, 0.0);
-            sleep(1);
+        else if (turns > 40) { // LAV MAX_TURNS
+            turning = 1;
         }
         // Check front
         else if (obsFront(&ir)) {
