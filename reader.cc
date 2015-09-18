@@ -17,7 +17,8 @@ int main(int argc, char** argv) {
     robert.SetReplaceRule(true, PLAYER_MSGTYPE_DATA, -1);
 
     while(1) {
-        printf("%f   %f    %f \n", SCORPION_IR_TE_NNW, SCORPION_IR_BN_N, SCORPION_IR_TW_NNE);
+        robert.Read();
+        printf("NNW: %f, N: %f, NNE: %f.\n", ir.GetRange(SCORPION_IR_TE_NNW), ir.GetRange(SCORPION_IR_BN_N), ir.GetRange(SCORPION_IR_TW_NNE));
         sleep(1);
     }
 }
