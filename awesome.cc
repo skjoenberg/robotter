@@ -5,16 +5,11 @@
 #include <scorpion.h>
 using namespace PlayerCc;
 
-#define MIN_DISTANCE 0.70
+#define MIN_DISTANCE 0.50
+#define SPEED 0.2
 
-void back_the_fuck_up(Position2dProxy* pp, PlayerClient* robert) {
-    pp->SetSpeed(-0.3, 0.0);
-    sleep(2);
-    pp->SetSpeed(0.0, 0.0);
-}
-
-void go_bot_go(Position2dProxy* pp) {
-    pp->SetSpeed(0.3, 0.0);
+void forward(Position2dProxy* pp) {
+        pp->SetSpeed(SPEED, 0.0);
 }
 
 bool obsFront(IrProxy* ir) {
@@ -23,32 +18,70 @@ bool obsFront(IrProxy* ir) {
         (ir->GetRange(SCORPION_IR_TW_NNE) < MIN_DISTANCE);
 }
 
+bool obsBack(IrProxy* ir) {
+    return (ir->GetRange(SCORPION_IR_BW_S) < MIN_DISTANCE) ||
+        (ir->GetRange(SCORPION_IR_BE_S) < MIN_DISTANCE);
+}
+
 bool obsLeft(IrProxy* ir) {
-    return (ir->GetRange(SCORPION_IR_BN_NW) < MIN_DISTANCE ||
-            ir->GetRange(SCORPION_IR_TW_NNW));
+    return (ir->GetRange(SCORPION_IR_BN_NW) < (MIN_DISTANCE-0.1) ||
+            ir->GetRange(SCORPION_IR_TW_NNW) < (MIN_DISTANCE-0.1));
 }
 
 bool obsRight(IrProxy* ir) {
-    return (ir->GetRange(SCORPION_IR_BN_NE) < MIN_DISTANCE ||
-            ir->GetRange(SCORPION_IR_TE_NNE));
+    return (ir->GetRange(SCORPION_IR_BN_NE) < (MIN_DISTANCE-0.1) ||
+            ir->GetRange(SCORPION_IR_TE_NNE) < (MIN_DISTANCE-0.1));
+}
+
+bool obsWeakLeft(IrProxy* ir) {
+    return (ir->GetRange(SCORPION_IR_BN_NW) < (MIN_DISTANCE-0.2) ||
+            ir->GetRange(SCORPION_IR_TW_NNW) < (MIN_DISTANCE-0.2));
+}
+
+bool obsWeakRight(IrProxy* ir) {
+    return (ir->GetRange(SCORPION_IR_BN_NE) < (MIN_DISTANCE-0.2) ||
+            ir->GetRange(SCORPION_IR_TE_NNE) < (MIN_DISTANCE-0.2));
 }
 
 void turnRight(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
     pp->SetSpeed(0.0, -0.5);
+    while (obsFront(ir)) {
+        robert->Read();
+    }
 }
 
 void turnLeft(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
     pp->SetSpeed(0.0, 0.5);
+    while (obsFront(ir)) {
+        robert->Read();
+    }
 }
 
-void frontAction(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
-    pp->SetSpeed(0.0, 0.5);
+
+void reverse(Position2dProxy* pp, IrProxy* ir, PlayerClient* robert) {
+    // Reverse
+    pp->SetSpeed(-SPEED, 0.0);
+
+    // Check front
+    while (obsFront(ir)) {
+        robert->Read();
+
+        // Check back
+        if (obsBack(ir)) {
+            break;
+        }
+    }
+    pp->SetSpeed(0.0, 0.0);
 }
 
 int main(int argc, char** argv) {
-    printf("Starter\n");
+    printf("Initializing thrusters!\n");
 
-    // Objekter
+    // Variables
+    int turns = 0;
+    bool turning = 0;
+
+    // Player objects
     PlayerClient robert(gHostname, gPort);
     Position2dProxy pp(&robert, gIndex);
     IrProxy ir(&robert, gIndex);
@@ -58,24 +91,66 @@ int main(int argc, char** argv) {
     robert.SetDataMode(PLAYER_DATAMODE_PULL);
     robert.SetReplaceRule(true, PLAYER_MSGTYPE_DATA, -1);
 
-    // LÃÂS LASER!
+    printf("Ready for take-off!\n");
+    // Drive!
     while (1) {
+        // Get sensor information
         robert.Read();
+        printf("Turns: %d.\n", turns);
 
-        // handle object in front
-        if (bumper.IsAnyBumped()) {
-            back_the_fuck_up(&pp, &robert);
+        if (turning) {
+            printf("Turning mode activate!\n");
+            while (obsRight(&ir) || obsLeft(&ir)) {
+                robert.Read();
+                if (obsWeakRight(&ir)) {
+                    turnLeft(&pp, &ir, &robert);
+                }
+                else if (obsWeakLeft(&ir)) {
+                    turnRight(&pp, &ir, &robert);
+                }
+                else {
+                    pp.SetSpeed(0.1, 0.0); // FIX
+                }
+            }
+            printf("Turning mode deactive!\n");
+            turns = 0;
+            turning = 0;
         }
+        // Check bumper
+        else if (bumper.IsAnyBumped()) {
+            reverse(&pp, &ir, &robert);
+        }
+        else if (turns > 40) { // LAV MAX_TURNS
+            turning = 1;
+        }
+        // Check front
+        else if (obsFront(&ir)) {
+            turns++;
+            // Turn left or right
+            if (obsRight(&ir)) {
+                turnLeft(&pp, &ir, &robert);
+            }
+            else {
+                turnRight(&pp, &ir, &robert);
+            }
+        }
+
+        // Check front-left and adjust
         else if (obsLeft(&ir)){
+            turns++;
             turnRight(&pp, &ir, &robert);
         }
+
+        // Check front-right and adjust
         else if (obsRight(&ir)) {
+            turns++;
             turnLeft(&pp, &ir, &robert);
         }
-        else if (obsFront(&ir)) {
-            turnLeft(&pp, &ir, &robert);
-        } else {
-            go_bot_go(&pp);
+
+        // Continue driving forward
+        else {
+            turns = 0;
+            forward(&pp);
         }
     }
 }
