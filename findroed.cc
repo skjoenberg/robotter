@@ -1,6 +1,7 @@
 #include <iostream>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/features2d.hpp"
 
 using namespace cv;
 using namespace std;
@@ -40,9 +41,6 @@ int main( int argc, char** argv )
 
     createTrackbar("LowV", "Control", &iLowV, 255);//Value (0 - 255)
     createTrackbar("HighV", "Control", &iHighV, 255);
-
-    int iLastX = -1;
-    int iLastY = -1;
 
     //Capture a temporary image from the camera
     Mat imgTmp;
@@ -87,39 +85,67 @@ int main( int argc, char** argv )
             erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
             dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
-            //morphological closing (removes small holes from the foreground)
-            dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-            erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
-            //Calculate the moments of the thresholded image
-            Moments oMoments = moments(imgThresholded);
+            // Setup SimpleBlobDetector parameters.
+            SimpleBlobDetector::Params params;
 
-            double dM01 = oMoments.m01;
-            double dM10 = oMoments.m10;
-            double dArea = oMoments.m00;
+            // Change thresholds
+            params.minThreshold = 20;
+            params.maxThreshold = 160;
 
-            // if the area <= 10000, I consider that the there are no object in the image and it's because of the noise, the area is not zero
-            if (dArea > 10000)
-                {
-                    //calculate the position of the ball
-                    int posX = dM10 / dArea;
-                    int posY = dM01 / dArea;
+            // BlobColor
+             params.blobColor = 255;
 
-                    cout << "x: " << posX << " y: " << posY << " area: " << dArea << endl;
-                    if (iLastX >= 0 && iLastY >= 0 && posX >= 0 && posY >= 0)
-                        {
-                            //Draw a red line from the previous point to the current point
-                            line(imgLines, Point(posX, posY), Point(iLastX, iLastY), Scalar(0,0,255), 2);
+            // Filter by Area.
+            params.filterByArea = true;
+            params.minArea = 20;
+            params.maxArea = 999999;
 
-                        }
+            // Filter by Circularity
+            params.filterByCircularity = false;
+            params.minCircularity = 0.1;
 
-                    iLastX = posX;
-                    iLastY = posY;
+            // Filter by Convexity
+            params.filterByConvexity = false;
+            params.minConvexity = 0.87;
+
+            // Filter by Inertia
+            params.filterByInertia = false;
+            params.minInertiaRatio = 0.01;
+
+            //            SimpleBlobDetector detector(params);
+            Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
+
+            // Storage for blobs
+            std::vector<KeyPoint> keypoints;
+
+            // Detect blobs
+            detector->detect(imgThresholded, keypoints);
+
+            // Draw detected blobs as red circles.
+            // DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures
+            // the size of the circle corresponds to the size of blob
+
+            Mat im_with_keypoints;
+            drawKeypoints(imgOriginal, keypoints, im_with_keypoints, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+            drawKeypoints(imgThresholded, keypoints, im_with_keypoints, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+
+            int best = 0;
+            for(int i = 0; i < keypoints.size(); i++) {
+                if (keypoints[i].size > keypoints[best].size) {
+                    best = i;
                 }
+            }
+            if (keypoints.size() > 0) {
+                float size = keypoints[best].size;
+                Point2f pt = keypoints[best].pt;
 
+                cout << "size = " << size << " x = " << pt.x << " y = " << pt.y << endl;
+            }
+
+            // Show blobs
+            imshow("keypoints", im_with_keypoints);
             imshow("Thresholded Image", imgThresholded); //show the thresholded image
-
-            imgOriginal = imgOriginal + imgLines;
             imshow("Original", imgDst); //show the original image
 
 
