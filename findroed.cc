@@ -185,13 +185,12 @@ int main( int argc, char** argv ) {
         default:
             cout << "u don goofed" << endl;
             return 0;
-
-            if (waitKey(30) == 27) {
-                cout << "esc key is pressed by user" << endl;
-                break;
-            }
         }
 
-        return 0;
+        if (waitKey(30) == 27) {
+            cout << "esc key is pressed by user" << endl;
+            break;
+        }
     }
+    return 0;
 }
