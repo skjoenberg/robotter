@@ -32,7 +32,7 @@ int iLowV;
 int iHighV;
 int iLowH2;
 int iHighH2;
-int blur;
+int iBlur;
 
 // Player objects
 PlayerClient robert("172.16.187.128");
@@ -42,6 +42,7 @@ BumperProxy bumper(&robert);
 
 void findBox() {
     counter360++;
+    printf("%d", counter360);
     pp.SetSpeed(0.0, 0.2);
 }
 
@@ -91,7 +92,7 @@ int main( int argc, char** argv ) {
     iHighH2 = 10;
 
     // Blur variable (used in gaussian blur)
-    blur = 51;
+    iBlur = 51;
 
     // Create trackbars in the Control window
     createTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
@@ -122,7 +123,7 @@ int main( int argc, char** argv ) {
         }
 
         // Filter the frame using guassian blur
-        GaussianBlur(imgOriginal, imgDst, Size(blur, blur), 0, 0);
+        GaussianBlur(imgOriginal, imgDst, Size(iBlur, iBlur), 0, 0);
 
         // Convert the captured frame from BGR to HSV
         cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);

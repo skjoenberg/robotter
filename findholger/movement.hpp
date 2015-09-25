@@ -1,3 +1,8 @@
+#include <libplayerc++/playerc++.h>
+#include <iostream>
+#include <time.h>
+#include "scorpion.h"
+using namespace PlayerCc;
 #define MIN_DISTANCE 0.30
 #define SPEED 0.2
 

@@ -1,9 +1,3 @@
-#include <libplayerc++/playerc++.h>
-#include <iostream>
-#include <time.h>
-#include "scorpion.h"
-using namespace PlayerCc;
-
 void forward(Position2dProxy* pp) {
         pp->SetSpeed(SPEED, 0.0);
 }
