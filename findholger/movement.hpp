@@ -1,4 +1,4 @@
-#define MIN_DISTANCE 0.20
+#define MIN_DISTANCE 0.30
 #define SPEED 0.2
 
 void forward(Position2dProxy* pp);
