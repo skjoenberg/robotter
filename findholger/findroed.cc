@@ -40,6 +40,80 @@ Position2dProxy pp(&robert);
 IrProxy ir(&robert);
 BumperProxy bumper(&robert);
 
+float cameraGO(VideoCapture* cap) {
+    // Read a new frame from video
+    bSuccess = cap->read(imgOriginal);
+
+    // Error handling for the camera
+    if (!bSuccess) {
+        cout << "Cannot read a frame from video stream" << endl;
+        break;
+    }
+
+    // Filter the frame using guassian blur
+    GaussianBlur(imgOriginal, imgDst, Size(iBlur, iBlur), 0, 0);
+
+    // Convert the captured frame from BGR to HSV
+    cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
+
+    // Two thresholds are needed to succesfully capture the color red
+    inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
+    inRange(imgHSV, Scalar(iLowH2, iLowS, iLowV), Scalar(iHighH2, iHighS, iHighV), imgThresholded2);
+
+    // Merge the thresholds
+    imgThresholded = imgThresholded + imgThresholded2;
+
+    // Morphological opening (removes small objects from the foreground)
+    erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+    dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+
+    // Setup SimpleBlobDetector parameters.
+    // Change thresholds
+    params.minThreshold = 20;
+    params.maxThreshold = 160;
+
+    // BlobColor
+    params.blobColor = 255;
+
+    // Filter by Area (and other blob settings)
+    params.filterByArea = true;
+    params.minArea = 20;
+    params.maxArea = 999999;
+
+    params.filterByCircularity = false;
+    params.filterByConvexity = false;
+    params.filterByInertia = false;
+
+    SimpleBlobDetector detector(params);
+    //Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params); // Used with opencv3
+
+    // Detect blobs
+    detector.detect(imgThresholded, keypoints);
+
+    // Draw detected blobs as red circles.
+    // DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures
+    // the size of the circle corresponds to the size of blob
+
+    drawKeypoints(imgOriginal, keypoints, imgOriginal, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    drawKeypoints(imgThresholded, keypoints, imgThresholded, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+
+    best = 0;
+    for(int i = 0; i < keypoints.size(); i++) {
+        if (keypoints[i].size > keypoints[best].size) {
+            best = i;
+        }
+    }
+
+    if (keypoints.size() > 0) {
+        blobpos = keypoints[best].pt;
+    }
+
+    imshow("Thresholded Image", imgThresholded); //show the thresholded image
+    imshow("Original", imgOriginal); //show the original image
+
+    return blobpos.x;
+}
+
 void findBox() {
     counter360++;
     printf("%d", counter360);
@@ -113,84 +187,15 @@ int main( int argc, char** argv ) {
 
     counter360 = 0;
     while (true) {
-        // Read a new frame from video
-        bSuccess = cap.read(imgOriginal);
-
-        // Error handling for the camera
-        if (!bSuccess) {
-            cout << "Cannot read a frame from video stream" << endl;
-            break;
-        }
-
-        // Filter the frame using guassian blur
-        GaussianBlur(imgOriginal, imgDst, Size(iBlur, iBlur), 0, 0);
-
-        // Convert the captured frame from BGR to HSV
-        cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
-
-        // Two thresholds are needed to succesfully capture the color red
-        inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
-        inRange(imgHSV, Scalar(iLowH2, iLowS, iLowV), Scalar(iHighH2, iHighS, iHighV), imgThresholded2);
-
-        // Merge the thresholds
-        imgThresholded = imgThresholded + imgThresholded2;
-
-        // Morphological opening (removes small objects from the foreground)
-        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-        dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-
-        // Setup SimpleBlobDetector parameters.
-        // Change thresholds
-        params.minThreshold = 20;
-        params.maxThreshold = 160;
-
-        // BlobColor
-        params.blobColor = 255;
-
-        // Filter by Area (and other blob settings)
-        params.filterByArea = true;
-        params.minArea = 20;
-        params.maxArea = 999999;
-
-        params.filterByCircularity = false;
-        params.filterByConvexity = false;
-        params.filterByInertia = false;
-
-        SimpleBlobDetector detector(params);
-        //Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params); // Used with opencv3
-
-        // Detect blobs
-        detector.detect(imgThresholded, keypoints);
-
-        // Draw detected blobs as red circles.
-        // DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures
-        // the size of the circle corresponds to the size of blob
-
-        drawKeypoints(imgOriginal, keypoints, imgOriginal, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-        drawKeypoints(imgThresholded, keypoints, imgThresholded, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-
-        best = 0;
-        for(int i = 0; i < keypoints.size(); i++) {
-            if (keypoints[i].size > keypoints[best].size) {
-                best = i;
-            }
-        }
-
-        if (keypoints.size() > 0) {
-            blobpos = keypoints[best].pt;
-        }
-
-        imshow("Thresholded Image", imgThresholded); //show the thresholded image
-        imshow("Original", imgOriginal); //show the original image
-
+        float blobX = cameraGO(&cap);
         // robot time!
         witb = -1;
-        if (blobpos.x < 220) {
+        if (blobX < 220) {
             witb = 0;
-        } else if (blobpos.x > 220 && blobpos.x < 420) {
+        } else if (blobX > 220 && blobX < 420) {
             //blaze it up faggot
             witb = 1;
-        } else if (blobpos.x > 420) {
+        } else if (blobX > 420) {
             witb = 2;
         }
 
