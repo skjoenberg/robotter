@@ -5,6 +5,7 @@
 #include <libplayerc++/playerc++.h>
 #include <time.h>
 #include "scorpion.h"
+#include "movement.hpp"
 
 using namespace PlayerCc;
 using namespace cv;
@@ -25,7 +26,9 @@ void goLeft() {
 }
 
 void goStraight() {
-    pp.SetSpeed(0.2, 0.0);
+    if(!obsFront){ 
+        pp.SetSpeed(0.2, 0.0);
+    }
 }
 
 void goRight() {
