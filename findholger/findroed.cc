@@ -5,7 +5,7 @@
 #include <libplayerc++/playerc++.h>
 #include <time.h>
 #include "scorpion.h"
-#include "movement.hpp"
+#include "movement.h"
 
 using namespace PlayerCc;
 using namespace cv;
@@ -42,7 +42,7 @@ BumperProxy bumper(&robert);
 
 void findBox() {
     counter360++;
-    printf("%d", counter360);
+    printf("%d\n", counter360);
     pp.SetSpeed(0.0, 0.2);
 }
 
@@ -51,8 +51,11 @@ void goLeft() {
 }
 
 void goStraight() {
-    if(!obsFront){
+    if(!obsFront(&ir)) {
+        printf("Frem!");
         forward(&pp);
+    } else {
+        pp.SetSpeed(0.0, 0.0);
     }
 }
 
@@ -112,6 +115,7 @@ int main( int argc, char** argv ) {
     Mat imgLines = Mat::zeros( imgTmp.size(), CV_8UC3 );;
 
     counter360 = 0;
+    printf("Starting!\n");
     while (true) {
         // Read a new frame from video
         bSuccess = cap.read(imgOriginal);
@@ -178,24 +182,29 @@ int main( int argc, char** argv ) {
 
         if (keypoints.size() > 0) {
             blobpos = keypoints[best].pt;
+        } else {
+            blobpos.x = 0.0;
         }
+
 
         imshow("Thresholded Image", imgThresholded); //show the thresholded image
         imshow("Original", imgOriginal); //show the original image
 
         // robot time!
         witb = -1;
-        if (blobpos.x < 220) {
+        if (blobpos.x < 220.0) {
             witb = 0;
-        } else if (blobpos.x > 220 && blobpos.x < 420) {
+        } else if (blobpos.x > 220.0 && blobpos.x < 420.0) {
             //blaze it up faggot
             witb = 1;
-        } else if (blobpos.x > 420) {
+        } else if (blobpos.x > 420.0) {
             witb = 2;
         }
 
+        printf("witb: %d, blobpos.x: %f\n", witb, blobpos.x);
         switch(witb) {
         case -1:
+            printf("FIND BOX!\n");
             findBox();
             break;
         case 0:
