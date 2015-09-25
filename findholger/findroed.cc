@@ -11,6 +11,29 @@ using namespace PlayerCc;
 using namespace cv;
 using namespace std;
 
+Mat imgOriginal;
+Mat imgHSV;
+Mat imgDst;
+Mat imgThresholded;
+Mat imgThresholded2;
+Mat im_with_keypoints;
+bool bSuccess;
+std::vector<KeyPoint> keypoints;
+SimpleBlobDetector::Params params;
+int best;
+Point2f blobpos;
+int witb;
+int counter360;
+int iLowH;
+int iHighH;
+int iLowS;
+int iHighS;
+int iLowV;
+int iHighV;
+int iLowH2;
+int iHighH2;
+int blur;
+
 // Player objects
 PlayerClient robert("172.16.187.128");
 Position2dProxy pp(&robert);
@@ -18,6 +41,7 @@ IrProxy ir(&robert);
 BumperProxy bumper(&robert);
 
 void findBox() {
+    counter360++;
     pp.SetSpeed(0.0, 0.2);
 }
 
@@ -26,8 +50,8 @@ void goLeft() {
 }
 
 void goStraight() {
-    if(!obsFront){ 
-        pp.SetSpeed(0.2, 0.0);
+    if(!obsFront){
+        forward(&pp);
     }
 }
 
@@ -54,20 +78,20 @@ int main( int argc, char** argv ) {
     namedWindow("Control", CV_WINDOW_AUTOSIZE);
 
     // Some Hue and Saturation settings
-    int iLowH = 160;
-    int iHighH = 179;
+    iLowH = 160;
+    iHighH = 179;
 
-    int iLowS = 167;
-    int iHighS = 255;
+    iLowS = 167;
+    iHighS = 255;
 
-    int iLowV = 160;
-    int iHighV = 255;
+    iLowV = 160;
+    iHighV = 255;
 
-    int iLowH2 = 0;
-    int iHighH2 = 10;
+    iLowH2 = 0;
+    iHighH2 = 10;
 
     // Blur variable (used in gaussian blur)
-    int blur = 51;
+    blur = 51;
 
     // Create trackbars in the Control window
     createTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
@@ -86,21 +110,8 @@ int main( int argc, char** argv ) {
     //Create a black image with the size as the camera output
     Mat imgLines = Mat::zeros( imgTmp.size(), CV_8UC3 );;
 
-    //
+    counter360 = 0;
     while (true) {
-        Mat imgOriginal;
-        Mat imgHSV;
-        Mat imgDst;
-        Mat imgThresholded;
-        Mat imgThresholded2;
-        Mat im_with_keypoints;
-        bool bSuccess;
-        std::vector<KeyPoint> keypoints;
-        SimpleBlobDetector::Params params;
-        int best;
-        Point2f blobpos;
-        int witb;
-
         // Read a new frame from video
         bSuccess = cap.read(imgOriginal);
 
@@ -145,10 +156,7 @@ int main( int argc, char** argv ) {
         params.filterByInertia = false;
 
         SimpleBlobDetector detector(params);
-        //Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params); //Used with opencv3
-
-        // Storage for blobs
-
+        //Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params); // Used with opencv3
 
         // Detect blobs
         detector.detect(imgThresholded, keypoints);
