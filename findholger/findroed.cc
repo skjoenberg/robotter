@@ -33,19 +33,24 @@ void goRight() {
 }
 
 int main( int argc, char** argv ) {
-    //    Streaming data instead of buffering
+    // Streaming data instead of buffering
     robert.SetDataMode(PLAYER_DATAMODE_PULL);
     robert.SetReplaceRule(true, PLAYER_MSGTYPE_DATA, -1);
 
-    VideoCapture cap(0); //capture the video from webcam
+    // Capture the video from webcam
+    VideoCapture cap(0);
 
-    if ( !cap.isOpened() )  // if not success, exit program
+    // Some camera errors
+    if ( !cap.isOpened() )
         {
             cout << "Cannot open the web cam" << endl;
             return -1;
         }
-    namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 
+    // Create a Control window
+    namedWindow("Control", CV_WINDOW_AUTOSIZE);
+
+    // Some Hue and Saturation settings
     int iLowH = 160;
     int iHighH = 179;
 
@@ -58,9 +63,10 @@ int main( int argc, char** argv ) {
     int iLowH2 = 0;
     int iHighH2 = 10;
 
+    // Blur variable (used in gaussian blur)
     int blur = 51;
 
-    //Create trackbars in "Control" window
+    // Create trackbars in the Control window
     createTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
     createTrackbar("HighH", "Control", &iHighH, 179);
 
@@ -77,36 +83,48 @@ int main( int argc, char** argv ) {
     //Create a black image with the size as the camera output
     Mat imgLines = Mat::zeros( imgTmp.size(), CV_8UC3 );;
 
+    //
     while (true) {
         Mat imgOriginal;
+        Mat imgHSV;
+        Mat imgDst;
+        Mat imgThresholded;
+        Mat imgThresholded2;
+        Mat im_with_keypoints;
+        bool bSuccess;
+        std::vector<KeyPoint> keypoints;
+        SimpleBlobDetector::Params params;
+        int best;
+        Point2f blobpos;
+        int witb;
 
-        bool bSuccess = cap.read(imgOriginal); // read a new frame from video
+        // Read a new frame from video
+        bSuccess = cap.read(imgOriginal);
 
+        // Error handling for the camera
         if (!bSuccess) {
             cout << "Cannot read a frame from video stream" << endl;
             break;
         }
 
-        Mat imgHSV;
-        Mat imgDst;
+        // Filter the frame using guassian blur
         GaussianBlur(imgOriginal, imgDst, Size(blur, blur), 0, 0);
 
-        cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+        // Convert the captured frame from BGR to HSV
+        cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
 
-        Mat imgThresholded;
-        Mat imgThresholded2;
-        inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
-        inRange(imgHSV, Scalar(iLowH2, iLowS, iLowV), Scalar(iHighH2, iHighS, iHighV), imgThresholded2); //Threshold the image
+        // Two thresholds are needed to succesfully capture the color red
+        inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
+        inRange(imgHSV, Scalar(iLowH2, iLowS, iLowV), Scalar(iHighH2, iHighS, iHighV), imgThresholded2);
 
+        // Merge the thresholds
         imgThresholded = imgThresholded + imgThresholded2;
 
-        //morphological opening (removes small objects from the foreground)
+        // Morphological opening (removes small objects from the foreground)
         erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
         dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
         // Setup SimpleBlobDetector parameters.
-        SimpleBlobDetector::Params params;
-
         // Change thresholds
         params.minThreshold = 20;
         params.maxThreshold = 160;
@@ -114,7 +132,7 @@ int main( int argc, char** argv ) {
         // BlobColor
         params.blobColor = 255;
 
-        // Filter by Area.
+        // Filter by Area (and other blob settings)
         params.filterByArea = true;
         params.minArea = 20;
         params.maxArea = 999999;
@@ -124,10 +142,10 @@ int main( int argc, char** argv ) {
         params.filterByInertia = false;
 
         SimpleBlobDetector detector(params);
-        //        Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
+        //Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params); //Used with opencv3
 
         // Storage for blobs
-        std::vector<KeyPoint> keypoints;
+
 
         // Detect blobs
         detector.detect(imgThresholded, keypoints);
@@ -136,30 +154,25 @@ int main( int argc, char** argv ) {
         // DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures
         // the size of the circle corresponds to the size of blob
 
-        Mat im_with_keypoints;
         drawKeypoints(imgOriginal, keypoints, imgOriginal, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
         drawKeypoints(imgThresholded, keypoints, imgThresholded, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 
-        int best = 0;
+        best = 0;
         for(int i = 0; i < keypoints.size(); i++) {
             if (keypoints[i].size > keypoints[best].size) {
                 best = i;
             }
         }
-        float blobsize;
-        Point2f blobpos;
+
         if (keypoints.size() > 0) {
-            blobsize = keypoints[best].size;
             blobpos = keypoints[best].pt;
         }
 
         imshow("Thresholded Image", imgThresholded); //show the thresholded image
         imshow("Original", imgOriginal); //show the original image
 
-
         // robot time!
-
-        int witb = -1;
+        witb = -1;
         if (blobpos.x < 220) {
             witb = 0;
         } else if (blobpos.x > 220 && blobpos.x < 420) {
