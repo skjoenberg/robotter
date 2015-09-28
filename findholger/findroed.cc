@@ -22,6 +22,7 @@ std::vector<KeyPoint> keypoints;
 SimpleBlobDetector::Params params;
 int best;
 Point2f blobpos;
+int sliderman;
 int witb;
 int counter360;
 int iLowH;
@@ -186,6 +187,9 @@ int main( int argc, char** argv ) {
     iBlur = 51;
 
     // Create trackbars in the Control window
+    createTrackbar("SE HER", "Control", &sliderman, 0); //Hue (0 - 179)
+
+
     createTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
     createTrackbar("HighH", "Control", &iHighH, 179);
 
