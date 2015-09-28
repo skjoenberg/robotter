@@ -76,7 +76,7 @@ float cameraGO(VideoCapture* cap) {
 
     // Filter by Area (and other blob settings)
     params.filterByArea = true;
-    params.minArea = 20;
+    params.minArea = 40;
     params.maxArea = 999999;
 
     params.filterByCircularity = false;
