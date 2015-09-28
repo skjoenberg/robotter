@@ -129,7 +129,10 @@ void goStraight() {
         printf("Frem!");
         forward(&pp);
     } else {
-        pp.SetSpeed(0.0, 0.0);
+        while(1){
+            printf("%s\n", "Traveling salesman is very ez");
+            pp.SetSpeed(0.0, 0.0);
+        }
     }
 }
 
