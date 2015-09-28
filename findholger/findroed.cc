@@ -124,6 +124,7 @@ void goLeft() {
 }
 
 void goStraight() {
+    robert.Read();
     if(!obsFront(&ir)) {
         printf("Frem!");
         forward(&pp);
@@ -155,7 +156,7 @@ int main( int argc, char** argv ) {
     namedWindow("Control", CV_WINDOW_AUTOSIZE);
 
     // Some Hue and Saturation settings
-    iLowH = 160;
+    /*   iLowH = 160;
     iHighH = 179;
 
     iLowS = 167;
@@ -166,7 +167,18 @@ int main( int argc, char** argv ) {
 
     iLowH2 = 0;
     iHighH2 = 10;
+    */
+    iLowH = 25;
+    iHighH = 75;
 
+    iLowS = 50;
+    iHighS = 255;
+
+    iLowV = 90;
+    iHighV = 255;
+
+    iLowH2 = 0;
+    iHighH2 = 0;
     // Blur variable (used in gaussian blur)
     iBlur = 51;
 
