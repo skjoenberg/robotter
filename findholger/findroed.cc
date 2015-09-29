@@ -108,15 +108,14 @@ float cameraGO(VideoCapture* cap) {
         }
     }
 
+    imshow("Thresholded Image", imgThresholded); //show the thresholded image
+    imshow("Original", imgOriginal); //show the original image
+
     if (keypoints.size() > 0) {
         blobpos = keypoints[best].pt;
     } else {
         return -1;
     }
-
-
-    imshow("Thresholded Image", imgThresholded); //show the thresholded image
-    imshow("Original", imgOriginal); //show the original image
 
     return blobpos.x;
 }
@@ -137,8 +136,10 @@ void goStraight() {
         printf("Frem!");
         forward(&pp);
     } else {
-        printf("%s\n", "Traveling salesman is very ez");
         pp.SetSpeed(0.0, 0.0);
+        while(true) {
+            printf("found the box master \n");
+        }
     }
 }
 
