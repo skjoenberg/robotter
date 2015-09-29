@@ -3,7 +3,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <time.h>
-
+#include <stdio.h>
 
 //using namespace irrklang;
 using namespace cv;
@@ -34,6 +34,7 @@ int iHighV;
 int iLowH2;
 int iHighH2;
 int iBlur;
+int iBlur2 = 1;
 RNG rng(12345);
 
 // Player objects
@@ -168,7 +169,7 @@ int main( int argc, char** argv ) {
     sliderman = 300;
 
     // Create trackbars in the Control window
-    createTrackbar("SE HER", "Control", &sliderman, 500); //Hue (0 - 179)
+    createTrackbar("SE HER", "Control", &iBlur2, 100); //Hue (0 - 179)
 
     createTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
     createTrackbar("HighH", "Control", &iHighH, 179);
@@ -199,6 +200,11 @@ int main( int argc, char** argv ) {
     printf("Starting!\n");
 
     while (true) {
+        iBlur = iBlur2;
+        if (!(iBlur2 % 2))
+            iBlur++;
+        printf("%d", iBlur);
+
         float blobX = cameraGO(&cap);
         // robot time!
         witb = -1;
