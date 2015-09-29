@@ -16,6 +16,7 @@ Mat imgHSV;
 Mat imgDst;
 Mat imgThresholded;
 Mat imgThresholded2;
+Mat imgThresholded3;
 Mat im_with_keypoints;
 bool bSuccess;
 std::vector<KeyPoint> keypoints;
@@ -34,7 +35,7 @@ int iHighV;
 int iLowH2;
 int iHighH2;
 int iBlur;
-int iBlur2 = 1;
+int iBlur2 = 20;
 RNG rng(12345);
 
 // Player objects
@@ -61,6 +62,7 @@ float cameraGO(VideoCapture* cap) {
     // Two thresholds are needed to succesfully capture the color red
     inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
     inRange(imgHSV, Scalar(iLowH2, iLowS, iLowV), Scalar(iHighH2, iHighS, iHighV), imgThresholded2);
+    inRange(imgHSV, Scalar(0,255,0), Scalar(0,0,0), imgThresholded3);
 
     // Merge the thresholds
     imgThresholded = imgThresholded + imgThresholded2;
@@ -69,35 +71,41 @@ float cameraGO(VideoCapture* cap) {
     erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
     dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
-   vector<vector<Point> > contours;
-   vector<Vec4i> hierarchy;
+    imshow("Filter", imgThresholded); //show the thresholded image
 
-   GaussianBlur(imgThresholded, imgThresholded, Size(iBlur, iBlur), 0, 0);
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
 
-   /// Find contours
-   findContours(imgThresholded, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    GaussianBlur(imgThresholded, imgThresholded, Size(iBlur, iBlur), 0, 0);
 
-   /// Find the convex hull object for each contour
-   vector<vector<Point> >hull( contours.size() );
-   for( int i = 0; i < contours.size(); i++ )
-       {  convexHull( Mat(contours[i]), hull[i], false ); }
+    /// Find contours
+    findContours(imgThresholded, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
-   /// Draw contours + hull results
-   best = 0;
-   for (int i = 0; i < hull.size(); i++) {
-       if (hull[i].size() > hull[best].size()) {
-           best = i;
-       }
-   }
-   Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+    /// Find the convex hull object for each contour
+    vector<vector<Point> >hull( contours.size() );
+    for( int i = 0; i < contours.size(); i++ ) {
+        convexHull( Mat(contours[i]), hull[i], false );
+    }
 
-   drawContours( imgThresholded, hull, best, color, 1, 8, vector<Vec4i>(), 0, Point() );
+    /// Draw contours + hull results
+    best = 0;
+    for (int i = 1; i < hull.size(); i++) {
+        if (hull[i].size() > hull[best].size()) {
+            best = i;
+        }
+    }
+    Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+
+    if (hull.size() > 0)
+        printf("yo: %d\n Contours: %d\n", hull[best][0].x, hull[best].size());
 
 
-   imshow("Thresholded Image", imgThresholded); //show the thresholded image
-   imshow("Original", imgOriginal); //show the original image
+    drawContours(imgThresholded3, hull, best, color);
 
-   if (keypoints.size() > 0) {
+    imshow("Thres all", imgThresholded3); //show the thresholded image
+    imshow("Original", imgOriginal); //show the original image
+
+    if (keypoints.size() > 0) {
         blobpos = keypoints[best].pt;
     } else {
         return -1;
@@ -118,15 +126,15 @@ void goLeft() {
 
 void goStraight() {
     /*    robert.Read();
-    if(!obsFront(&ir)) {
-        printf("Frem!");
-        forward(&pp);
-    } else {
-        pp.SetSpeed(0.0, 0.0);
-        while(true) {
-            printf("found the box master \n");
-        }
-    } */
+          if(!obsFront(&ir)) {
+          printf("Frem!");
+          forward(&pp);
+          } else {
+          pp.SetSpeed(0.0, 0.0);
+          while(true) {
+          printf("found the box master \n");
+          }
+          } */
 }
 
 void goRight() {
@@ -190,11 +198,11 @@ int main( int argc, char** argv ) {
     counter360 = 0;
 
     /*
-    ISoundEngine* engine = createIrrKlangDevice();
-    if (!engine) {
-        printf("Could not startup engine\n");
-        return 0; // error starting up the engine
-    }
+      ISoundEngine* engine = createIrrKlangDevice();
+      if (!engine) {
+      printf("Could not startup engine\n");
+      return 0; // error starting up the engine
+      }
     */
 
     printf("Starting!\n");
@@ -203,7 +211,6 @@ int main( int argc, char** argv ) {
         iBlur = iBlur2;
         if (!(iBlur2 % 2))
             iBlur++;
-        printf("%d", iBlur);
 
         float blobX = cameraGO(&cap);
         // robot time!
