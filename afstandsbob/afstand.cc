@@ -73,7 +73,6 @@ float cameraGO(VideoCapture* cap) {
 
    GaussianBlur(imgThresholded, imgThresholded, Size(iBlur, iBlur), 0, 0);
 
-
    /// Find contours
    findContours(imgThresholded, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
@@ -83,13 +82,15 @@ float cameraGO(VideoCapture* cap) {
        {  convexHull( Mat(contours[i]), hull[i], false ); }
 
    /// Draw contours + hull results
-   for( int i = 0; i< contours.size(); i++ )
-       {
-           Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-           drawContours( imgThresholded, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
-           drawContours( imgThresholded, hull, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+   best = 0;
+   for (int i = 0; i < hull.size(); i++) {
+       if (hull[i].size() > hull[best].size()) {
+           best = i;
        }
+   }
+   Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
 
+   drawContours( imgThresholded, hull, best, color, 1, 8, vector<Vec4i>(), 0, Point() );
 
 
    imshow("Thresholded Image", imgThresholded); //show the thresholded image
