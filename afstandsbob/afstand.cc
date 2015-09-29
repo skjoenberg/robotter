@@ -36,12 +36,6 @@ int iHighH2;
 int iBlur;
 RNG rng(12345);
 
-// Player objects
-// PlayerClient robert("172.16.187.128");
-// Position2dProxy pp(&robert);
-// IrProxy ir(&robert);
-// BumperProxy bumper(&robert);
-
 float cameraGO(VideoCapture* cap) {
     // Read a new frame from video
     bSuccess = cap->read(imgOriginal);
@@ -50,7 +44,6 @@ float cameraGO(VideoCapture* cap) {
     if (!bSuccess) {
         cout << "Cannot read a frame from video stream" << endl;
     }
-
     // Filter the frame using guassian blur
     GaussianBlur(imgOriginal, imgDst, Size(iBlur, iBlur), 0, 0);
 
@@ -59,7 +52,6 @@ float cameraGO(VideoCapture* cap) {
 
     // Two thresholds are needed to succesfully capture the color red
     inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
-    inRange(imgHSV, Scalar(iLowH2, iLowS, iLowV), Scalar(iHighH2, iHighS, iHighV), imgThresholded2);
 
     // Merge the thresholds
     imgThresholded = imgThresholded + imgThresholded2;
@@ -88,21 +80,32 @@ float cameraGO(VideoCapture* cap) {
            best = i;
        }
    }
-   Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
 
-   drawContours( imgThresholded, hull, best, color, 1, 8, vector<Vec4i>(), 0, Point() );
+   Mat lolDst;
 
+   drawContours(imgThresholded, hull, best, Scalar(180), 1, 8, vector<Vec4i>(), 0, Point() );
+
+   vector<Vec2f> lines;
+
+   HoughLines(imgOriginal, lines, 1, CV_PI/180, 100);
+
+   for(int i = 0; i < lines.size(); i++) {
+       float rho = lines[i][0], theta = lines[i][1];
+       Point pt1, pt2;
+       double a = cos(theta), b = sin(theta);
+       double x0 = a*rho, y0 = b*rho;
+       pt1.x = cvRound(x0 + 1000*(-b));
+       pt1.y = cvRound(y0 + 1000*(a));
+       pt2.x = cvRound(x0 - 1000*(-b));
+       pt2.y = cvRound(y0 - 1000*(a));
+       line(imgOriginal, pt1, pt2, Scalar(0,0,255), 10, CV_AA);
+   }
+   cout << "found " << lines.size() << " lines" << endl;
 
    imshow("Thresholded Image", imgThresholded); //show the thresholded image
    imshow("Original", imgOriginal); //show the original image
 
-   if (keypoints.size() > 0) {
-        blobpos = keypoints[best].pt;
-    } else {
-        return -1;
-    }
-
-    return blobpos.x;
+   return -1.0;
 }
 
 void findBox() {
@@ -168,7 +171,7 @@ int main( int argc, char** argv ) {
     sliderman = 300;
 
     // Create trackbars in the Control window
-    createTrackbar("SE HER", "Control", &sliderman, 500); //Hue (0 - 179)
+    createTrackbar("Blur", "Control", &sliderman, 500); //Hue (0 - 179)
 
     createTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
     createTrackbar("HighH", "Control", &iHighH, 179);
