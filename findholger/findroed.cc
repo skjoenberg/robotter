@@ -6,10 +6,14 @@
 #include <time.h>
 #include "scorpion.h"
 #include "movement.h"
+//#include <irrKlang.h>
 
+//using namespace irrklang;
 using namespace PlayerCc;
 using namespace cv;
 using namespace std;
+
+//#pragma comment(lib, "irrKlang.lib") // link with irrKlang.dll
 
 Mat imgOriginal;
 Mat imgHSV;
@@ -77,7 +81,7 @@ float cameraGO(VideoCapture* cap) {
 
     // Filter by Area (and other blob settings)
     params.filterByArea = true;
-    params.minArea = 40;
+    params.minArea = sliderman;
     params.maxArea = 999999;
 
     params.filterByCircularity = false;
@@ -106,7 +110,10 @@ float cameraGO(VideoCapture* cap) {
 
     if (keypoints.size() > 0) {
         blobpos = keypoints[best].pt;
+    } else {
+        return -1;
     }
+
 
     imshow("Thresholded Image", imgThresholded); //show the thresholded image
     imshow("Original", imgOriginal); //show the original image
@@ -130,10 +137,8 @@ void goStraight() {
         printf("Frem!");
         forward(&pp);
     } else {
-        while(1){
-            printf("%s\n", "Traveling salesman is very ez");
-            pp.SetSpeed(0.0, 0.0);
-        }
+        printf("%s\n", "Traveling salesman is very ez");
+        pp.SetSpeed(0.0, 0.0);
     }
 }
 
@@ -186,9 +191,10 @@ int main( int argc, char** argv ) {
     // Blur variable (used in gaussian blur)
     iBlur = 51;
 
-    // Create trackbars in the Control window
-    createTrackbar("SE HER", "Control", &sliderman, 0); //Hue (0 - 179)
+    sliderman = 300;
 
+    // Create trackbars in the Control window
+    createTrackbar("SE HER", "Control", &sliderman, 500); //Hue (0 - 179)
 
     createTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
     createTrackbar("HighH", "Control", &iHighH, 179);
@@ -207,12 +213,22 @@ int main( int argc, char** argv ) {
     Mat imgLines = Mat::zeros( imgTmp.size(), CV_8UC3 );;
 
     counter360 = 0;
+
+    /*
+    ISoundEngine* engine = createIrrKlangDevice();
+    if (!engine) {
+        printf("Could not startup engine\n");
+        return 0; // error starting up the engine
+    }
+    */
+
     printf("Starting!\n");
+
     while (true) {
         float blobX = cameraGO(&cap);
         // robot time!
         witb = -1;
-        if (blobX < 220) {
+        if (blobX < 220 && blobX > 0) {
             witb = 0;
         } else if (blobX > 220 && blobX < 420) {
             //blaze it up faggot
