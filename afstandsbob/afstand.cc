@@ -43,6 +43,8 @@ int iLowH2;
 int iHighH2;
 int iBlur;
 int iBlur2 = 20;
+int bestRight;
+int bestLeft;
 RNG rng(12345);
 
 // Player objects
@@ -130,7 +132,61 @@ float cameraGO(VideoCapture* cap) {
             }
             counter++;
         }
+
+
+
+        int rightH, leftH;
+        int lowright = 480;
+        int highright = 0;
+        int lowleft = 480;
+        int highleft = 0;
+
+        int middle = 320;
+
+        for (int i = 0; i < hull[best].size(); i++) {
+            if (hull[best][i].x < middle) {
+                if (hull[best][i].y < lowright) {
+                    lowright = hull[best][i].y;
+                }
+                if (hull[best][i].y > highright) {
+                    highright = hull[best][i].y;
+                }
+
+            } else {
+                if (hull[best][i].y < lowleft) {
+                    lowleft = hull[best][i].y;
+                }
+                if (hull[best][i].y > highleft) {
+                    highleft = hull[best][i].y;
+                }
+            }
+
+        }
+
+        rightH = highright - lowright;
+        leftH = highleft - lowleft;
+
+        if (counter == 0) {
+            bestLeft = 0;
+            bestRight = 0;
+        }
+    	if (counter > 9) {
+            printf("left height is: %d \n right heigh is %d \n", bestLeft, bestRight);
+    		counter = 0;
+    	} else {
+            if (rightH > bestRight) {
+                bestRight = rightH;
+            }
+            if (leftH > bestLeft) {
+                bestLeft = leftH;
+            }
+            counter++;
+        }
+
 	}
+
+
+
 	drawContours(imgThresholded3, hull, best, color);
 
 
