@@ -4,6 +4,7 @@
 #include <opencv2/features2d/features2d.hpp>
 #include <time.h>
 #include <stdio.h>
+#include <algorithm>
 
 //using namespace irrklang;
 using namespace cv;
@@ -27,7 +28,6 @@ std::vector<KeyPoint> keypoints;
 SimpleBlobDetector::Params params;
 int best;
 int counter;
-int bestHeight;
 int avg[10];
 Point2f blobpos;
 int sliderman;
@@ -43,8 +43,7 @@ int iLowH2;
 int iHighH2;
 int iBlur;
 int iBlur2 = 20;
-int bestRight;
-int bestLeft;
+
 RNG rng(12345);
 
 // Player objects
@@ -54,166 +53,128 @@ RNG rng(12345);
 // BumperProxy bumper(&robert);
 
 float cameraGO(VideoCapture* cap) {
-	// Read a new frame from video
-	bSuccess = cap->read(imgOriginal);
+    int bestRight = 0;
+    int bestLeft = 0;
+    int bestHeight = 0;
+	for (int k = 0; k < 10; k++) {
 
-	// Error handling for the camera
-	if (!bSuccess) {
-		cout << "Cannot read a frame from video stream" << endl;
-	}
+        // Read a new frame from video
+        bSuccess = cap->read(imgOriginal);
 
-	// Filter the frame using guassian blur
-	GaussianBlur(imgOriginal, imgDst, Size(iBlur, iBlur), 0, 0);
-
-	// Convert the captured frame from BGR to HSV
-	cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
-
-	// Two thresholds are needed to succesfully capture the color red
-	inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
-	inRange(imgHSV, Scalar(iLowH2, iLowS, iLowV), Scalar(iHighH2, iHighS, iHighV), imgThresholded2);
-	inRange(imgHSV, Scalar(0,255,0), Scalar(0,0,0), imgThresholded3);
-
-	// Merge the thresholds
-	imgThresholded = imgThresholded + imgThresholded2;
-
-	// Morphological opening (removes small objects from the foreground)
-	erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-	dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-
-	imshow("Filter", imgThresholded); //show the thresholded image
-
-	vector<vector<Point> > contours;
-	vector<Vec4i> hierarchy;
-
-	GaussianBlur(imgThresholded, imgThresholded, Size(iBlur, iBlur), 0, 0);
-
-	/// Find contours
-	findContours(imgThresholded, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-
-	/// Find the convex hull object for each contour
-	vector<vector<Point> >hull( contours.size() );
-	for( int i = 0; i < contours.size(); i++ ) {
-		convexHull( Mat(contours[i]), hull[i], false );
-	}
-
-	/// Draw contours + hull results
-	best = 0;
-	for (int i = 1; i < hull.size(); i++) {
-		if (hull[i].size() > hull[best].size()) {
-			best = i;
-		}
-	}
-	Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-
-
-	int min = 480;
-	int max = 0;
-	int height;
-	if (hull.size()){
-    	for(int i = 0; i < hull[best].size(); i++) {
-			if(hull[best][i].y < min){
-				min = hull[best][i].y;
-			}
-			if(hull[best][i].y > max){
-				max = hull[best][i].y;
-			}
-    	}
-    	height = max - min;
-        if (counter == 0) {
-            bestHeight = 0;
+        // Error handling for the camera
+        if (!bSuccess) {
+            cout << "Cannot read a frame from video stream" << endl;
         }
-    	if (counter > 9) {
-            double dist = (fl * paperheight) / bestHeight;
-            printf("we are %f cm from the paper \n", dist);
-    		counter = 0;
-    	} else {
-            if (height > bestHeight) {
-                bestHeight = height;
+
+        // Filter the frame using guassian blur
+        GaussianBlur(imgOriginal, imgDst, Size(iBlur, iBlur), 0, 0);
+
+        // Convert the captured frame from BGR to HSV
+        cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
+
+        // Two thresholds are needed to succesfully capture the color red
+        inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
+        inRange(imgHSV, Scalar(iLowH2, iLowS, iLowV), Scalar(iHighH2, iHighS, iHighV), imgThresholded2);
+        inRange(imgHSV, Scalar(0,255,0), Scalar(0,0,0), imgThresholded3);
+
+        // Merge the thresholds
+        imgThresholded = imgThresholded + imgThresholded2;
+
+        // Morphological opening (removes small objects from the foreground)
+        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+        dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+
+        imshow("Filter", imgThresholded); //show the thresholded image
+
+        vector<vector<Point> > contours;
+        vector<Vec4i> hierarchy;
+
+        GaussianBlur(imgThresholded, imgThresholded, Size(iBlur, iBlur), 0, 0);
+
+        /// Find contours
+        findContours(imgThresholded, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+        /// Find the convex hull object for each contour
+        vector<vector<Point> >hull( contours.size() );
+        for( int i = 0; i < contours.size(); i++ ) {
+            convexHull( Mat(contours[i]), hull[i], false );
+        }
+
+        /// Draw contours + hull results
+        best = 0;
+        for (int i = 1; i < hull.size(); i++) {
+            if (hull[i].size() > hull[best].size()) {
+                best = i;
             }
-            counter++;
         }
+        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
 
+        if (hull.size()){
+            int rightH, leftH, middle, width, offset;
+            int lowright = 480;
+            int highright = 0;
+            int lowleft = 480;
+            int highleft = 0;
+            int leftX = 640;
+            int rightX = 0;
 
+            for (int i = 0; i < hull[best].size(); i++) {
+                if (rightX < hull[best][i].x)
+                    rightX = hull[best][i].x;
+                if (leftX > hull[best][i].x)
+                    leftX = hull[best][i].x;
+            }
+            middle = (rightX + leftX) / 2;
+            width = rightX - leftX;
+            offset = width / 4;
 
-        int rightH, leftH;
-        int lowright = 480;
-        int highright = 0;
-        int lowleft = 480;
-        int highleft = 0;
-        int leftX = 640;
-        int rightX = 0;
-        int middle, width, offset;
+            for (int i = 0; i < hull[best].size(); i++) {
+                if (hull[best][i].x < middle - offset) {
+                    if (hull[best][i].y < lowright) {
+                        lowright = hull[best][i].y;
+                    }
+                    if (hull[best][i].y > highright) {
+                        highright = hull[best][i].y;
+                    }
 
-
-        for (int i = 0; i < hull[best].size(); i++) {
-            if (rightX < hull[best][i].x)
-                rightX = hull[best][i].x;
-            if (leftX > hull[best][i].x)
-                leftX = hull[best][i].x;
-        }
-        middle = (rightX + leftX) / 2;
-        width = rightX - leftX;
-        offset = width / 4;
-
-
-
-        for (int i = 0; i < hull[best].size(); i++) {
-            if (hull[best][i].x < middle - offset) {
-                if (hull[best][i].y < lowright) {
-                    lowright = hull[best][i].y;
+                } else if (hull[best][i].x > middle + offset) {
+                    if (hull[best][i].y < lowleft) {
+                        lowleft = hull[best][i].y;
+                    }
+                    if (hull[best][i].y > highleft) {
+                        highleft = hull[best][i].y;
+                    }
                 }
-                if (hull[best][i].y > highright) {
-                    highright = hull[best][i].y;
-                }
 
-            } else if (hull[best][i].x > middle + offset) {
-                if (hull[best][i].y < lowleft) {
-                    lowleft = hull[best][i].y;
-                }
-                if (hull[best][i].y > highleft) {
-                    highleft = hull[best][i].y;
-                }
             }
 
-        }
+            rightH = highright - lowright;
+            leftH = highleft - lowleft;
 
-        rightH = highright - lowright;
-        leftH = highleft - lowleft;
-
-        if (counter == 0) {
-            bestLeft = 0;
-            bestRight = 0;
-        }
-    	if (counter > 9) {
-            printf("left height is: %d \n right heigh is %d \n", bestLeft, bestRight);
-    		counter = 0;
-    	} else {
             if (rightH > bestRight) {
                 bestRight = rightH;
             }
             if (leftH > bestLeft) {
                 bestLeft = leftH;
             }
-            counter++;
         }
 
-	}
+        drawContours(imgThresholded3, hull, best, color);
 
+        imshow("Thres all", imgThresholded3); //show the thresholded image
+        imshow("Original", imgOriginal); //show the original image
 
+    }
+    if (bestRight > bestLeft) {
+        bestHeight = bestRight;
+    } else {
+        bestHeight = bestLeft;
+    }
+    printf("left height is: %d \nright heigh is %d \n", bestLeft, bestRight);
+    double dist = (fl * paperheight) / bestHeight;
+    printf("we are %f cm from the paper \n", dist);
 
-	drawContours(imgThresholded3, hull, best, color);
-
-
-	imshow("Thres all", imgThresholded3); //show the thresholded image
-	imshow("Original", imgOriginal); //show the original image
-
-	if (keypoints.size() > 0) {
-		blobpos = keypoints[best].pt;
-	} else {
-		return -1;
-	}
-
-	return blobpos.x;
+    return 1.0;
 }
 
 void findBox() {
