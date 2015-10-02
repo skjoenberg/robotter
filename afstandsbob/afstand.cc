@@ -147,7 +147,7 @@ float cameraGO(VideoCapture* cap) {
         for (int i = 0; i < hull[best].size(); i++) {
             if (rightX < hull[best][i].x)
                 rightX = hull[best][i].x;
-            if (leftX < hull[best][i].x)
+            if (leftX > hull[best][i].x)
                 leftX = hull[best][i].x;
         }
 
