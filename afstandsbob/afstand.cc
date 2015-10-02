@@ -22,6 +22,8 @@ bool bSuccess;
 std::vector<KeyPoint> keypoints;
 SimpleBlobDetector::Params params;
 int best;
+int counter;
+int avg[10];
 Point2f blobpos;
 int sliderman;
 int witb;
@@ -96,12 +98,10 @@ float cameraGO(VideoCapture* cap) {
 	}
 	Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
 
-	if (hull.size() > 0)
-		printf("yo: %d\n Contours: %d\n", hull[best][0].x, hull[best].size());
-
 
 	int min = 480;
 	int max = 0;
+	int height; 
 	if (hull.size()){ 
     	for(int i = 0; i < hull[best].size(); i++) {
 			if(hull[best][i].y < min){
@@ -111,9 +111,20 @@ float cameraGO(VideoCapture* cap) {
 				max = hull[best][i].y;
 			}
     	}
-    	printf("%d min : \n",min );
-    	printf("%d max : \n",max );
-    	printf("%d height : \n",max-min );
+    	height = max - min;
+    	if (counter > 9) {
+    		int sum = 0;
+    		for(int i = 0; i < 10; i++) {
+    			sum += avg[i];
+    		}
+    		printf("height = %d \n", sum / 10);
+    		counter = 0;
+    	}
+    	if (height > 0) {
+    		avg[counter] = height;
+    		counter++;
+    	}
+
 	}
 	drawContours(imgThresholded3, hull, best, color);
 
@@ -222,6 +233,8 @@ int main( int argc, char** argv ) {
 	*/
 
 	printf("Starting!\n");
+
+	counter = 0;
 
 	while (true) {
 		iBlur = iBlur2;
