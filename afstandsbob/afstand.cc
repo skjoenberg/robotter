@@ -121,13 +121,14 @@ float cameraGO(VideoCapture* cap) {
             bestHeight = 0;
         }
     	if (counter > 9) {
-            double dist = (fl * paperheight) / height;
+            double dist = (fl * paperheight) / bestHeight;
             printf("we are %f cm from the paper \n", dist);
     		counter = 0;
     	} else {
             if (height > bestHeight) {
                 bestHeight = height;
             }
+            counter++;
         }
 	}
 	drawContours(imgThresholded3, hull, best, color);
