@@ -27,6 +27,7 @@ std::vector<KeyPoint> keypoints;
 SimpleBlobDetector::Params params;
 int best;
 int counter;
+int bestHeight;
 int avg[10];
 Point2f blobpos;
 int sliderman;
@@ -116,21 +117,18 @@ float cameraGO(VideoCapture* cap) {
 			}
     	}
     	height = max - min;
+        if (counter == 0) {
+            bestHeight = 0;
+        }
     	if (counter > 9) {
-    		int sum = 0;
-    		for(int i = 0; i < 10; i++) {
-    			sum += avg[i];
-    		}
-    		printf("height = %d \n", sum / 10);
             double dist = (fl * paperheight) / height;
             printf("we are %f cm from the paper \n", dist);
     		counter = 0;
-    	}
-    	if (height > 0) {
-    		avg[counter] = height;
-    		counter++;
-    	}
-
+    	} else {
+            if (height > bestHeight) {
+                bestHeight = height;
+            }
+        }
 	}
 	drawContours(imgThresholded3, hull, best, color);
 
