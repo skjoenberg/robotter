@@ -260,9 +260,20 @@ void goStraight() {
 		printf("Frem!");
 		forward(&pp);
 	} else {
-		pp.SetSpeed(0.0, 0.0);
-		while(true) {
-		printf("found the box master \n");
+		if((bestRight < bestLeft) && abs(bestRight-bestLeft) > 10){
+			pp.SetSpeed(0,0,-0.2);
+			sleep(2);
+			pp.SetSpeed(2.0,0.0);
+			sleep(1);
+			pp.SetSpeed(0.0,2.0);
+			sleep(2);
+		} else {
+			pp.SetSpeed(0,0,0.2);
+			sleep(2);
+			pp.SetSpeed(2.0,0.0);
+			sleep(1);
+			pp.SetSpeed(0.0,-2.0);
+			sleep(2);
 		}
 	}
 }
