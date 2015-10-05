@@ -7,10 +7,12 @@
 #include <algorithm>
 #include <utility>
 #include "movement.h"
+#include <libplayerc++/playerc++.h>
 
 //using namespace irrklang;
 using namespace cv;
 using namespace std;
+using namespace PlayerCc;
 
 //#pragma comment(lib, "irrKlang.lib") // link with irrKlang.dll
 
@@ -19,7 +21,7 @@ const double fl = 704.4;
 const double paperheight = 21.0;
 
 //
-#define FRAMES 10
+#define FRAMES 7
 #define MINIMUM_AREA 3000
 #define MAXIMUM_AREA 100000
 
@@ -60,17 +62,19 @@ int bestMid;
 vector<int> midCalc;
 int currentDist;
 
+// Time
+timespec turn_sleep = { 4, 0 };
+timespec forward_sleep = { 2, 0 };
+timespec stop_sleep = { 3, 0 };
+
 // Player objects
-// PlayerClient robert("172.16.187.128");
-// Position2dProxy pp(&robert);
-// IrProxy ir(&robert);
-// BumperProxy bumper(&robert);
+PlayerClient robert("172.16.187.128");
+Position2dProxy pp(&robert);
+IrProxy ir(&robert);
+BumperProxy bumper(&robert);
+
 double distance(double height) {
-    if (height > 0) {
-        return (fl * paperheight) / height;
-    } else {
-        return -1;
-    }
+    return (fl * paperheight) / height;
 }
 
 
@@ -102,9 +106,6 @@ vector<vector<Point> > convexHulls() {
     if (areas[best] < MINIMUM_AREA || areas[best] > MAXIMUM_AREA) {
         best = -1;
     }
-    if (best >= 0)
-        cout << "area of the biggest contour is " << areas[best] << endl;
-
     return hull;
 }
 
@@ -256,25 +257,33 @@ void goLeft() {
 
 void goStraight() {
 	robert.Read();
-	if(currentDist > 100) {
+	if(currentDist > 150) {
 		printf("Frem!");
 		forward(&pp);
 	} else {
-		if((bestRight < bestLeft) && abs(bestRight-bestLeft) > 10){
-			pp.SetSpeed(0,0,-0.2);
-			sleep(2);
-			pp.SetSpeed(2.0,0.0);
-			sleep(1);
-			pp.SetSpeed(0.0,2.0);
-			sleep(2);
-		} else {
-			pp.SetSpeed(0,0,0.2);
-			sleep(2);
-			pp.SetSpeed(2.0,0.0);
-			sleep(1);
-			pp.SetSpeed(0.0,-2.0);
-			sleep(2);
-		}
+            if (abs(bestRight-bestLeft) > 10) {
+		if((bestRight > bestLeft)){
+                    pp.SetSpeed(0,0,-0.2);
+                    nanosleep(&turn_sleep, NULL);
+                    pp.SetSpeed(0.2,0.0);
+                    nanosleep(&forward_sleep, NULL);
+                    pp.SetSpeed(0.0,0.2);
+                    nanosleep(&forward_sleep, NULL);
+                    pp.SetSpeed(0.0,0.0);
+                } else {
+                    pp.SetSpeed(0,0,0.2);
+                    nanosleep(&forward_sleep, NULL);
+                    pp.SetSpeed(0.2,0.0);
+                    nanosleep(&forward_sleep, NULL);
+                    pp.SetSpeed(0.0,-0.2);
+                    nanosleep(&forward_sleep, NULL);
+                    pp.SetSpeed(0.0,0.0);
+                }
+            } else {
+                pp.SetSpeed(0.0,0.0);
+                nanosleep(&stop_sleep, NULL);
+            }
+
 	}
 }
 
