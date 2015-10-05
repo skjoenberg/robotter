@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <algorithm>
 #include <utility>
+#include "movement.h"
 
 //using namespace irrklang;
 using namespace cv;

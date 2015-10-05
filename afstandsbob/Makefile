@@ -1,13 +1,13 @@
 # Compile and link flags
 CXX      =  g++
-CXXFLAGS = `pkg-config opencv --cflags` -Wall
-LIBS     = `pkg-config opencv --libs`
+CXXFLAGS = `pkg-config opencv --cflags playerc++` -Wall
+LIBS     = `pkg-config opencv --libs playerc++`
 
 # Name of executable
 EXECUTABLE = afstand
 
 # Files
-SOURCES = afstand.cc
+SOURCES = afstand.cc movement.cc
 OBJECTS = $(patsubst %.cc, %.o, $(SOURCES))
 
 # Linking
