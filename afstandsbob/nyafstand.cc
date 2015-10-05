@@ -373,6 +373,7 @@ int main( int argc, char** argv ) {
         cout << "venstre højde: " << bestLeft << endl;
         cout << "højre højde: " << bestRight << endl;
         cout << "forskellen: " << abs(bestLeft - bestRight) << endl;
+        cout << "midten: " << bestMid << endl;
 
         if (currentDist < 0 || bestMid == -1) {
             turnLeft();
