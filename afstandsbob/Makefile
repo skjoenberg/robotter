@@ -7,7 +7,7 @@ LIBS     = `pkg-config opencv --libs playerc++`
 EXECUTABLE = afstand
 
 # Files
-SOURCES = afstand.cc movement.cc
+SOURCES = nyafstand.cc movement.cc
 OBJECTS = $(patsubst %.cc, %.o, $(SOURCES))
 
 # Linking
