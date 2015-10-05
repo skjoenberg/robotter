@@ -64,10 +64,14 @@ int currentDist;
 // Position2dProxy pp(&robert);
 // IrProxy ir(&robert);
 // BumperProxy bumper(&robert);
-
 double distance(double height) {
-    return (fl * paperheight) / height;
+    if (height > 0) {
+        return (fl * paperheight) / height;
+    } else {
+        return -1;
+    }
 }
+
 
 vector<vector<Point> > convexHulls() {
     vector<Vec4i> hierarchy;
@@ -102,6 +106,7 @@ vector<vector<Point> > convexHulls() {
 
     return hull;
 }
+
 
 pair<int, int> hullHeights(vector<Point>* bestHull) {
     int middle, width, offset;
@@ -154,7 +159,6 @@ pair<int, int> hullHeights(vector<Point>* bestHull) {
     return result;
 }
 
-
 // Captures frames from the webcam
 void cameraGO(VideoCapture* cap) {
     vector<vector<Point> > hull;
@@ -197,7 +201,6 @@ void cameraGO(VideoCapture* cap) {
 
         GaussianBlur(imgThresholded, imgThresholded, Size(iBlur, iBlur), 0, 0);
 
-
         hull = convexHulls();
 
         if (hull.size() && best >= 0){
@@ -219,7 +222,6 @@ void cameraGO(VideoCapture* cap) {
         imshow("Thres all", imgThresholded3);
         //show the original image
         imshow("Original", imgOriginal);
-
     }
 
     if (bestRight > bestLeft) {
@@ -227,6 +229,7 @@ void cameraGO(VideoCapture* cap) {
     } else {
         bestHeight = bestLeft;
     }
+
     if(midCalc.size()){
     	sort(midCalc.begin(), midCalc.end());
     	bestMid = midCalc[4];
