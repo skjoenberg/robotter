@@ -66,7 +66,8 @@ int currentDist;
 timespec turn_sleep = { 4, 0 };
 timespec forward_sleep = { 2, 0 };
 timespec stop_sleep = { 3, 0 };
-timespec search_sleep = { 1, 0 }
+timespec search_sleep = { 1, 0 };
+
 
 // Player objects
 PlayerClient robert("172.16.187.128");
@@ -170,7 +171,7 @@ void cameraGO(VideoCapture* cap) {
     bestRight = 0;
     bestLeft = 0;
     bestHeight = 0;
-    currentDist;
+    currentDist = 0;
 
     // Capture the amount of frames specified in "frames"
     for (int k = 0; k < FRAMES; k++) {
@@ -249,13 +250,13 @@ void cameraGO(VideoCapture* cap) {
 
 void turnLeft() {
 	pp.SetSpeed(0.0, 0.2);
-    nanosleep(&search_sleep);
+        nanosleep(&search_sleep, NULL);
     pp.SetSpeed(0.0, 0.0);
 }
 
 void turnRight() {
-	pp.SetSpeed(0.0, -0.2);
-    nanosleep(&search_sleep);
+    pp.SetSpeed(0.0, -0.2);
+    nanosleep(&search_sleep, NULL);
     pp.SetSpeed(0.0, 0.0);
 }
 
@@ -284,9 +285,9 @@ void goStraight() {
         nanosleep(&turn_sleep, NULL);
         pp.SetSpeed(0.0, 0.0);
     } else {
-        if (currentDistance > 100) {
+        if (currentDist > 100) {
             pp.SetSpeed(0.1, 0.0);
-            nanosleep(&forward_sleep);
+            nanosleep(&forward_sleep, NULL);
         } else if(currentDist < 100 && currentDist >= 0) {
             while(true) {
                 printf("robert er den bedste\n");
