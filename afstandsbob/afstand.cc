@@ -5,6 +5,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <algorithm>
+#include <utility>
 
 //using namespace irrklang;
 using namespace cv;
@@ -86,7 +87,7 @@ vector<vector<Point> > convexHulls() {
     return hull;
 }
 
-int* hullHeights(vector<Point>* bestHull) {
+pair<int, int> hullHeights(vector<Point>* bestHull) {
     int middle, width, offset;
     int lowright = 480;
     int highright = 0;
@@ -96,7 +97,7 @@ int* hullHeights(vector<Point>* bestHull) {
     int rightX = 0;
 
     Point point;
-    int* result;
+    pair<int, int> result;
 
     for (int i = 0; i < bestHull->size(); i++) {
         point = bestHull->at(i);
@@ -131,18 +132,18 @@ int* hullHeights(vector<Point>* bestHull) {
 
     }
 
-    result[0] = highright - lowright;
-    result[1] = highleft - lowleft;
+    result.first = highright - lowright;
+    result.second = highleft - lowleft;
 
     return result;
 }
 
 
 // Captures frames from the webcam
-float cameraGO(VideoCapture* cap) {
+pair<int, int> cameraGO(VideoCapture* cap) {
     vector<vector<Point> > hull;
     Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
-    int* currentHull;
+    pair<int, int> currentHull;
     int bestRight = 0;
     int bestLeft = 0;
     int bestHeight = 0;
@@ -183,18 +184,14 @@ float cameraGO(VideoCapture* cap) {
         hull = convexHulls();
 
         if (hull.size()){
-            for (int i = 0; i < hull.size(); i++) {
-                currentHull = hullHeights(&hull[best]);
+            currentHull = hullHeights(&hull[best]);
+            if (currentHull.first > bestRight) {
+                bestRight = currentHull.first;
             }
-            if (currentHull[0] > bestRight) {
-                bestRight = currentHull[0];
-            }
-            if (currentHull[1] > bestLeft) {
-                bestLeft = currentHull[1];
+            if (currentHull.second > bestLeft) {
+                bestLeft = currentHull.second;
             }
         }
-
-
 
         drawContours(imgThresholded3, hull, best, color);
 
@@ -217,7 +214,7 @@ float cameraGO(VideoCapture* cap) {
     printf("Left height is: %d\nRight height is: %d\n", bestLeft, bestRight);
     printf("we are %f cm from the paper \n", distance(bestHeight));
 
-    return 1.0;
+    return pair<int, int>(bestRight, bestLeft);
 }
 
 void findBox() {
@@ -320,17 +317,17 @@ int main( int argc, char** argv ) {
 		if (!(iBlur2 % 2))
 			iBlur++;
 
-		float blobX = cameraGO(&cap);
+        pair<int, int> lolbandit = cameraGO(&cap);
 		// robot time!
-		witb = -1;
-		if (blobX < 220 && blobX > 0) {
-			witb = 0;
-		} else if (blobX > 220 && blobX < 420) {
-			//blaze it up faggot
-			witb = 1;
-		} else if (blobX > 420) {
-			witb = 2;
-		}
+		 witb = -1;
+		// if (blobX < 220 && blobX > 0) {
+		// 	witb = 0;
+		// } else if (blobX > 220 && blobX < 420) {
+		// 	//blaze it up faggot
+		// 	witb = 1;
+		// } else if (blobX > 420) {
+		// 	witb = 2;
+		// }
 
 		switch(witb) {
 		case -1:
