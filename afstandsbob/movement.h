@@ -7,7 +7,7 @@
 
 using namespace PlayerCc;
 #define MIN_DISTANCE 0.30
-#define SPEED 0.2
+#define SPEED 0.1
 
 void forward(Position2dProxy* pp);
 bool obsFront(IrProxy* ir);
