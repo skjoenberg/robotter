@@ -236,7 +236,7 @@ void cameraGO(VideoCapture* cap) {
 
     if(midCalc.size()){
         cout << "middle values are: " << endl;
-        for (int i = 0; i < midCalc.size(), i++) {
+        for (int i = 0; i < midCalc.size(); i++) {
             cout << midCalc[i] << " ";
         }
         cout << endl;
