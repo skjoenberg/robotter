@@ -19,6 +19,7 @@ const double paperheight = 21.0;
 
 //
 #define FRAMES 10
+#define MINIMUM_AREA 500
 
 // Random variables
 int best;
@@ -83,13 +84,16 @@ vector<vector<Point> > convexHulls() {
     }
 
     // Find the biggest hull
-    best = -1;
-    for (int i = 1; i < hull.size(); i++) {
+    best = 0;
+    for (int i = 0; i < hull.size(); i++) {
         approxPolyDP(Mat(hull[i]), cont2[i], 0.001, true);
         areas[i] = fabs(contourArea(Mat(cont2[i])));
         if(areas[i] > areas[best]) {
             best = i;
         }
+    }
+    if (areas[best] < MINIMUM_AREA) {
+        best = -1;
     }
     if (best >= 0)
         cout << "area of the biggest contour is " << areas[best] << endl;
