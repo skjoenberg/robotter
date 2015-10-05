@@ -93,7 +93,7 @@ vector<vector<Point> > convexHulls() {
             best = i;
         }
     }
-    if (areas[best] < MINIMUM_AREA && areas[best] > MAXIMUM_AREA) {
+    if (areas[best] < MINIMUM_AREA || areas[best] > MAXIMUM_AREA) {
         best = -1;
     }
     if (best >= 0)
