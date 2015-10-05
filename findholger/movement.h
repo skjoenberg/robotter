@@ -1,6 +1,4 @@
-#ifndef MOVEMENT_H
 #define MOVEMENT_H
-
 
 #include <libplayerc++/playerc++.h>
 #include <iostream>

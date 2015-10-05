@@ -260,29 +260,33 @@ void goStraight() {
 	if(currentDist > 150) {
 		printf("Frem!");
 		forward(&pp);
+        nanosleep(&forward_sleep, NULL);
+        pp.SetSpeed(0.0, 0.0);
 	} else {
-            if (abs(bestRight-bestLeft) > 10) {
-		if((bestRight > bestLeft)) {
-                    pp.SetSpeed(0,0,-0.2);
-                    nanosleep(&turn_sleep, NULL);
-                    pp.SetSpeed(0.2,0.0);
-                    nanosleep(&forward_sleep, NULL);
-                    pp.SetSpeed(0.0,0.2);
-                    nanosleep(&forward_sleep, NULL);
-                    pp.SetSpeed(0.0,0.0);
-                } else {
-                    pp.SetSpeed(0,0,0.2);
-                    nanosleep(&forward_sleep, NULL);
-                    pp.SetSpeed(0.2,0.0);
-                    nanosleep(&forward_sleep, NULL);
-                    pp.SetSpeed(0.0,-0.2);
-                    nanosleep(&forward_sleep, NULL);
-                    pp.SetSpeed(0.0,0.0);
-                }
-            } else {
+        if (abs(bestRight-bestLeft) > 5) {
+            if((bestRight < bestLeft)) {
+                //left er størst
+                pp.SetSpeed(0,0,-0.2);
+                nanosleep(&turn_sleep, NULL);
+                pp.SetSpeed(0.2,0.0);
+                nanosleep(&forward_sleep, NULL);
+                pp.SetSpeed(0.0,0.2);
+                nanosleep(&forward_sleep, NULL);
                 pp.SetSpeed(0.0,0.0);
-                nanosleep(&stop_sleep, NULL);
+            } else {
+                //right er størst
+                pp.SetSpeed(0,0,0.2);
+                nanosleep(&forward_sleep, NULL);
+                pp.SetSpeed(0.2,0.0);
+                nanosleep(&forward_sleep, NULL);
+                pp.SetSpeed(0.0,-0.2);
+                nanosleep(&forward_sleep, NULL);
+                pp.SetSpeed(0.0,0.0);
             }
+        } else {
+            pp.SetSpeed(0.0,0.0);
+            nanosleep(&stop_sleep, NULL);
+        }
 
 	}
 }

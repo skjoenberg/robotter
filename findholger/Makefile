@@ -7,7 +7,7 @@ LIBS     = `pkg-config opencv --libs playerc++`
 EXECUTABLE = findroed
 
 # Files
-SOURCES = findroed.cc
+SOURCES = findroed.cc movement.cc
 OBJECTS = $(patsubst %.cc, %.o, $(SOURCES))
 
 # Linking

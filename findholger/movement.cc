@@ -10,6 +10,7 @@ void forward(Position2dProxy* pp) {
 }
 
 bool obsFront(IrProxy* ir) {
+    printf("%f, %f, %f",ir->GetRange(SCORPION_IR_BN_N),ir->GetRange(SCORPION_IR_TE_NNW), ir->GetRange(SCORPION_IR_TW_NNE));
     return (ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) ||
         (ir->GetRange(SCORPION_IR_TE_NNW) < MIN_DISTANCE) ||
         (ir->GetRange(SCORPION_IR_TW_NNE) < MIN_DISTANCE);

@@ -110,14 +110,14 @@ float cameraGo() {
         params.filterByConvexity = false;
         params.filterByInertia = false;
 
-        // SimpleBlobDetector detector(params); (til opencv2)
-        Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
+        SimpleBlobDetector detector(params);
+        //        Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
 
         // Storage for blobs
         std::vector<KeyPoint> keypoints;
 
         // Detect blobs
-        detector->detect(imgThresholded, keypoints);
+        detector.detect(imgThresholded, keypoints);
 
         int best = 0;
         for(int i = 0; i < keypoints.size(); i++) {
