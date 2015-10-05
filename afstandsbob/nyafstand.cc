@@ -63,7 +63,7 @@ vector<int> midCalc;
 int currentDist;
 
 // Time
-timespec turn_sleep = { 5, 0 };
+timespec turn_sleep = { 4, 250000 };
 timespec forward_sleep = { 2, 0 };
 timespec stop_sleep = { 3, 0 };
 timespec search_sleep = { 1, 0 };
