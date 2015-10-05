@@ -27,10 +27,7 @@ Point2f blobpos;
 int sliderman;
 int witb;
 int counter360;
-Mat im_with_keypoints;
 bool bSuccess;
-std::vector<KeyPoint> keypoints;
-SimpleBlobDetector::Params params;
 
 // Images
 Mat imgOriginal;
@@ -73,9 +70,12 @@ vector<vector<Point> > convexHulls() {
     vector<Vec4i> hierarchy;
     vector<vector<Point> > contours;
 
+
     // Find contours
     findContours(imgThresholded, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
     vector<vector<Point> > hull(contours.size());
+    vector<vector<Point> > cont2(contours.size());
+    int areas[contours.size()];
 
     // Find the convex hull object for each contour
     for(int i = 0; i < contours.size(); i++) {
@@ -83,12 +83,17 @@ vector<vector<Point> > convexHulls() {
     }
 
     // Find the biggest hull
-    best = 0;
+    best = -1;
     for (int i = 1; i < hull.size(); i++) {
-        if (hull[i].size() > hull[best].size()) {
+        approxPolyDP(Mat(hull[i]), cont2[i], 0.001, true);
+        areas[i] = fabs(contourArea(Mat(cont2[i])));
+        if(areas[i] > areas[best]) {
             best = i;
         }
     }
+    if (best >= 0)
+        cout << "area of the biggest contour is " << areas[best] << endl;
+
     return hull;
 }
 
@@ -188,7 +193,7 @@ void cameraGO(VideoCapture* cap) {
 
         hull = convexHulls();
 
-        if (hull.size()){
+        if (hull.size() && best >= 0){
             currentHull = hullHeights(&hull[best]);
             if (currentHull.first > bestRight) {
                 bestRight = currentHull.first;
