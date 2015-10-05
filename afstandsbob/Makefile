@@ -1,5 +1,5 @@
 # Compile and link flags
-CXX      =  g++
+CXX      =  g++ -g
 CXXFLAGS = `pkg-config opencv --cflags playerc++` -Wall
 LIBS     = `pkg-config opencv --libs playerc++`
 
