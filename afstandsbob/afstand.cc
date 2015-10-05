@@ -262,7 +262,7 @@ void goStraight() {
 		forward(&pp);
 	} else {
             if (abs(bestRight-bestLeft) > 10) {
-		if((bestRight > bestLeft)){
+		if((bestRight > bestLeft)) {
                     pp.SetSpeed(0,0,-0.2);
                     nanosleep(&turn_sleep, NULL);
                     pp.SetSpeed(0.2,0.0);
