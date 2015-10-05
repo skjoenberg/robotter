@@ -12,20 +12,14 @@ using namespace std;
 
 //#pragma comment(lib, "irrKlang.lib") // link with irrKlang.dll
 
+// Paper information
 const double fl = 704.4;
 const double paperheight = 21.0;
 
+//
+#define FRAMES 10
 
-Mat imgOriginal;
-Mat imgHSV;
-Mat imgDst;
-Mat imgThresholded;
-Mat imgThresholded2;
-Mat imgThresholded3;
-Mat im_with_keypoints;
-bool bSuccess;
-std::vector<KeyPoint> keypoints;
-SimpleBlobDetector::Params params;
+// Random variables
 int best;
 int counter;
 int avg[10];
@@ -33,6 +27,20 @@ Point2f blobpos;
 int sliderman;
 int witb;
 int counter360;
+Mat im_with_keypoints;
+bool bSuccess;
+std::vector<KeyPoint> keypoints;
+SimpleBlobDetector::Params params;
+
+// Images
+Mat imgOriginal;
+Mat imgHSV;
+Mat imgDst;
+Mat imgThresholded;
+Mat imgThresholded2;
+Mat imgThresholded3;
+
+// Filter settings
 int iLowH;
 int iHighH;
 int iLowS;
@@ -43,7 +51,6 @@ int iLowH2;
 int iHighH2;
 int iBlur;
 int iBlur2 = 20;
-
 RNG rng(12345);
 
 // Player objects
@@ -52,12 +59,96 @@ RNG rng(12345);
 // IrProxy ir(&robert);
 // BumperProxy bumper(&robert);
 
+double distance(double height) {
+    return (fl * paperheight) / height;
+}
+
+vector<vector<Point> > convexHulls() {
+    vector<Vec4i> hierarchy;
+    vector<vector<Point> > contours;
+
+    // Find contours
+    findContours(imgThresholded, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    vector<vector<Point> > hull(contours.size());
+
+    // Find the convex hull object for each contour
+    for(int i = 0; i < contours.size(); i++) {
+        convexHull(Mat(contours[i]), hull[i], false);
+    }
+
+    // Find the biggest hull
+    best = 0;
+    for (int i = 1; i < hull.size(); i++) {
+        if (hull[i].size() > hull[best].size()) {
+            best = i;
+        }
+    }
+    return hull;
+}
+
+int* hullHeights(vector<Point>* bestHull) {
+    int middle, width, offset;
+    int lowright = 480;
+    int highright = 0;
+    int lowleft = 480;
+    int highleft = 0;
+    int leftX = 640;
+    int rightX = 0;
+
+    Point point;
+    int* result;
+
+    for (int i = 0; i < bestHull->size(); i++) {
+        point = bestHull->at(i);
+        if (rightX < point.x)
+            rightX = point.x;
+        if (leftX > point.x)
+            leftX = point.x;
+    }
+
+    middle = (rightX + leftX) / 2;
+    width = rightX - leftX;
+    offset = width / 4;
+
+    for (int i = 0; i < bestHull->size(); i++) {
+        point = bestHull->at(i);
+        if (point.x < middle - offset) {
+            if (point.y < lowright) {
+                lowright = point.y;
+            }
+            if (point.y > highright) {
+                highright = point.y;
+            }
+
+        } else if (point.x > middle + offset) {
+            if (point.y < lowleft) {
+                lowleft = point.y;
+            }
+            if (point.y > highleft) {
+                highleft = point.y;
+            }
+        }
+
+    }
+
+    result[0] = highright - lowright;
+    result[1] = highleft - lowleft;
+
+    return result;
+}
+
+
+// Captures frames from the webcam
 float cameraGO(VideoCapture* cap) {
+    vector<vector<Point> > hull;
+    Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+    int* currentHull;
     int bestRight = 0;
     int bestLeft = 0;
     int bestHeight = 0;
-	for (int k = 0; k < 10; k++) {
 
+    // Capture the amount of frames specified in "frames"
+    for (int k = 0; k < FRAMES; k++) {
         // Read a new frame from video
         bSuccess = cap->read(imgOriginal);
 
@@ -75,7 +166,6 @@ float cameraGO(VideoCapture* cap) {
         // Two thresholds are needed to succesfully capture the color red
         inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
         inRange(imgHSV, Scalar(iLowH2, iLowS, iLowV), Scalar(iHighH2, iHighS, iHighV), imgThresholded2);
-        inRange(imgHSV, Scalar(0,255,0), Scalar(0,0,0), imgThresholded3);
 
         // Merge the thresholds
         imgThresholded = imgThresholded + imgThresholded2;
@@ -84,95 +174,48 @@ float cameraGO(VideoCapture* cap) {
         erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
         dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
-        imshow("Filter", imgThresholded); //show the thresholded image
-
-        vector<vector<Point> > contours;
-        vector<Vec4i> hierarchy;
+        // Create a black/blank image
+        inRange(imgHSV, Scalar(0,255,0), Scalar(0,0,0), imgThresholded3);
 
         GaussianBlur(imgThresholded, imgThresholded, Size(iBlur, iBlur), 0, 0);
 
-        /// Find contours
-        findContours(imgThresholded, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
-        /// Find the convex hull object for each contour
-        vector<vector<Point> >hull( contours.size() );
-        for( int i = 0; i < contours.size(); i++ ) {
-            convexHull( Mat(contours[i]), hull[i], false );
-        }
-
-        /// Draw contours + hull results
-        best = 0;
-        for (int i = 1; i < hull.size(); i++) {
-            if (hull[i].size() > hull[best].size()) {
-                best = i;
-            }
-        }
-        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        hull = convexHulls();
 
         if (hull.size()){
-            int rightH, leftH, middle, width, offset;
-            int lowright = 480;
-            int highright = 0;
-            int lowleft = 480;
-            int highleft = 0;
-            int leftX = 640;
-            int rightX = 0;
-
-            for (int i = 0; i < hull[best].size(); i++) {
-                if (rightX < hull[best][i].x)
-                    rightX = hull[best][i].x;
-                if (leftX > hull[best][i].x)
-                    leftX = hull[best][i].x;
+            for (int i = 0; i < hull.size(); i++) {
+                currentHull = hullHeights(&hull[best]);
             }
-            middle = (rightX + leftX) / 2;
-            width = rightX - leftX;
-            offset = width / 4;
-
-            for (int i = 0; i < hull[best].size(); i++) {
-                if (hull[best][i].x < middle - offset) {
-                    if (hull[best][i].y < lowright) {
-                        lowright = hull[best][i].y;
-                    }
-                    if (hull[best][i].y > highright) {
-                        highright = hull[best][i].y;
-                    }
-
-                } else if (hull[best][i].x > middle + offset) {
-                    if (hull[best][i].y < lowleft) {
-                        lowleft = hull[best][i].y;
-                    }
-                    if (hull[best][i].y > highleft) {
-                        highleft = hull[best][i].y;
-                    }
-                }
-
+            if (currentHull[0] > bestRight) {
+                bestRight = currentHull[0];
             }
-
-            rightH = highright - lowright;
-            leftH = highleft - lowleft;
-
-            if (rightH > bestRight) {
-                bestRight = rightH;
-            }
-            if (leftH > bestLeft) {
-                bestLeft = leftH;
+            if (currentHull[1] > bestLeft) {
+                bestLeft = currentHull[1];
             }
         }
+
+
 
         drawContours(imgThresholded3, hull, best, color);
 
-        imshow("Thres all", imgThresholded3); //show the thresholded image
-        imshow("Original", imgOriginal); //show the original image
+        // Show the images
+        //show the thresholded image
+        imshow("Filter", imgThresholded);
+        //show the thresholded image
+        imshow("Thres all", imgThresholded3);
+        //show the original image
+        imshow("Original", imgOriginal);
 
     }
+
     if (bestRight > bestLeft) {
         bestHeight = bestRight;
     } else {
         bestHeight = bestLeft;
     }
-    printf("left height is: %d \nright heigh is %d \n", bestLeft, bestRight);
-    double dist = (fl * paperheight) / bestHeight;
-    printf("we are %f cm from the paper \n", dist);
+
+    printf("Left height is: %d\nRight height is: %d\n", bestLeft, bestRight);
+    printf("we are %f cm from the paper \n", distance(bestHeight));
 
     return 1.0;
 }
