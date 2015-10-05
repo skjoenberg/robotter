@@ -63,7 +63,7 @@ vector<int> midCalc;
 int currentDist;
 
 // Time
-timespec turn_sleep = { 4, 250000 };
+timespec turn_sleep = { 4, 350000 };
 timespec forward_sleep = { 2, 0 };
 timespec stop_sleep = { 3, 0 };
 timespec search_sleep = { 1, 0 };
@@ -267,7 +267,7 @@ void turnRight() {
 }
 
 void goStraight() {
-    if (currentDist > 180) {
+    if (currentDist > 150) {
         pp.SetSpeed(0.1, 0.0);
         nanosleep(&forward_sleep, NULL);
         pp.SetSpeed(0.0, 0.0);
@@ -282,6 +282,7 @@ void goStraight() {
         pp.SetSpeed(0.0, 1.0);
         nanosleep(&turn_sleep, NULL);
         pp.SetSpeed(0.0, 0.0);
+        return;
     } else if (diff > 5) {
         pp.SetSpeed(0.0, 1.0);
         nanosleep(&turn_sleep, NULL);
@@ -290,6 +291,7 @@ void goStraight() {
         pp.SetSpeed(0.0, -1.0);
         nanosleep(&turn_sleep, NULL);
         pp.SetSpeed(0.0, 0.0);
+        return;
     } else {
         if (currentDist > 100) {
             pp.SetSpeed(0.1, 0.0);
