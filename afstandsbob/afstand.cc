@@ -19,7 +19,8 @@ const double paperheight = 21.0;
 
 //
 #define FRAMES 10
-#define MINIMUM_AREA 500
+#define MINIMUM_AREA 3000
+#define MAXIMUM_AREA 100000
 
 // Random variables
 int best;
@@ -92,7 +93,7 @@ vector<vector<Point> > convexHulls() {
             best = i;
         }
     }
-    if (areas[best] < MINIMUM_AREA) {
+    if (areas[best] > MINIMUM_AREA && areas[best] < MAXIMUM_AREA) {
         best = -1;
     }
     if (best >= 0)
