@@ -21,7 +21,7 @@ const double fl = 704.4;
 const double paperheight = 21.0;
 
 //
-#define FRAMES 7
+#define FRAMES 4
 #define MINIMUM_AREA 3000
 #define MAXIMUM_AREA 100000
 
@@ -66,6 +66,7 @@ int currentDist;
 timespec turn_sleep = { 4, 0 };
 timespec forward_sleep = { 2, 0 };
 timespec stop_sleep = { 3, 0 };
+timespec search_sleep = { 1, 0 }
 
 // Player objects
 PlayerClient robert("172.16.187.128");
@@ -236,60 +237,62 @@ void cameraGO(VideoCapture* cap) {
     	sort(midCalc.begin(), midCalc.end());
     	bestMid = midCalc[4];
     	midCalc.clear();
-	}
+	} else {
+        bestMid = -1;
+    }
+
 	if(distance(bestHeight)){
 		currentDist = distance(bestHeight);
 	}
     return;
 }
 
-void findBox() {
-	counter360++;
+void turnLeft() {
 	pp.SetSpeed(0.0, 0.2);
+    nanosleep(&search_sleep);
+    pp.SetSpeed(0.0, 0.0);
 }
 
-void goLeft() {
-	pp.SetSpeed(0.0, 0.2);
+void turnRight() {
+	pp.SetSpeed(0.0, -0.2);
+    nanosleep(&search_sleep);
+    pp.SetSpeed(0.0, 0.0);
 }
 
 void goStraight() {
-	robert.Read();
-	if(currentDist > 150) {
-		printf("Frem!");
-		forward(&pp);
+    if (currentDist > 180) {
+        pp.SetSpeed(0.1, 0.0);
         nanosleep(&forward_sleep, NULL);
         pp.SetSpeed(0.0, 0.0);
-	} else {
-        if (abs(bestRight-bestLeft) > 10) {
-            if((bestRight < bestLeft)) {
-                //left er størst
-                pp.SetSpeed(0,0,-0.2);
-                nanosleep(&turn_sleep, NULL);
-                pp.SetSpeed(0.2,0.0);
-                nanosleep(&forward_sleep, NULL);
-                pp.SetSpeed(0.0,0.2);
-                nanosleep(&forward_sleep, NULL);
-                pp.SetSpeed(0.0,0.0);
-            } else {
-                //right er størst
-                pp.SetSpeed(0,0,0.2);
-                nanosleep(&forward_sleep, NULL);
-                pp.SetSpeed(0.2,0.0);
-                nanosleep(&forward_sleep, NULL);
-                pp.SetSpeed(0.0,-0.2);
-                nanosleep(&forward_sleep, NULL);
-                pp.SetSpeed(0.0,0.0);
+        return;
+    }
+    int diff = bestRight - bestLeft;
+    if (diff < -5) {
+        pp.SetSpeed(0.0, -1.0);
+        nanosleep(&turn_sleep, NULL);
+        pp.SetSpeed(0.2, 0.0);
+        nanosleep(&forward_sleep, NULL);
+        pp.SetSpeed(0.0, 1.0);
+        nanosleep(&turn_sleep, NULL);
+        pp.SetSpeed(0.0, 0.0);
+    } else if (diff > 5) {
+        pp.SetSpeed(0.0, 1.0);
+        nanosleep(&turn_sleep, NULL);
+        pp.SetSpeed(0.2, 0.0);
+        nanosleep(&forward_sleep, NULL);
+        pp.SetSpeed(0.0, -1.0);
+        nanosleep(&turn_sleep, NULL);
+        pp.SetSpeed(0.0, 0.0);
+    } else {
+        if (currentDistance > 100) {
+            pp.SetSpeed(0.1, 0.0);
+            nanosleep(&forward_sleep);
+        } else if(currentDist < 100 && currentDist >= 0) {
+            while(true) {
+                printf("robert er den bedste\n");
             }
-        } else {
-            pp.SetSpeed(0.0,0.0);
-            nanosleep(&stop_sleep, NULL);
         }
-
-	}
-}
-
-void goRight() {
-	pp.SetSpeed(0.0, -0.2);
+    }
 }
 
 int main( int argc, char** argv ) {
@@ -370,10 +373,25 @@ int main( int argc, char** argv ) {
         cout << "venstre højde: " << bestLeft << endl;
         cout << "højre højde: " << bestRight << endl;
         cout << "forskellen: " << abs(bestLeft - bestRight) << endl;
+
+        if (currentDist < 0 || bestMid == -1) {
+            turnLeft();
+        } else if (bestMid > 0 && bestMid < 220) {
+            turnLeft();
+        } else if (bestMid > 220 && bestMid < 420) {
+            goStraight();
+        } else if (bestMid < 640 && bestMid > 420) {
+            turnRight();
+        }
+
+
+
+
 		if (waitKey(30) == 27) {
 			cout << "esc key is pressed by user" << endl;
 			break;
 		}
-	}
+
+    }
 	return 0;
 }
