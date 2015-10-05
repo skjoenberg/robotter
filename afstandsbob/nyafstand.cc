@@ -377,12 +377,16 @@ int main( int argc, char** argv ) {
         cout << "midten: " << bestMid << endl;
 
         if (currentDist < 0 || bestMid == -1) {
+            cout << "searching" << endl;
             turnLeft();
         } else if (bestMid > 0 && bestMid < 220) {
+            cout << "i see you left" << endl;
             turnLeft();
         } else if (bestMid > 220 && bestMid < 420) {
+            cout << "i see you mid" << endl;
             goStraight();
         } else if (bestMid < 640 && bestMid > 420) {
+            cout << "i see you right" << endl;
             turnRight();
         }
 
