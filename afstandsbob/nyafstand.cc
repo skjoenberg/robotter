@@ -293,6 +293,7 @@ void goStraight() {
         if (currentDistance > 100) {
             pp.SetSpeed(0.1, 0.0);
             nanosleep(&forward_sleep);
+            pp.SetSpeed(0.0, 0.0);
         } else if(currentDist < 100 && currentDist >= 0) {
             while(true) {
                 printf("robert er den bedste\n");
