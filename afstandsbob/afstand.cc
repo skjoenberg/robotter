@@ -215,9 +215,11 @@ void cameraGO(VideoCapture* cap) {
     } else {
         bestHeight = bestLeft;
     }
-    sort(midCalc.begin(), midCalc.end());
-    bestMid = midCalc[4];
-    midCalc.clear();
+    if(midCalc.size()){
+    	sort(midCalc.begin(), midCalc.end());
+    	bestMid = midCalc[4];
+    	midCalc.clear();
+	}
 
     printf("Left height is: %d\nRight height is: %d\n", bestLeft, bestRight);
     printf("we are %f cm from the paper \n", distance(bestHeight));
