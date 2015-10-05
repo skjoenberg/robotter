@@ -22,7 +22,6 @@ const double paperheight = 21.0;
 
 // Random variables
 int best;
-int counter;
 int avg[10];
 Point2f blobpos;
 int sliderman;
@@ -53,6 +52,12 @@ int iHighH2;
 int iBlur;
 int iBlur2 = 20;
 RNG rng(12345);
+
+int bestRight;
+int bestLeft;
+int bestHeight;
+int bestMid;
+vector<int> midCalc;
 
 // Player objects
 // PlayerClient robert("172.16.187.128");
@@ -108,6 +113,7 @@ pair<int, int> hullHeights(vector<Point>* bestHull) {
     }
 
     middle = (rightX + leftX) / 2;
+    midCalc.push_back(middle);
     width = rightX - leftX;
     offset = width / 4;
 
@@ -129,7 +135,6 @@ pair<int, int> hullHeights(vector<Point>* bestHull) {
                 highleft = point.y;
             }
         }
-
     }
 
     result.first = highright - lowright;
@@ -140,13 +145,13 @@ pair<int, int> hullHeights(vector<Point>* bestHull) {
 
 
 // Captures frames from the webcam
-pair<int, int> cameraGO(VideoCapture* cap) {
+void cameraGO(VideoCapture* cap) {
     vector<vector<Point> > hull;
     Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
     pair<int, int> currentHull;
-    int bestRight = 0;
-    int bestLeft = 0;
-    int bestHeight = 0;
+    bestRight = 0;
+    bestLeft = 0;
+    bestHeight = 0;
 
     // Capture the amount of frames specified in "frames"
     for (int k = 0; k < FRAMES; k++) {
@@ -210,11 +215,13 @@ pair<int, int> cameraGO(VideoCapture* cap) {
     } else {
         bestHeight = bestLeft;
     }
+    sort(midCalc.begin(), midCalc.end());
+    bestMid = midCalc[4];
+    midCalc.clear();
 
     printf("Left height is: %d\nRight height is: %d\n", bestLeft, bestRight);
     printf("we are %f cm from the paper \n", distance(bestHeight));
-
-    return pair<int, int>(bestRight, bestLeft);
+    return;
 }
 
 void findBox() {
@@ -310,14 +317,12 @@ int main( int argc, char** argv ) {
 
 	printf("Starting!\n");
 
-	counter = 0;
-
 	while (true) {
 		iBlur = iBlur2;
 		if (!(iBlur2 % 2))
 			iBlur++;
 
-        pair<int, int> lolbandit = cameraGO(&cap);
+        cameraGO(&cap);
 		// robot time!
 		 witb = -1;
 		// if (blobX < 220 && blobX > 0) {
