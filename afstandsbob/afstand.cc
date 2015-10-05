@@ -57,6 +57,7 @@ int bestLeft;
 int bestHeight;
 int bestMid;
 vector<int> midCalc;
+int currentDist;
 
 // Player objects
 // PlayerClient robert("172.16.187.128");
@@ -162,6 +163,7 @@ void cameraGO(VideoCapture* cap) {
     bestRight = 0;
     bestLeft = 0;
     bestHeight = 0;
+    currentDist;
 
     // Capture the amount of frames specified in "frames"
     for (int k = 0; k < FRAMES; k++) {
@@ -230,37 +232,39 @@ void cameraGO(VideoCapture* cap) {
     	bestMid = midCalc[4];
     	midCalc.clear();
 	}
-
+	if(distance(bestHeight)){
+		currentDist = distance(bestHeight);
+	}
     printf("Left height is: %d\nRight height is: %d\n", bestLeft, bestRight);
     printf("we are %f cm from the paper \n", distance(bestHeight));
     return;
 }
 
 void findBox() {
-	// counter360++;
-	// printf("%d\n", counter360);
-	// pp.SetSpeed(0.0, 0.2);
+	counter360++;
+	printf("%d\n", counter360);
+	pp.SetSpeed(0.0, 0.2);
 }
 
 void goLeft() {
-	//    pp.SetSpeed(0.0, 0.2);
+	pp.SetSpeed(0.0, 0.2);
 }
 
 void goStraight() {
-	/*    robert.Read();
-		  if(!obsFront(&ir)) {
-		  printf("Frem!");
-		  forward(&pp);
-		  } else {
-		  pp.SetSpeed(0.0, 0.0);
-		  while(true) {
-		  printf("found the box master \n");
-		  }
-		  } */
+	robert.Read();
+	if(currentDist > 100) {
+		printf("Frem!");
+		forward(&pp);
+	} else {
+		pp.SetSpeed(0.0, 0.0);
+		while(true) {
+		printf("found the box master \n");
+		}
+	}
 }
 
 void goRight() {
-	//    pp.SetSpeed(0.0, -0.2);
+	pp.SetSpeed(0.0, -0.2);
 }
 
 int main( int argc, char** argv ) {
@@ -337,14 +341,14 @@ int main( int argc, char** argv ) {
         cameraGO(&cap);
 		// robot time!
 		 witb = -1;
-		// if (blobX < 220 && blobX > 0) {
-		// 	witb = 0;
-		// } else if (blobX > 220 && blobX < 420) {
-		// 	//blaze it up faggot
-		// 	witb = 1;
-		// } else if (blobX > 420) {
-		// 	witb = 2;
-		// }
+		if (bestMid < 220 && bestMid > 0) {
+			witb = 0;
+		} else if (bestMid > 220 && bestMid < 420) {
+			//blaze it up faggot
+			witb = 1;
+		} else if (bestMid > 420) {
+			witb = 2;
+		}
 
 		switch(witb) {
 		case -1:
