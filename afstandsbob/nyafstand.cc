@@ -235,9 +235,15 @@ void cameraGO(VideoCapture* cap) {
     }
 
     if(midCalc.size()){
+        cout << "middle values are: " << endl;
+        for (int i = 0; i < midCalc.size(), i++) {
+            cout << midCalc[i] << " ";
+        }
+        cout << endl;
     	sort(midCalc.begin(), midCalc.end());
     	bestMid = midCalc[FRAMES / 2];
     	midCalc.clear();
+        cout << "midCalc cleared, it now has size: " << midCalc.size();
 	} else {
         bestMid = -1;
     }
