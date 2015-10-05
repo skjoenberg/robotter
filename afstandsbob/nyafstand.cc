@@ -236,7 +236,7 @@ void cameraGO(VideoCapture* cap) {
 
     if(midCalc.size()){
     	sort(midCalc.begin(), midCalc.end());
-    	bestMid = midCalc[4];
+    	bestMid = midCalc[FRAMES / 2];
     	midCalc.clear();
 	} else {
         bestMid = -1;
@@ -389,9 +389,6 @@ int main( int argc, char** argv ) {
             cout << "i see you right" << endl;
             turnRight();
         }
-
-
-
 
 		if (waitKey(30) == 27) {
 			cout << "esc key is pressed by user" << endl;
