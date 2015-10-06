@@ -202,7 +202,10 @@ int main()
       // Or use motor controls to update particles
       //XXX: You do this
         
-        
+      // Reset/ start
+      //pp.SetOdometry();
+      //pp.ResetOdometry();  
+
       // Read odometry, see how far we have moved, and update particles.
       //pp.GetXPos();
       //pp.GetYPos();
