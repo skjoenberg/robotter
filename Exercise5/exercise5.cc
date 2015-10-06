@@ -198,10 +198,17 @@ int main()
         // for(int i = 0; i < particles.size(); i++) {
         //      move_particle(particles[i], 1, 1, 1);
         // }
-        add_uncertainty(particles, 1, 1);
-      // Read odometry, see how far we have moved, and update particles.
+      add_uncertainty(particles, 1, 1);
       // Or use motor controls to update particles
       //XXX: You do this
+        
+        
+      // Read odometry, see how far we have moved, and update particles.
+      //pp.GetXPos();
+      //pp.GetYPos();
+
+      //Driving
+      //pp.Goto(x, y, yax);
 
       // Grab image
       IplImage *im = cam.get_colour ();
