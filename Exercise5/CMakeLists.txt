@@ -42,10 +42,9 @@ SET(SOLUTION_MAIN
   solutions/solution.cc
 )
 
-add_executable(solution ${SOLUTION_MAIN} ${SRCS} ${HEADERS})
-target_link_libraries(solution ${OpenCV_LIBS})
-SET_PROPERTY(TARGET solution APPEND PROPERTY INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}")
+#add_executable(solution ${SOLUTION_MAIN} ${SRCS} ${HEADERS})
+#target_link_libraries(solution ${OpenCV_LIBS})
+#SET_PROPERTY(TARGET solution APPEND PROPERTY INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}")
 
 # Only works with CMake 3.3 and onwards
 #target_include_directories(solution PUBLIC ${PROJECT_SOURCE_DIR})
-
