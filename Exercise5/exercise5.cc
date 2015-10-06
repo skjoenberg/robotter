@@ -48,10 +48,10 @@ const CvPoint landmarks [num_landmarks] = {
 CvScalar jet (const double x)
 {
   const double r = (x >= 3.0/8.0 && x < 5.0/8.0) * (4.0 * x - 3.0/2.0)
-                 + (x >= 5.0/8.0 && x < 7.0/8.0) 
+                 + (x >= 5.0/8.0 && x < 7.0/8.0)
                  + (x >= 7.0/8.0) * (-4.0 * x + 9.0/2.0);
   const double g = (x >= 1.0/8.0 && x < 3.0/8.0) * (4.0 * x - 1.0/2.0)
-                 + (x >= 3.0/8.0 && x < 5.0/8.0) 
+                 + (x >= 3.0/8.0 && x < 5.0/8.0)
                  + (x >= 5.0/8.0 && x < 7.0/8.0) * (-4.0 * x + 7.0/2.0);
   const double b = (x < 1.0/8.0) * (4.0 * x + 1.0/2.0)
                  + (x >= 1.0/8.0 && x < 3.0/8.0)
@@ -97,7 +97,7 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
 
   // Draw estimated robot pose
   const CvPoint a = cvPoint ((int)est_pose.x+offset, (int)est_pose.y+offset);
-  const CvPoint b = cvPoint ((int)(est_pose.x + 15.0*cos(est_pose.theta))+offset, 
+  const CvPoint b = cvPoint ((int)(est_pose.x + 15.0*cos(est_pose.theta))+offset,
                              (int)(est_pose.y + 15.0*sin(est_pose.theta))+offset);
   cvCircle (im, a, 5, CMAGENTA, 2);
   cvLine   (im, a, b, CMAGENTA, 2);
@@ -106,7 +106,7 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
 /*************************\
  *      Main program     *
 \*************************/
-int main() 
+int main()
 {
   // The GUI
   const char *map = "World map";
@@ -128,8 +128,8 @@ int main()
       particles[i].weight = 1.0/(double)num_particles;
     }
   particle est_pose = estimate_pose (particles); // The estimate of the robots current pose
-  
-  // The camera interface  
+
+  // The camera interface
   camera cam;
 
   // Parameters
@@ -154,8 +154,8 @@ int main()
   while (true)
     {
       // Move the robot according to user input
-      int action = cvWaitKey (10);
-      switch (action) {
+        int action = cvWaitKey (10);
+        switch (action) {
         case KEY_UP:
             velocity += 4.0;
             break;
@@ -168,32 +168,35 @@ int main()
         case KEY_RIGHT:
             angular_velocity -= 0.2;
             break;
-      case 'w': // Forward
-          velocity += 4.0;
-          break;
-      case 'x': // Backwards
-          velocity -= 4.0;
-          break;
-      case 's': // Stop
-          velocity = 0.0;
-          angular_velocity = 0.0;
-          break;
-      case 'a': // Left
-          angular_velocity += 0.2;
-          break;
-      case 'd': // Right
-          angular_velocity -= 0.2;
-          break;
+        case 'w': // Forward
+            velocity += 4.0;
+            break;
+        case 'x': // Backwards
+            velocity -= 4.0;
+            break;
+        case 's': // Stop
+            velocity = 0.0;
+            angular_velocity = 0.0;
+            break;
+        case 'a': // Left
+            angular_velocity += 0.2;
+            break;
+        case 'd': // Right
+            angular_velocity -= 0.2;
+            break;
         case 'q': // Quit
             goto theend;
       }
 
       //XXX: Make player drive
-
+        // for(int i = 0; i < particles.size(); i++) {
+        //      move_particle(particles[i], 1, 1, 1);
+        // }
+        add_uncertainty(particles, 1, 1);
       // Read odometry, see how far we have moved, and update particles.
       // Or use motor controls to update particles
       //XXX: You do this
-        
+
       // Grab image
       IplImage *im = cam.get_colour ();
       //rgb_im = cam.get_colour ();
@@ -207,7 +210,7 @@ int main()
           printf ("Measured distance: %f\n", measured_distance);
           printf ("Measured angle:    %f\n", measured_angle);
           printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
-            
+
           if (ID == object::horizontal)
             {
               printf ("Landmark is horizontal\n");
@@ -221,29 +224,29 @@ int main()
               printf ("Unknown landmark type!\n");
               continue;
             }
-        
+
           // Compute particle weights
           // XXX: You do this
-            
+
           // Resampling
           // XXX: You do this
-          
+
           // Draw the object in the image (for visualisation)
           cam.draw_object (im);
-            
+
         } else { // end: if (found_landmark)
-          
+
           // No observation - reset weights to uniform distribution
           for (int i = 0; i < num_particles; i++)
           {
               particles[i].weight = 1.0/(double)num_particles;
           }
-          
+
         }  // end: if (not found_landmark)
 
       // Estimate pose
-      est_pose = estimate_pose (particles);                   
-        
+      est_pose = estimate_pose (particles);
+
       // Visualisation
       draw_world (est_pose, particles, world);
       cvShowImage (map, world);

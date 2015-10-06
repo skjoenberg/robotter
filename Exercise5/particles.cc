@@ -25,7 +25,9 @@ particle estimate_pose (std::vector<particle> &particles)
 // XXX: You implement this
 void move_particle (particle &p, double delta_x, double delta_y, double delta_theta)
 {
-  std::cerr << "particle.cc: move_particle not implemented. You should do this." << std::endl;
+    p.x += delta_x;
+    p.y += delta_y;
+    p.theta += delta_theta;
 }
 
 
@@ -40,4 +42,3 @@ void add_uncertainty (std::vector<particle> &particles, double sigma, double the
         particles[i].theta = fmod(rand_von_mises (particles[i].theta, theta_kappa), 2.0f * M_PI) - M_PI;
       }
 }
-
