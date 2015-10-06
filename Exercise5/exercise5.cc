@@ -140,6 +140,13 @@ int main()
 
   // Initialize player (XXX: You do this)
 
+  //PlayerClient robert("172.16.187.128");
+  //Position2dProxy pp(&robert);
+  //IrProxy ir(&robert);
+  //BumperProxy bumper(&robert);
+
+
+
   // Driving parameters
   double velocity = 15; // cm/sec
   const double acceleration = 12; // cm/sec^2
