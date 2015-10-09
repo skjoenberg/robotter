@@ -25,7 +25,9 @@ particle estimate_pose (std::vector<particle> &particles)
 // XXX: You implement this
 void move_particle (particle &p, double delta_x, double delta_y, double delta_theta)
 {
-  std::cerr << "particle.cc: move_particle not implemented. You should do this." << std::endl;
+    p.x += delta_x;
+    p.y += delta_y;
+    p.theta += delta_theta;
 }
 
 

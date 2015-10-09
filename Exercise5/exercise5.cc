@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <cmath>
+#include <time.h>
 
 //#include "index.h"
 #include "camera.h"
@@ -29,6 +30,14 @@
 #define KEY_DOWN  65364
 #define KEY_LEFT  65361
 #define KEY_RIGHT 65363
+
+#define SIGMA 5.0
+
+using namespace std;
+
+double round(double d) {
+    return floor(d + 0.5);
+}
 
 /*
  * Landmarks.
@@ -140,6 +149,13 @@ int main()
 
   // Initialize player (XXX: You do this)
 
+  //PlayerClient robert("172.16.187.128");
+  //Position2dProxy pp(&robert);
+  //IrProxy ir(&robert);
+  //BumperProxy bumper(&robert);
+
+
+
   // Driving parameters
   double velocity = 15; // cm/sec
   const double acceleration = 12; // cm/sec^2
@@ -153,8 +169,8 @@ int main()
   while (true)
     {
       // Move the robot according to user input
-      int action = cvWaitKey (10);
-      switch (action) {
+        int action = cvWaitKey (10);
+        switch (action) {
         case KEY_UP:
             velocity += 4.0;
             break;
@@ -167,31 +183,49 @@ int main()
         case KEY_RIGHT:
             angular_velocity -= 0.2;
             break;
-      case 'w': // Forward
-          velocity += 4.0;
-          break;
-      case 'x': // Backwards
-          velocity -= 4.0;
-          break;
-      case 's': // Stop
-          velocity = 0.0;
-          angular_velocity = 0.0;
-          break;
-      case 'a': // Left
-          angular_velocity += 0.2;
-          break;
-      case 'd': // Right
-          angular_velocity -= 0.2;
-          break;
+        case 'w': // Forward
+            velocity += 4.0;
+            break;
+        case 'x': // Backwards
+            velocity -= 4.0;
+            break;
+        case 's': // Stop
+            velocity = 0.0;
+            angular_velocity = 0.0;
+            break;
+        case 'a': // Left
+            angular_velocity += 0.2;
+            break;
+        case 'd': // Right
+            angular_velocity -= 0.2;
+            break;
         case 'q': // Quit
             goto theend;
       }
 
       //XXX: Make player drive
+        // for(int i = 0; i < particles.size(); i++) {
+        //      move_particle(particles[i], 1, 1, 1);
+        // }
+
 
       // Read odometry, see how far we have moved, and update particles.
       // Or use motor controls to update particles
       //XXX: You do this
+        /* her tilføjes støj efter movement */
+      // Or use motor controls to update particles
+      //XXX: You do this
+
+      // Reset/ start
+      //pp.SetOdometry();
+      //pp.ResetOdometry();
+
+      // Read odometry, see how far we have moved, and update particles.
+      //pp.GetXPos();
+      //pp.GetYPos();
+
+      //Driving
+      //pp.Goto(x, y, yax);
 
       // Grab image
       IplImage *im = cam.get_colour ();
@@ -221,15 +255,86 @@ int main()
               continue;
             }
 
+          float box_x, box_y;
+          if (cp.red > cp.green) {
+              box_x = 0.;
+              box_y = 0.;
+          } else {
+              box_x = 300.;
+              box_y = 0.;
+          }
+
+
           // Compute particle weights
           // XXX: You do this
+          /* Vægten er givet ved den funktion der står opgaven */
+
+         add_uncertainty(particles, 10, 0);
+
+          double tmpweight;
+          double sum = 0;
+          double dist;
+          double gaussman = 1. / sqrt(2. * M_PI * pow(SIGMA, 2.));
+          for (int i = 0; i < particles.size(); i++) {
+              dist = sqrt(pow(particles[i].x - box_x, 2.0) + pow(particles[i].y - box_y, 2.0));
+              tmpweight = gaussman * exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)) )));
+              sum += tmpweight;
+              particles[i].weight = tmpweight;
+              // std::cout << "en weight er = " << tmpweight << std::endl;
+              // std::cout << "en distance er = " << dist << std::endl;
+              // std::cout << "measured dist er = " << measured_distance << std::endl;
+          }
+
+          for (int i = 0; i < particles.size(); i++) {
+              particles[i].weight = particles[i].weight / sum;
+          }
+
+          cout << "VI HAR " << particles.size() << " PARTIKLER MOTHERFUCCKER" << endl;
 
           // Resampling
           // XXX: You do this
+          /* Lav cumsum og rand [0, 1] for at se hvilken partikel du skal duplikere */
+          std::vector<particle> resamples;
+          vector<pair<double, int> > cumsum;
+          double cum = 0;
+          int count = 0;
+          for(int i = 0; i < particles.size(); i++) {
+              if (particles[i].weight > 0.0) {
+                  cum += particles[i].weight;
+                  cumsum.push_back(pair<double, int>(cum, i));
+                  count++;
+              }
+          }
+          cout << "counted " << count << " particles" << endl;
+          std::cout << "cum: " << cum << std::endl;
+
+          resamples.clear();
+          for (int i = 0; i < num_particles; i++) {
+              float r = randf();
+              int j = 1;
+
+              while(cumsum[j].first < r && j < cumsum.size()) {
+                  j++;
+              }
+
+              int tmpx = particles[cumsum[j-1].second].x;
+              int tmpy = particles[cumsum[j-1].second].y;
+              double tmptheta = particles[cumsum[j-1].second].theta;
+              double tmpweight = particles[cumsum[j-1].second].weight;
+              //cout << "r = " << r << " j = " << j << " x = " << tmpx << " y = " << tmpy << endl;
+              particle tmp(tmpx, tmpy, tmptheta, tmpweight);
+              resamples.push_back(tmp);
+          }
+
+          particles.clear();
+          for (int i = 0; i < resamples.size(); i++) {
+              particles.push_back(resamples[i]);
+          }
 
           // Draw the object in the image (for visualisation)
           cam.draw_object (im);
-
+          // timespec fuckseiib = {2, 0};
+          // nanosleep(&fuckseiib, NULL);
         } else { // end: if (found_landmark)
 
           // No observation - reset weights to uniform distribution
