@@ -282,6 +282,7 @@ void goStraight() {
         pp.SetSpeed(0.0, 1.0);
         nanosleep(&turn_sleep, NULL);
         pp.SetSpeed(0.0, 0.0);
+        nanosleep(&search_sleep, NULL);
         return;
     } else if (diff > 5) {
         pp.SetSpeed(0.0, 1.0);
@@ -291,6 +292,7 @@ void goStraight() {
         pp.SetSpeed(0.0, -1.0);
         nanosleep(&turn_sleep, NULL);
         pp.SetSpeed(0.0, 0.0);
+        nanosleep(&search_sleep, NULL);
         return;
     } else {
         if (currentDist > 100) {
