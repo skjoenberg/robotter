@@ -32,6 +32,8 @@
 
 #define SIGMA 10.0
 
+using namespace std;
+
 double round(double d) {
     return floor(d + 0.5);
 }
@@ -269,43 +271,62 @@ int main()
           double tmpweight;
           double sum = 0;
           double dist;
+          double gaussman = 1. / sqrt(2. * M_PI * pow(SIGMA, 2.));
           for (int i = 0; i < particles.size(); i++) {
               dist = sqrt(pow(particles[i].x - box_x, 2.0) + pow(particles[i].y - box_y, 2.0));
-              tmpweight = exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)) )));
+              tmpweight = gaussman * exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)) )));
               sum += tmpweight;
-              std::cout << "en weight er = " << tmpweight << std::endl;
-              std::cout << "en distance er = " << dist << std::endl;
+              particles[i].weight = tmpweight;
+              // std::cout << "en weight er = " << tmpweight << std::endl;
+              // std::cout << "en distance er = " << dist << std::endl;
+              // std::cout << "measured dist er = " << measured_distance << std::endl;
           }
+
           for (int i = 0; i < particles.size(); i++) {
               particles[i].weight = particles[i].weight / sum;
           }
+
+          cout << "VI HAR " << particles.size() << " PARTIKLER MOTHERFUCCKER" << endl;
 
           // Resampling
           // XXX: You do this
           /* Lav cumsum og rand [0, 1] for at se hvilken partikel du skal duplikere */
           std::vector<particle> resamples;
-          resamples.clear();
-          for (int i = 0; i < particles.size(); i++) {
-              int newparts = round(num_particles*particles[i].weight);
-              for (int j = 0; j < newparts; j++) {
-                  particle tmp;
-                  tmp = particle();
-                  tmp.x = particles[i].x;
-                  tmp.y = particles[i].y;
-                  resamples.push_back(tmp);
+          vector<pair<double, int> > cumsum;
+          double cum = 0;
+          int count = 0;
+          for(int i = 0; i < particles.size(); i++) {
+              if (particles[i].weight > 0.0) {
+                  cum += particles[i].weight;
+                  cumsum.push_back(pair<double, int>(cum, i));
+                  count++;
               }
+          }
+          cout << "counted " << count << " particles" << endl;
+          std::cout << "cum: " << cum << std::endl;
+
+          resamples.clear();
+          for (int i = 0; i < num_particles; i++) {
+              float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+              int j = 0;
+              while(cumsum[j].first < r && j < cumsum.size()) {
+                  j++;
+              }
+              int tmpx = particles[cumsum[j-1].second].x;
+              int tmpy = particles[cumsum[j-1].second].y;
+              double tmptheta = particles[cumsum[j-1].second].theta;
+              //cout << "r = " << r << " j = " << j << " x = " << tmpx << " y = " << tmpy << endl;
+              particle tmp(tmpx, tmpy, tmptheta);
+              resamples.push_back(tmp);
           }
 
           particles.clear();
           for (int i = 0; i < resamples.size(); i++) {
-              std::cout << "we made " << resamples.size() << " new particles" << std::endl;
               particles.push_back(resamples[i]);
           }
 
-
           // Draw the object in the image (for visualisation)
           cam.draw_object (im);
-
         } else { // end: if (found_landmark)
 
           // No observation - reset weights to uniform distribution
