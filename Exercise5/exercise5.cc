@@ -30,7 +30,7 @@
 #define KEY_LEFT  65361
 #define KEY_RIGHT 65363
 
-#define SIGMA 10
+#define SIGMA 10.0
 
 double round(double d) {
     return floor(d + 0.5);
