@@ -146,6 +146,13 @@ int main()
 
   // Initialize player (XXX: You do this)
 
+  //PlayerClient robert("172.16.187.128");
+  //Position2dProxy pp(&robert);
+  //IrProxy ir(&robert);
+  //BumperProxy bumper(&robert);
+
+
+
   // Driving parameters
   double velocity = 15; // cm/sec
   const double acceleration = 12; // cm/sec^2
@@ -197,12 +204,29 @@ int main()
         // for(int i = 0; i < particles.size(); i++) {
         //      move_particle(particles[i], 1, 1, 1);
         // }
+<<<<<<< HEAD
 
 
       // Read odometry, see how far we have moved, and update particles.
       // Or use motor controls to update particles
       //XXX: You do this
         /* her tilføjes støj efter movement */
+=======
+      add_uncertainty(particles, 1, 1);
+      // Or use motor controls to update particles
+      //XXX: You do this
+        
+      // Reset/ start
+      //pp.SetOdometry();
+      //pp.ResetOdometry();  
+
+      // Read odometry, see how far we have moved, and update particles.
+      //pp.GetXPos();
+      //pp.GetYPos();
+
+      //Driving
+      //pp.Goto(x, y, yax);
+>>>>>>> 69079d4996162fdc5359f3c5990a5a3f35c54543
 
       // Grab image
       IplImage *im = cam.get_colour ();
