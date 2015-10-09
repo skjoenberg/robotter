@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <cmath>
+#include <time.h>
 
 //#include "index.h"
 #include "camera.h"
@@ -30,7 +31,7 @@
 #define KEY_LEFT  65361
 #define KEY_RIGHT 65363
 
-#define SIGMA 10.0
+#define SIGMA 5.0
 
 using namespace std;
 
@@ -268,6 +269,8 @@ int main()
           // XXX: You do this
           /* Vægten er givet ved den funktion der står opgaven */
 
+         add_uncertainty(particles, 10, 0);
+
           double tmpweight;
           double sum = 0;
           double dist;
@@ -307,16 +310,19 @@ int main()
 
           resamples.clear();
           for (int i = 0; i < num_particles; i++) {
-              float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-              int j = 0;
+              float r = randf();
+              int j = 1;
+
               while(cumsum[j].first < r && j < cumsum.size()) {
                   j++;
               }
+
               int tmpx = particles[cumsum[j-1].second].x;
               int tmpy = particles[cumsum[j-1].second].y;
               double tmptheta = particles[cumsum[j-1].second].theta;
+              double tmpweight = particles[cumsum[j-1].second].weight;
               //cout << "r = " << r << " j = " << j << " x = " << tmpx << " y = " << tmpy << endl;
-              particle tmp(tmpx, tmpy, tmptheta);
+              particle tmp(tmpx, tmpy, tmptheta, tmpweight);
               resamples.push_back(tmp);
           }
 
@@ -327,6 +333,8 @@ int main()
 
           // Draw the object in the image (for visualisation)
           cam.draw_object (im);
+          // timespec fuckseiib = {2, 0};
+          // nanosleep(&fuckseiib, NULL);
         } else { // end: if (found_landmark)
 
           // No observation - reset weights to uniform distribution
