@@ -30,6 +30,12 @@
 #define KEY_LEFT  65361
 #define KEY_RIGHT 65363
 
+#define SIGMA 10
+
+double round(double d) {
+    return floor(d + 0.5);
+}
+
 /*
  * Landmarks.
  * The robot knows the position of 2 landmarks. Their coordinates are in cm.
@@ -191,10 +197,12 @@ int main()
         // for(int i = 0; i < particles.size(); i++) {
         //      move_particle(particles[i], 1, 1, 1);
         // }
-        add_uncertainty(particles, 1, 1);
+
+
       // Read odometry, see how far we have moved, and update particles.
       // Or use motor controls to update particles
       //XXX: You do this
+        /* her tilføjes støj efter movement */
 
       // Grab image
       IplImage *im = cam.get_colour ();
@@ -224,11 +232,56 @@ int main()
               continue;
             }
 
+          float box_x, box_y;
+          if (cp.red > cp.green) {
+              box_x = 0.;
+              box_y = 0.;
+          } else {
+              box_x = 300.;
+              box_y = 0.;
+          }
+
+
           // Compute particle weights
           // XXX: You do this
+          /* Vægten er givet ved den funktion der står opgaven */
+
+          double tmpweight;
+          double sum = 0;
+          double dist;
+          for (int i = 0; i < particles.size(); i++) {
+              dist = sqrt(pow(particles[i].x - box_x, 2.0) + pow(particles[i].y - box_y, 2.0));
+              tmpweight = exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)) )));
+              sum += tmpweight;
+              std::cout << "en weight er = " << tmpweight << std::endl;
+              std::cout << "en distance er = " << dist << std::endl;
+          }
+          for (int i = 0; i < particles.size(); i++) {
+              particles[i].weight = particles[i].weight / sum;
+          }
 
           // Resampling
           // XXX: You do this
+          /* Lav cumsum og rand [0, 1] for at se hvilken partikel du skal duplikere */
+          std::vector<particle> resamples;
+          resamples.clear();
+          for (int i = 0; i < particles.size(); i++) {
+              int newparts = round(num_particles*particles[i].weight);
+              for (int j = 0; j < newparts; j++) {
+                  particle tmp;
+                  tmp = particle();
+                  tmp.x = particles[i].x;
+                  tmp.y = particles[i].y;
+                  resamples.push_back(tmp);
+              }
+          }
+
+          particles.clear();
+          for (int i = 0; i < resamples.size(); i++) {
+              std::cout << "we made " << resamples.size() << " new particles" << std::endl;
+              particles.push_back(resamples[i]);
+          }
+
 
           // Draw the object in the image (for visualisation)
           cam.draw_object (im);
