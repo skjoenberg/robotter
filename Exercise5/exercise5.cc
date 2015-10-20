@@ -294,24 +294,24 @@ int main()
               deltay = particles[i].y - box_y;
               dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
               angletobox = atan(deltax / deltay);
-              if (deltay > 0) {
-                  angletobox = -angletobox;
-              }
+
+              //              if (deltay < 0) {
+              //                  angletobox = -angletobox;
+              //              }
               if (deltax > 0) {
-                  angletobox += M_PI;
+                   angletobox += M_PI;
               }
 
 
-              angletobox = atan((particles[i].y - box_y) / (particles[i].x - box_x));
               deltaangle = particles[i].theta - angletobox;
 
               if(deltaangle > M_PI){
-                deltaangle - 2*M_PI;
+                deltaangle - M_PI;
 
               }
 
               if(deltaangle < -M_PI){
-                deltaangle + 2*M_PI;
+                deltaangle + M_PI;
               }
               // Calculate weight of the current particle
               angleweight = gaussman * exp(-((pow(measured_angle - deltaangle, 2.0) / (2.0 * pow(SIGMA_THETA, 2.0)))));
@@ -376,7 +376,7 @@ int main()
               double tmptheta = particles[cumsum[j].second].theta;
               double tmpweight = particles[cumsum[j].second].weight;
               //cout << "r = " << r << " j = " << j << " x = " << tmpx << " y = " << tmpy << endl;
-              particle tmp(tmpx, tmpy, 0, tmpweight);
+              particle tmp(tmpx, tmpy, tmptheta, tmpweight);
               resamples.push_back(tmp);
           }
 
