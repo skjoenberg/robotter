@@ -33,6 +33,7 @@
 #define KEY_RIGHT 65363
 
 #define SIGMA 20.0
+#define SIGMA_THETA 0.3
 
 using namespace std;
 
@@ -131,7 +132,7 @@ int main()
   cvMoveWindow (window, 20, 20);
 
   // Initialize particles
-  const int num_particles = 50;
+  const int num_particles = 2000;
   std::vector<particle> particles(num_particles);
   for (int i = 0; i < num_particles; i++)
     {
@@ -289,23 +290,26 @@ int main()
           for (int i = 0; i < particles.size(); i++) {
               // Measure euclidean distance to landmark
               dist = sqrt(pow(particles[i].x - box_x, 2.0) + pow(particles[i].y - box_y, 2.0));
-              angletobox = atan((particles[i].y - box_y)/(particles[i].x - box_x));
+              angletobox = atan((particles[i].y - box_y) / (particles[i].x - box_x));
               deltaangle = particles[i].theta - angletobox;
-              if(deltaangle > 2*M_PI){
+
+              if(deltaangle > M_PI){
                 deltaangle - 2*M_PI;
+
               }
-              if(deltaangle < -2*M_PI){
+
+              if(deltaangle < -M_PI){
                 deltaangle + 2*M_PI;
               }
               // Calculate weight of the current particle
-              angleweight = gaussman * exp(-((pow(measured_angle - deltaangle, 2.0) / (2.0 * pow(SIGMA, 2.0)))));
+              angleweight = gaussman * exp(-((pow(measured_angle - deltaangle, 2.0) / (2.0 * pow(SIGMA_THETA, 2.0)))));
               distweight = gaussman * exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)))));
-              //cout << "angleweight: " <<  angleweight << endl;              
-              //cout << "deltaangle: " <<  deltaangle << endl;              
-              //cout << "angletobox: " <<  angletobox << endl;              
-              //cout << "particles theta: " <<  particles[i].theta << endl;              
-              //cout << "particles x: " <<  particles[i].x << endl;              
-              //cout << "particles y: " <<  particles[i].y << endl << endl;              
+              //cout << "angleweight: " <<  angleweight << endl;
+              //cout << "deltaangle: " <<  deltaangle << endl;
+              //cout << "angletobox: " <<  angletobox << endl;
+              //cout << "particles theta: " <<  particles[i].theta << endl;
+              //cout << "particles x: " <<  particles[i].x << endl;
+              //cout << "particles y: " <<  particles[i].y << endl << endl;
               tmpweight = angleweight*distweight;
 
               // Add the weight to a sum (used later on to normalize weights)
@@ -360,7 +364,7 @@ int main()
               double tmptheta = particles[cumsum[j].second].theta;
               double tmpweight = particles[cumsum[j].second].weight;
               //cout << "r = " << r << " j = " << j << " x = " << tmpx << " y = " << tmpy << endl;
-              particle tmp(tmpx, tmpy, tmptheta, tmpweight);
+              particle tmp(tmpx, tmpy, 0, tmpweight);
               resamples.push_back(tmp);
           }
 
