@@ -1,3 +1,0 @@
-/home/sebastian/robot/Exercise5/build/CMakeFiles/camera_calibrator.dir
-/home/sebastian/robot/Exercise5/build/CMakeFiles/checkerboard_generator.dir
-/home/sebastian/robot/Exercise5/build/CMakeFiles/exercise5.dir
