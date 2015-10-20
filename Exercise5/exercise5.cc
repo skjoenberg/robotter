@@ -275,6 +275,7 @@ int main()
           // XXX: You do this
           /* Vægten er givet ved den funktion der står opgaven */
 
+
           add_uncertainty(particles, 10, 0);
 
           double tmpweight;
@@ -282,10 +283,19 @@ int main()
           double dist;
           double gaussman = 1. / sqrt(2. * M_PI * pow(SIGMA, 2.));
           for (int i = 0; i < particles.size(); i++) {
+              // Measure euclidean distance to landmark
               dist = sqrt(pow(particles[i].x - box_x, 2.0) + pow(particles[i].y - box_y, 2.0));
+
+              // Calculate weight of the current particle
               tmpweight = gaussman * exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)))));
+
+              // Add the weight to a sum (used later on to normalize weights)
               sum += tmpweight;
+
+              // Save the weight in a particle array
               particles[i].weight = tmpweight;
+
+              // ## Debugging! ##
               // std::cout << "en weight er = " << tmpweight << std::endl;
               // std::cout << "en distance er = " << dist << std::endl;
               // std::cout << "measured dist er = " << measured_distance << std::endl;
@@ -315,7 +325,6 @@ int main()
           }
 
           cout << "counted " << count << " particles" << endl;
-
           std::cout << "cum: " << cum << std::endl;
 
           resamples.clear();
