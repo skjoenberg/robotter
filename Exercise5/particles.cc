@@ -4,6 +4,9 @@
 #include <math.h>
 #include <iostream>
 
+
+using namespace std;
+
 particle estimate_pose (std::vector<particle> &particles)
 {
     double x_sum = 0, y_sum = 0, cos_sum = 0, sin_sum = 0;
@@ -39,6 +42,8 @@ void add_uncertainty (std::vector<particle> &particles, double sigma, double the
       {
         particles[i].x += randn (0, sigma);
         particles[i].y += randn (0, sigma);
-        particles[i].theta = fmod(rand_von_mises (particles[i].theta, theta_kappa), 2.0f * M_PI) - M_PI;
+        //particles[i].theta = fmod(rand_von_mises (particles[i].theta, theta_kappa), 2.0f * M_PI); //+ M_PI;
+        //cout << "theta: " << particles[i].theta << endl;
       }
+
 }

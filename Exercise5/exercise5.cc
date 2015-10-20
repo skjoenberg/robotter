@@ -131,7 +131,7 @@ int main()
   cvMoveWindow (window, 20, 20);
 
   // Initialize particles
-  const int num_particles = 10;
+  const int num_particles = 50;
   std::vector<particle> particles(num_particles);
   for (int i = 0; i < num_particles; i++)
     {
@@ -276,7 +276,7 @@ int main()
           /* Vægten er givet ved den funktion der står opgaven */
 
 
-          //add_uncertainty(particles, 10, 1);
+          add_uncertainty(particles, 10, 0.0);
 
           double tmpweight;
           double sum = 0;
@@ -300,12 +300,12 @@ int main()
               // Calculate weight of the current particle
               angleweight = gaussman * exp(-((pow(measured_angle - deltaangle, 2.0) / (2.0 * pow(SIGMA, 2.0)))));
               distweight = gaussman * exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)))));
-              cout << "angleweight: " <<  angleweight << endl;              
-              cout << "deltaangle: " <<  deltaangle << endl;              
-              cout << "angletobox: " <<  angletobox << endl;              
-              cout << "particles theta: " <<  particles[i].theta << endl;              
-              cout << "particles x: " <<  particles[i].x << endl;              
-              cout << "particles y: " <<  particles[i].y << endl << endl;              
+              //cout << "angleweight: " <<  angleweight << endl;              
+              //cout << "deltaangle: " <<  deltaangle << endl;              
+              //cout << "angletobox: " <<  angletobox << endl;              
+              //cout << "particles theta: " <<  particles[i].theta << endl;              
+              //cout << "particles x: " <<  particles[i].x << endl;              
+              //cout << "particles y: " <<  particles[i].y << endl << endl;              
               tmpweight = angleweight*distweight;
 
               // Add the weight to a sum (used later on to normalize weights)
