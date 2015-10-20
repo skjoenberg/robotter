@@ -287,9 +287,21 @@ int main()
           double deltaangle;
           double distweight;
           double angleweight;
+          double deltax, deltay;
           for (int i = 0; i < particles.size(); i++) {
               // Measure euclidean distance to landmark
-              dist = sqrt(pow(particles[i].x - box_x, 2.0) + pow(particles[i].y - box_y, 2.0));
+              deltax = particles[i].x - box_x;
+              deltay = particles[i].y - box_y;
+              dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
+              angletobox = atan(deltax / deltay);
+              if (deltay > 0) {
+                  angletobox = -angletobox;
+              }
+              if (deltax > 0) {
+                  angletobox += M_PI;
+              }
+
+
               angletobox = atan((particles[i].y - box_y) / (particles[i].x - box_x));
               deltaangle = particles[i].theta - angletobox;
 
