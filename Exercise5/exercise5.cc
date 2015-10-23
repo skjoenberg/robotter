@@ -238,6 +238,9 @@ int main()
       IplImage *im = cam.get_colour ();
       //rgb_im = cam.get_colour ();
 
+      // Tilføj Inger Støjberg
+      add_uncertainty(particles, 10, 0.1);
+
       // Do landmark detection
       double measured_distance, measured_angle;
       colour_prop cp;
@@ -276,9 +279,6 @@ int main()
           // XXX: You do this
           /* Vægten er givet ved den funktion der står opgaven */
 
-
-          add_uncertainty(particles, 10, 0.0);
-
           double tmpweight;
           double sum = 0;
           double dist;
@@ -288,39 +288,38 @@ int main()
           double distweight;
           double angleweight;
           double deltax, deltay;
+
           for (int i = 0; i < particles.size(); i++) {
               // Measure euclidean distance to landmark
               deltax = particles[i].x - box_x;
               deltay = particles[i].y - box_y;
               dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
-              angletobox = atan(abs(deltax) / abs(deltay));
-
-
-              // if (deltax > 0) {
-              //     angletobox -= M_PI;
-              //     if (deltay < 0) {
-              //         angletobox = -angletobox;
-              //     }
-              // }
+              angletobox = atan(deltay / deltax);
 
               if (deltax > 0) {
                   angletobox -= M_PI;
               }
               else if (deltay < 0) {
                   angletobox -= 2.0 * M_PI;
-                  cout << angletobox << endl;
               }
 
               deltaangle = particles[i].theta - angletobox;
 
-              if(deltaangle > M_PI){
-                deltaangle - M_PI;
+              if (deltaangle > M_PI){
+                deltaangle -= 2 * M_PI;
 
               }
-
               if(deltaangle < -M_PI){
-                deltaangle + M_PI;
+                deltaangle += 2 * M_PI;
               }
+
+              if (deltaangle > M_PI) {
+                  cout << deltaangle << endl;
+              }
+              if (deltaangle < -M_PI) {
+                  cout << deltaangle << endl;
+              }
+
               // Calculate weight of the current particle
               angleweight = gaussman * exp(-((pow(measured_angle - deltaangle, 2.0) / (2.0 * pow(SIGMA_THETA, 2.0)))));
               distweight = gaussman * exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)))));
