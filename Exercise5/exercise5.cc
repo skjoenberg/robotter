@@ -35,16 +35,17 @@
 #define SIGMA 20.0
 #define SIGMA_THETA 0.3
 
+#define TARGET_X = 150
+#define TARGET_Y = 0
+
+PlayerClient robert("172.16.187.128");
+Position2dProxy pp(&robert);
+IrProxy ir(&robert);
+BumperProxy bumper(&robert);
+
 using namespace std;
 
-double round(double d) {
-    return floor(d + 0.5);
-}
 
-
-bool operator < (particle a , particle b) {
-    return a.weight < b.weight;
-}
 
 /*
  * Landmarks.
@@ -118,6 +119,36 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
   cvLine   (im, a, b, CMAGENTA, 2);
 }
 
+void turnXRadians(double angle) {
+
+}
+
+void driveXcm(int 10) {
+
+}
+
+void move(particle est_pose) {
+    double dx = (double)(est_pose.x - TARGET_X);
+    double dy = (double)(est_pose.x - TARGET_Y);
+    double targetangle = atan((dy)/(dx));
+    if (est_pose.x > TARGET_X) {
+        targetangle -= M_PI;
+    }
+    if (abs(est_pose.theta - targetangle) > M_PI / 6) {
+        turnXRadians(est_pose.theta - targetangle);
+        return;
+    }
+    DriveXcm(10);
+    return;
+}
+
+void read () {
+    robert.Read();
+    timespec readsleep = {0, 100000};
+    nanosleep(&readsleep, NULL);
+}
+
+
 /*************************\
  *      Main program     *
 \*************************/
@@ -155,13 +186,6 @@ int main()
   //IplImage *rgb_im = cvCreateImage (size, IPL_DEPTH_8U, 3);
 
   // Initialize player (XXX: You do this)
-
-  //PlayerClient robert("172.16.187.128");
-  //Position2dProxy pp(&robert);
-  //IrProxy ir(&robert);
-  //BumperProxy bumper(&robert);
-
-
 
   // Driving parameters
   double velocity = 15; // cm/sec
@@ -210,36 +234,32 @@ int main()
             goto theend;
       }
 
-      //XXX: Make player drive
+        timespec search_sleep = { 1, 0 };
+        pp.SetSpeed(0.0, 0.2);
+        nanosleep(&search_sleep, NULL);
+        pp.SetSpeed(0.0, 0.0);
+
+        // read();
+        // double x_before = pp.GetXPos();
+        // double y_before = pp.GetYPos();
+        // double theta_before = pp.GetYaw();
+
+        // move(estimate_pose(particles));
+
+        // read();
+        // double deltax = pp.GetXPos() - x_before;
+        // double deltay = pp.GetYPos() - y_before;
+        // double deltatheta = pp.GetYaw() - theta_before;
+
         // for(int i = 0; i < particles.size(); i++) {
-        //      move_particle(particles[i], 1, 1, 1);
+        //     move_particle(particles[i], deltax, deltay, deltatheta);
         // }
+        add_uncertainty(particles, 10, 0.1);
 
-
-      // Read odometry, see how far we have moved, and update particles.
-      // Or use motor controls to update particles
-      //XXX: You do this
-        /* her tilføjes støj efter movement */
-      // Or use motor controls to update particles
-      //XXX: You do this
-
-      // Reset/ start
-      //pp.SetOdometry();
-      //pp.ResetOdometry();
-
-      // Read odometry, see how far we have moved, and update particles.
-      //pp.GetXPos();
-      //pp.GetYPos();
-
-      //Driving
-      //pp.Goto(x, y, yax);
 
       // Grab image
       IplImage *im = cam.get_colour ();
       //rgb_im = cam.get_colour ();
-
-      // Tilføj Inger Støjberg
-      add_uncertainty(particles, 10, 0.1);
 
       // Do landmark detection
       double measured_distance, measured_angle;
