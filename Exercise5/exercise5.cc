@@ -231,9 +231,6 @@ int main()
       //pp.GetXPos();
       //pp.GetYPos();
 
-      //Driving
-      //pp.Goto(x, y, yax);
-
       // Grab image
       IplImage *im = cam.get_colour ();
       //rgb_im = cam.get_colour ();
@@ -278,7 +275,6 @@ int main()
           // Compute particle weights
           // XXX: You do this
           /* Vægten er givet ved den funktion der står opgaven */
-
           double tmpweight;
           double sum = 0;
           double dist;
@@ -299,20 +295,16 @@ int main()
               if (deltax > 0) {
                   angletobox -= M_PI;
               }
-              else if (deltay < 0) {
-                  angletobox -= 2.0 * M_PI;
-              }
 
               deltaangle = particles[i].theta - angletobox;
 
               if (deltaangle > M_PI){
                 deltaangle -= 2 * M_PI;
-
-              }
-              if(deltaangle < -M_PI){
+              } else if (deltaangle < -M_PI) {
                 deltaangle += 2 * M_PI;
               }
 
+              // Debugging
               if (deltaangle > M_PI) {
                   cout << deltaangle << endl;
               }
