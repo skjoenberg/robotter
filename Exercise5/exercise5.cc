@@ -234,10 +234,10 @@ int main()
             goto theend;
       }
 
-        timespec search_sleep = { 1, 0 };
-        pp.SetSpeed(0.0, 0.2);
-        nanosleep(&search_sleep, NULL);
-        pp.SetSpeed(0.0, 0.0);
+        // timespec search_sleep = { 1, 0 };
+        // pp.SetSpeed(0.0, 0.2);
+        // nanosleep(&search_sleep, NULL);
+        // pp.SetSpeed(0.0, 0.0);
 
         // read();
         // double x_before = pp.GetXPos();
