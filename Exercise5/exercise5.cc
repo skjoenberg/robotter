@@ -293,15 +293,23 @@ int main()
               deltax = particles[i].x - box_x;
               deltay = particles[i].y - box_y;
               dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
-              angletobox = atan(deltax / deltay);
+              angletobox = atan(abs(deltax) / abs(deltay));
 
-              //              if (deltay < 0) {
-              //                  angletobox = -angletobox;
-              //              }
+
+              // if (deltax > 0) {
+              //     angletobox -= M_PI;
+              //     if (deltay < 0) {
+              //         angletobox = -angletobox;
+              //     }
+              // }
+
               if (deltax > 0) {
-                   angletobox += M_PI;
+                  angletobox -= M_PI;
               }
-
+              else if (deltay < 0) {
+                  angletobox -= 2.0 * M_PI;
+                  cout << angletobox << endl;
+              }
 
               deltaangle = particles[i].theta - angletobox;
 
