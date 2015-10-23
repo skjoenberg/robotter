@@ -289,15 +289,22 @@ int main()
               // Measure euclidean distance to landmark
               deltax = particles[i].x - box_x;
               deltay = particles[i].y - box_y;
+
+              // Euclidean distance to box
               dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
+
+              // Angle between particle and box
               angletobox = atan(deltay / deltax);
 
+              // If deltax > 0, then the angle needs to be turned by a half circle.
               if (deltax > 0) {
                   angletobox -= M_PI;
               }
 
+              // Difference in angle
               deltaangle = particles[i].theta - angletobox;
 
+              // The angles are between (-pi, pi)
               if (deltaangle > M_PI){
                 deltaangle -= 2 * M_PI;
               } else if (deltaangle < -M_PI) {
