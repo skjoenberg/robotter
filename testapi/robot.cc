@@ -12,17 +12,14 @@ using namespace PlayerCc;
 using namespace std;
 
 Robot::Robot() {
-    PlayerClient roberto("192.168.240.129");
-    Position2dProxy ppo(&roberto);
-    IrProxy iro(&roberto);
-    BumperProxy bumpero(&roberto);
-    robert = &roberto;
-    pp = &ppo;
-    ir = &iro;
-    bumper = &bumpero;
+    robert = new PlayerClient("172.16.187.128");;
+    pp = new Position2dProxy(robert);
+    ir = new IrProxy (robert);
+    bumper = new BumperProxy(robert);
 }
 
 void Robot::read () {
+    cout << "hej" << endl;
     robert->Read();
     timespec readsleep = {0, 100000};
     nanosleep(&readsleep, NULL);
@@ -30,7 +27,9 @@ void Robot::read () {
 
 void Robot::moveXcm(int cm) {
     double meters = (double) cm / 100.;
+    cout << "hej" << endl;
     read();
+    cout << "nej" << endl;
     double startx = pp->GetXPos();
     double starty = pp->GetYPos();
     double dist = 0;
