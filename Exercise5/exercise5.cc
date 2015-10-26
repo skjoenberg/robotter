@@ -8,14 +8,14 @@
 #include <iomanip>
 
 //#include "index.h"
+#include "robot.h"
 #include "camera.h"
 #include "particles.h"
 #include "random_numbers.h"
 
-#include "/usr/local/include/player-2.0/libplayerc++/playerc++.h"
-//#include <libplayerc++/playerc++.h>
+#include <libplayerc++/playerc++.h>
 #include "scorpion.h"
-#include "robot.h"
+
 /*
  * Some colors
  */
