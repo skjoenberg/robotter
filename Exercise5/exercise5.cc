@@ -130,21 +130,28 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
 //         turnXRadians(est_pose.theta - targetangle);
 //         return;
 //     }
-//     DriveXcm(10);
+//     robert.moveXcm(afstand til target)
 //     return;
 // }
 
-// void search() {
-//     int boxes = 0;
-//     while (boxes < 2) {
-//         // Snak med kamera
-//         // turn(0.17 * M_PI)
-//         if (boxes == 1) {
-//             measu
-//         }
-//     }
-
-// }
+void search() {
+    int boxes = 0;
+    while (boxes < 2) {
+        // Snak med kamera
+        // If only 1 box is spotted try to move into a new pos.
+        if (boxes == 1) {
+            if(measured_distance > 100){
+                robert.moveXcm(measured_distance - 100);  
+            }
+            turnXRadians(0.25 * M_PI);
+            robert.moveXcm(50);
+            return;           
+        }
+        turnXRadians(0.17 * M_PI);
+        // TODO: Lav noget check om der er drejet 360 uden at finde noget
+    }
+    //Hvis 2 bokse så move()
+}
 
 /*************************\
  *      Main program     *
@@ -202,6 +209,7 @@ int main()
             double theta_before = robert.pp->GetYaw();
 
             // LAV NOGET FLYTTELSE
+            // HVAD LAVER DET HER???
 
             robert.read();
             double deltax = robert.pp->GetXPos() - x_before;
