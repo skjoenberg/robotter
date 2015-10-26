@@ -1,11 +1,14 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.9)
 PROJECT(exercise5 CXX)
+#add_library(exercise5 file1.c file2.c)
 
 
 #FIND_PACKAGE(OpenCV REQUIRED core highgui imgcodecs)
 FIND_PACKAGE(OpenCV REQUIRED)
 
+
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(/usr/local/include/player-2.0/)
 
 MESSAGE( STATUS "OpenCV_VERSION = ${OpenCV_VERSION}")
 MESSAGE( STATUS "OpenCV_LIBS = ${OpenCV_LIBS}")
@@ -18,17 +21,18 @@ add_executable(camera_calibrator camera_calibrator.cc)
 target_link_libraries(camera_calibrator ${OpenCV_LIBS})
 
 
-
 SET(SRCS
   camera.cc
   particles.cc
   random_numbers.cc
+  robot.cc
 )
 
 SET(HEADERS
   camera.h
   particles.h
   random_numbers.h
+  robot.h
 )
 
 SET(DUMMY_MAIN
@@ -37,6 +41,7 @@ SET(DUMMY_MAIN
 
 add_executable(exercise5 ${DUMMY_MAIN} ${SRCS} ${HEADERS})
 target_link_libraries(exercise5 ${OpenCV_LIBS})
+target_link_libraries(exercise5 playerc++)
 
 SET(SOLUTION_MAIN
   solutions/solution.cc
@@ -48,4 +53,3 @@ SET(SOLUTION_MAIN
 
 # Only works with CMake 3.3 and onwards
 #target_include_directories(solution PUBLIC ${PROJECT_SOURCE_DIR})
-
