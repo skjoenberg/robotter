@@ -19,7 +19,6 @@ Robot::Robot() {
 }
 
 void Robot::read () {
-    cout << "hej" << endl;
     robert->Read();
     timespec readsleep = {0, 100000};
     nanosleep(&readsleep, NULL);
@@ -34,7 +33,7 @@ void Robot::moveXcm(int cm) {
     double starty = pp->GetYPos();
     double dist = 0;
     double currentx, currenty;
-    pp->SetSpeed(0.3, 0.0);
+    pp->SetSpeed(0.2, 0.0);
     while(dist < meters) {
         read();
         currentx = pp->GetXPos();
