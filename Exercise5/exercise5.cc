@@ -169,12 +169,13 @@ int main()
     // Main loop
     while (true)
         {
+            int action = cvWaitKey (10);
             robert.read();
             double x_before = robert.pp->GetXPos();
             double y_before = robert.pp->GetYPos();
 
             // LAV NOGET FLYTTELSE
-            if (false) {
+            if (search_mode) {
                 for(int k = 0; k < 40; k++) {
                     double theta_before = robert.pp->GetYaw();
                     robert.turnXradians(0.17);
