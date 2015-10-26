@@ -15,6 +15,6 @@ class Robot {
     PlayerCc::BumperProxy* bumper;
     Robot();
 
-    void read(robot* theBot);
-    void moveXcm(robot* theBot, int cm);
-    void turnXradians(robot* theBot, double angle);
+    void read();
+    void moveXcm(int cm);
+    void turnXradians(double angle);
