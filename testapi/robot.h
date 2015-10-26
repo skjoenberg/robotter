@@ -5,16 +5,15 @@
 #include <algorithm>
 #include <string>
 #include <libplayerc++/playerc++.h>
-#include <scorpion.h>
-
+#include "scorpion.h"
 
 class Robot {
  public:
+    PlayerCc::PlayerClient* robert;
+    PlayerCc::Position2dProxy* pp;
+    PlayerCc::IrProxy* ir;
+    PlayerCc::BumperProxy* bumper;
     Robot();
-    PlayerClient robert;
-    Position2dProxy pp;
-    IrProxy ir;
-    BumperProxy Bumper;
 
     void moveXcm(int cm);
     void turnXradians(double angle);

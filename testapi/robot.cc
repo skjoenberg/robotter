@@ -4,17 +4,24 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <libplayerc++/playerc++.h>
+#include "scorpion.h"
 #include "robot.h"
 using namespace std;
+using namespace PlayerCc;
 
 Robot::Robot() {
-    robert = robert("172.16.187.128");
-    pp = pp(&robert);
-    ir = ir(&robert);
-    Bumper = Bumper(&robert);
+    PlayerClient roberto("192.168.240.129");
+    Position2dProxy ppo(&roberto);
+    IrProxy iro(&roberto);
+    BumperProxy bumpero(&roberto);
+    robert = &roberto;
+    pp = &ppo;
+    ir = &iro;
+    bumper = &bumpero;
 }
 
-void Robot::moveXcm() {
+void Robot::moveXcm(int cm) {
     cout << "moving" << endl;
 }
 
