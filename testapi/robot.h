@@ -18,3 +18,4 @@ class Robot {
     void read();
     void moveXcm(int cm);
     void turnXradians(double angle);
+};
