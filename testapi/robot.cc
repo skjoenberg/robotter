@@ -8,13 +8,13 @@
 #include <libplayerc++/playerc++.h>
 #include "scorpion.h"
 #include "robot.h"
-using namespace std;
 using namespace PlayerCc;
 
 void read () {
     this.robert.read();
     timespec readsleep = {0, 100000};
     nanosleep(&readsleep, NULL);
+}
 
 void Robot::moveXcm(int cm) {
     double meters = (double) cm / 100.;
@@ -46,5 +46,5 @@ Robot::Robot() {
 
 
 void Robot::turnXradians(double angle) {
-    cout << "turning" << endl;
+
 }
