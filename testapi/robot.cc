@@ -62,8 +62,11 @@ void Robot::turnXradians(double angle) {
     double start = pp->GetYaw();
     double target = start + angle;
     double current = start;
-    if (target < 0) {
+    if (target < -M_PI) {
         target += 2 * M_PI;
+    }
+    if (target > M_PI) {
+        target -= 2 * M_PI
     }
     if(angle < 0) {
         pp->SetSpeed(0.0, -0.3);
