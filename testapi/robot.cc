@@ -26,20 +26,20 @@ void Robot::read () {
 
 void Robot::moveXcm(int cm) {
     double meters = (double) cm / 100.;
-    cout << "hej" << endl;
     read();
-    cout << "nej" << endl;
     double startx = pp->GetXPos();
     double starty = pp->GetYPos();
     double dist = 0;
     double currentx, currenty;
     pp->SetSpeed(0.2, 0.0);
+    
     while(dist < meters) {
         read();
         currentx = pp->GetXPos();
         currenty = pp->GetYPos();
         dist = sqrt(pow(currentx - startx, 2.)+pow(currenty - starty, 2.));
     }
+    
     pp->SetSpeed(0.0, 0.0);
     return;
 }
@@ -56,7 +56,6 @@ void Robot::turnXradians(double angle) {
     if (target > M_PI) {
         target -= 2 * M_PI;
     }
-    cout << "start: " << start << ", target: " << target << endl;
 
     if(angle < 0) {
         pp->SetSpeed(0.0, -0.2);
