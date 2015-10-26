@@ -48,3 +48,4 @@ SET(SOLUTION_MAIN
 
 # Only works with CMake 3.3 and onwards
 #target_include_directories(solution PUBLIC ${PROJECT_SOURCE_DIR})
+
