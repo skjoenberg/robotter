@@ -117,21 +117,6 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
     cvLine   (im, a, b, CMAGENTA, 2);
 }
 
-void move(particle est_pose) {
-    double dx = (double)(est_pose.x - TARGET_X);
-    double dy = (double)(est_pose.x - TARGET_Y);
-    double targetangle = atan((dy)/(dx));
-    if (est_pose.x > TARGET_X) {
-        targetangle -= M_PI;
-    }
-    if (abs(est_pose.theta - targetangle) > M_PI / 6) {
-        turnXRadians(est_pose.theta - targetangle);
-        return;
-    }
-    DriveXcm(10);
-    return;
-}
-
 /*************************\
  *      Main program     *
 \*************************/
@@ -182,22 +167,22 @@ int main()
     // Main loop
     while (true)
         {
-            robert.read();
-            double x_before = robert.pp->GetXPos();
-            double y_before = robert.pp->GetYPos();
-            double theta_before = robert->pp.GetYaw();
+            // robert.read();
+            // double x_before = robert.pp->GetXPos();
+            // double y_before = robert.pp->GetYPos();
+            // double theta_before = robert->pp.GetYaw();
 
             // LAV NOGET FLYTTELSE
 
-            robert.read();
-            double deltax = robert.pp->GetXPos() - x_before;
-            double deltay = robert.pp->GetYPos() - y_before;
-            double deltatheta = pp.GetYaw() - theta_before;
+            // robert.read();
+            // double deltax = robert.pp->GetXPos() - x_before;
+            // double deltay = robert.pp->GetYPos() - y_before;
+            // double deltatheta = pp.GetYaw() - theta_before;
 
-            for(int i = 0; i < particles.size(); i++) {
-                 move_particle(particles[i], deltax, deltay, deltatheta);
-            }
-            add_uncertainty(particles, 10, 0.2);
+            // for(int i = 0; i < particles.size(); i++) {
+            //      move_particle(particles[i], deltax, deltay, deltatheta);
+            // }
+            // add_uncertainty(particles, 10, 0.2);
 
             // Grab image
             IplImage *im = cam.get_colour ();
