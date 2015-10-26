@@ -9,29 +9,7 @@
 #include "scorpion.h"
 #include "robot.h"
 using namespace PlayerCc;
-
-void read () {
-    this.robert.read();
-    timespec readsleep = {0, 100000};
-    nanosleep(&readsleep, NULL);
-}
-
-void Robot::moveXcm(int cm) {
-    double meters = (double) cm / 100.;
-    this.read();
-    double startx = this.robert.getXpos();
-    double starty = this.robert.getYpos();
-    dist = 0;
-    double currentx, currenty;
-    this.pp.SetSpeed(0.3, 0.0);
-    while(dist < meters) {
-        this.read();
-        double currentx = this.robert.getXpos();
-        double currenty = this.robert.getYpos();
-        dist = sqrt(pow(currentx - startx, 2.)+pow(currenty - starty, 2.));
-    }
-    this.pp.SetSpeed(0.0, 0.0);
-    return;
+using namespace std;
 
 Robot::Robot() {
     PlayerClient roberto("192.168.240.129");
@@ -44,6 +22,29 @@ Robot::Robot() {
     bumper = &bumpero;
 }
 
+void Robot::read () {
+    robert->Read();
+    timespec readsleep = {0, 100000};
+    nanosleep(&readsleep, NULL);
+}
+
+void Robot::moveXcm(int cm) {
+    double meters = (double) cm / 100.;
+    read();
+    double startx = pp->GetXPos();
+    double starty = pp->GetYPos();
+    double dist = 0;
+    double currentx, currenty;
+    pp->SetSpeed(0.3, 0.0);
+    while(dist < meters) {
+        read();
+        currentx = pp->GetXPos();
+        currenty = pp->GetYPos();
+        dist = sqrt(pow(currentx - startx, 2.)+pow(currenty - starty, 2.));
+    }
+    pp->SetSpeed(0.0, 0.0);
+    return;
+}
 
 void Robot::turnXradians(double angle) {
 
