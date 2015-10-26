@@ -44,18 +44,6 @@ void Robot::moveXcm(int cm) {
     return;
 }
 
-Robot::Robot() {
-    PlayerClient roberto("192.168.240.129");
-    Position2dProxy ppo(&roberto);
-    IrProxy iro(&roberto);
-    BumperProxy bumpero(&roberto);
-    robert = &roberto;
-    pp = &ppo;
-    ir = &iro;
-    bumper = &bumpero;
-
-}
-
 void Robot::turnXradians(double angle) {
     double start = pp->GetYaw();
     double target = start + angle;
@@ -63,14 +51,18 @@ void Robot::turnXradians(double angle) {
     if (target < 0) {
         target += 2 * M_PI;
     }
+    cout << "start: " << start << endl;
+    cout << "target: " << target << endl;
+
     if(angle < 0) {
-        pp->SetSpeed(0.0, -0.3);
+        pp->SetSpeed(0.0, -0.1);
     } else {
-        pp->SetSpeed(0.0, -0.3);
+        pp->SetSpeed(0.0, 0.1);
     }
-    while(abs(current - start) > 0.2) {
+    while(abs(current - target) > 0.2) {
         read();
         current = pp->GetYaw();
+        cout << "current: " << current << endl;
     }
     pp->SetSpeed(0.0, 0.0);
     return;
