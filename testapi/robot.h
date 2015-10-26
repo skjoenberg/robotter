@@ -5,17 +5,16 @@
 #include <algorithm>
 #include <string>
 #include <libplayerc++/playerc++.h>
-#include <scorpion.h>
+#include "scorpion.h"
+
+struct robot {
+    PlayerCc::PlayerClient bot;
+    PlayerCc::Position2dProxy pp;
+    PlayerCc::IrProxy ir;
+    PlayerCc::BumperProxy bumper;
+}
 
 
-class Robot {
- public:
-    Robot();
-    PlayerClient robert;
-    Position2dProxy pp;
-    IrProxy ir;
-    BumperProxy Bumper;
-
-    void moveXcm(int cm);
-    void turnXradians(double angle);
-};
+void read(robot* theBot);
+void moveXcm(robot* theBot, int cm);
+void turnXradians(robot* theBot, double angle);
