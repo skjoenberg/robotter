@@ -48,21 +48,25 @@ void Robot::turnXradians(double angle) {
     double start = pp->GetYaw();
     double target = start + angle;
     double current = start;
-    if (target < 0) {
+
+    if (target < -M_PI) {
         target += 2 * M_PI;
     }
-    cout << "start: " << start << endl;
-    cout << "target: " << target << endl;
+
+    if (target > M_PI) {
+        target -= 2 * M_PI;
+    }
+    cout << "start: " << start << ", target: " << target << endl;
 
     if(angle < 0) {
-        pp->SetSpeed(0.0, -0.1);
+        pp->SetSpeed(0.0, -0.2);
     } else {
-        pp->SetSpeed(0.0, 0.1);
+        pp->SetSpeed(0.0, 0.2);
     }
-    while(abs(current - target) > 0.2) {
+
+    while(abs(current - target) > 0.1) {
         read();
         current = pp->GetYaw();
-        cout << "current: " << current << endl;
     }
     pp->SetSpeed(0.0, 0.0);
     return;
