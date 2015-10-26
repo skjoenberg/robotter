@@ -32,6 +32,7 @@ void Robot::moveXcm(int cm) {
     }
     this.pp.SetSpeed(0.0, 0.0);
     return;
+}
 
 Robot::Robot() {
     PlayerClient roberto("192.168.240.129");
@@ -46,5 +47,21 @@ Robot::Robot() {
 
 
 void Robot::turnXradians(double angle) {
-
+    double start = pp->GetYaw();
+    double target = start + angle;
+    double current = start;
+    if (target < 0) {
+        target += 2 * M_PI;
+    }
+    if(angle < 0) {
+        pp->SetSpeed(0.0, -0.3);
+    } else {
+        pp->SetSpeed(0.0, -0.3);
+    }
+    while(abs(current - start) > 0.2) {
+        read();
+        current = pp->GetYaw();
+    }
+    pp->SetSpeed(0.0, 0.0);
+    return;
 }
