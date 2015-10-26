@@ -12,14 +12,10 @@ using namespace PlayerCc;
 using namespace std;
 
 Robot::Robot() {
-    PlayerClient roberto("192.168.240.129");
-    Position2dProxy ppo(&roberto);
-    IrProxy iro(&roberto);
-    BumperProxy bumpero(&roberto);
-    robert = &roberto;
-    pp = &ppo;
-    ir = &iro;
-    bumper = &bumpero;
+    robert = new PlayerClient("172.16.187.128");;
+    pp = new Position2dProxy(robert);
+    ir = new IrProxy (robert);
+    bumper = new BumperProxy(robert);
 }
 
 void Robot::read () {
@@ -35,45 +31,39 @@ void Robot::moveXcm(int cm) {
     double starty = pp->GetYPos();
     double dist = 0;
     double currentx, currenty;
-    pp->SetSpeed(0.3, 0.0);
+    pp->SetSpeed(0.2, 0.0);
+    
     while(dist < meters) {
         read();
         currentx = pp->GetXPos();
         currenty = pp->GetYPos();
         dist = sqrt(pow(currentx - startx, 2.)+pow(currenty - starty, 2.));
     }
+    
     pp->SetSpeed(0.0, 0.0);
     return;
-}
-
-Robot::Robot() {
-    PlayerClient roberto("192.168.240.129");
-    Position2dProxy ppo(&roberto);
-    IrProxy iro(&roberto);
-    BumperProxy bumpero(&roberto);
-    robert = &roberto;
-    pp = &ppo;
-    ir = &iro;
-    bumper = &bumpero;
-
 }
 
 void Robot::turnXradians(double angle) {
     double start = pp->GetYaw();
     double target = start + angle;
     double current = start;
+
     if (target < -M_PI) {
         target += 2 * M_PI;
     }
+
     if (target > M_PI) {
-        target -= 2 * M_PI
+        target -= 2 * M_PI;
     }
+
     if(angle < 0) {
-        pp->SetSpeed(0.0, -0.3);
+        pp->SetSpeed(0.0, -0.2);
     } else {
-        pp->SetSpeed(0.0, -0.3);
+        pp->SetSpeed(0.0, 0.2);
     }
-    while(abs(current - start) > 0.2) {
+
+    while(abs(current - target) > 0.1) {
         read();
         current = pp->GetYaw();
     }
