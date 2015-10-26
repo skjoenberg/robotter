@@ -32,7 +32,7 @@ void Robot::moveXcm(int cm) {
     }
     this.pp.SetSpeed(0.0, 0.0);
     return;
-=======
+
 Robot::Robot() {
     PlayerClient roberto("192.168.240.129");
     Position2dProxy ppo(&roberto);
@@ -44,10 +44,6 @@ Robot::Robot() {
     bumper = &bumpero;
 }
 
-void Robot::moveXcm(int cm) {
-    cout << "moving" << endl;
->>>>>>> f83c6b2aaa9fa36de03d83929717d8d40ee7b489
-}
 
 void Robot::turnXradians(double angle) {
     cout << "turning" << endl;
