@@ -12,7 +12,8 @@
 #include "particles.h"
 #include "random_numbers.h"
 
-#include <libplayerc++/playerc++.h>
+#include "/usr/local/include/player-2.0/libplayerc++/playerc++.h"
+//#include <libplayerc++/playerc++.h>
 #include "scorpion.h"
 #include "robot.h"
 /*
@@ -38,12 +39,13 @@
 #define SIGMA 20.0
 #define SIGMA_THETA 0.3
 
-#define TARGET_X = 150
-#define TARGET_Y = 0
+#define TARGET_X 150
+#define TARGET_Y 0
 
-Robot robert();
+Robot robert;
 
 using namespace std;
+using namespace PlayerCc;
 
 /*
  * Landmarks.
@@ -117,20 +119,32 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
     cvLine   (im, a, b, CMAGENTA, 2);
 }
 
-void move(particle est_pose) {
-    double dx = (double)(est_pose.x - TARGET_X);
-    double dy = (double)(est_pose.x - TARGET_Y);
-    double targetangle = atan((dy)/(dx));
-    if (est_pose.x > TARGET_X) {
-        targetangle -= M_PI;
-    }
-    if (abs(est_pose.theta - targetangle) > M_PI / 6) {
-        turnXRadians(est_pose.theta - targetangle);
-        return;
-    }
-    DriveXcm(10);
-    return;
-}
+// void move(particle est_pose) {
+//     double dx = (double)(est_pose.x - TARGET_X);
+//     double dy = (double)(est_pose.x - TARGET_Y);
+//     double targetangle = atan((dy)/(dx));
+//     if (est_pose.x > TARGET_X) {
+//         targetangle -= M_PI;
+//     }
+//     if (abs(est_pose.theta - targetangle) > M_PI / 6) {
+//         turnXRadians(est_pose.theta - targetangle);
+//         return;
+//     }
+//     DriveXcm(10);
+//     return;
+// }
+
+// void search() {
+//     int boxes = 0;
+//     while (boxes < 2) {
+//         // Snak med kamera
+//         // turn(0.17 * M_PI)
+//         if (boxes == 1) {
+//             measu
+//         }
+//     }
+
+// }
 
 /*************************\
  *      Main program     *
@@ -185,14 +199,14 @@ int main()
             robert.read();
             double x_before = robert.pp->GetXPos();
             double y_before = robert.pp->GetYPos();
-            double theta_before = robert->pp.GetYaw();
+            double theta_before = robert.pp->GetYaw();
 
             // LAV NOGET FLYTTELSE
 
             robert.read();
             double deltax = robert.pp->GetXPos() - x_before;
             double deltay = robert.pp->GetYPos() - y_before;
-            double deltatheta = pp.GetYaw() - theta_before;
+            double deltatheta = robert.pp->GetYaw() - theta_before;
 
             for(int i = 0; i < particles.size(); i++) {
                  move_particle(particles[i], deltax, deltay, deltatheta);
