@@ -1,5 +1,6 @@
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/core.hpp>
+#include "cv.h"
+#include "cxcore.h"
+#include "highgui.h"
 
 #include <stdio.h>
 #include <iostream>
@@ -12,7 +13,6 @@
 #include "camera.h"
 #include "particles.h"
 #include "random_numbers.h"
-
 #include <libplayerc++/playerc++.h>
 #include "scorpion.h"
 
@@ -41,8 +41,6 @@
 
 #define TARGET_X 150
 #define TARGET_Y 0
-
-Robot robert;
 
 using namespace std;
 using namespace PlayerCc;
@@ -119,38 +117,6 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
     cvLine   (im, a, b, CMAGENTA, 2);
 }
 
-// void move(particle est_pose) {
-//     double dx = (double)(est_pose.x - TARGET_X);
-//     double dy = (double)(est_pose.x - TARGET_Y);
-//     double targetangle = atan((dy)/(dx));
-//     if (est_pose.x > TARGET_X) {
-//         targetangle -= M_PI;
-//     }
-//     if (abs(est_pose.theta - targetangle) > M_PI / 6) {
-//         turnXRadians(est_pose.theta - targetangle);
-//         return;
-//     }
-//     robert.moveXcm(afstand til target)
-//     return;
-// }
-
-int seen_green_box = 0;
-int seen_red_box = 0;
-
-// void search() {
-//     // Snak med kamera
-//     // If only 1 box is spotted try to move into a new pos.
-//     if(measured_distance > 100){
-//         robert.moveXcm(measured_distance - 100);
-//     }
-//     turnXRadians(0.25 * M_PI);
-//     robert.moveXcm(50);
-
-
-//     // TODO: Lav noget check om der er drejet 360 uden at finde noget
-// }
-
-
 /*************************\
  *      Main program     *
 \*************************/
@@ -163,6 +129,7 @@ int main()
     cvNamedWindow (map, CV_WINDOW_AUTOSIZE);
     cvNamedWindow (window, CV_WINDOW_AUTOSIZE);
     cvMoveWindow (window, 20, 20);
+    Robot robert;
 
     // Initialize particles
     const int num_particles = 2000;
@@ -199,7 +166,6 @@ int main()
     draw_world (est_pose, particles, world);
 
     bool search_mode = true;
-
     // Main loop
     while (true)
         {
@@ -208,17 +174,18 @@ int main()
             double y_before = robert.pp->GetYPos();
 
             // LAV NOGET FLYTTELSE
-            if (search_mode) {
+            if (false) {
                 for(int k = 0; k < 40; k++) {
                     double theta_before = robert.pp->GetYaw();
                     robert.turnXradians(0.17);
-                    IplImage *im = cam.get_colour ();
+                    IplImage *im = cam.get_colour();
                     //rgb_im = cam.get_colour ();
 
                     // Do landmark detection
                     double measured_distance, measured_angle;
                     colour_prop cp;
                     object::type ID = cam.get_object (im, cp, measured_distance, measured_angle);
+                    cout << "hej" << endl;
                     if (ID != object::none)
                         {
                             printf ("Measured distance: %f\n", measured_distance);
@@ -239,11 +206,9 @@ int main()
                             if (cp.red > cp.green) {
                                 box_x = 0.;
                                 box_y = 0.;
-                                seen_red_box = 1;
                             } else {
                                 box_x = 300.;
                                 box_y = 0.;
-                                seen_green_box = 1;
                             }
 
                             // Compute particle weights
@@ -368,18 +333,6 @@ int main()
                                 move_particle(particles[i], 0, 0, deltatheta);
                             }
                             //          sort(particles.begin(), particles.end());
-                        // Draw the object in the image (for visualisation)
-                        cam.draw_object (im);
-                        //          timespec fuckseiib = {2, 0};
-                        //          nanosleep(&fuckseiib, NULL);
-
-                        // Estimate pose
-                        est_pose = estimate_pose (particles);
-
-                        // Visualisation
-                        draw_world (est_pose, particles, world);
-                        cvShowImage (map, world);
-                        cvShowImage (window, im);
 
                         } else { // end: if (found_landmark)
 
@@ -387,14 +340,25 @@ int main()
                         for (int i = 0; i < num_particles; i++) {
                             particles[i].weight = 1.0/(double)num_particles;
                         }
-
                     }  // end: if (not found_landmark)
-
                 }
                 search_mode = 0;
             } else {
-
             }
+            // Draw the object in the image (for visualisation)
+            IplImage *im = cam.get_colour();
+            cout << "lol" << endl;
+            cam.draw_object (im);
+            //          timespec fuckseiib = {2, 0};
+            //          nanosleep(&fuckseiib, NULL);
+
+            // Estimate pose
+            est_pose = estimate_pose (particles);
+
+            // Visualisation
+            draw_world (est_pose, particles, world);
+            cvShowImage (map, world);
+            cvShowImage (window, im);
             // add_uncertainty(particles, 10, 0.2);
             // robert.read();
             // double deltax = robert.pp->GetXPos() - x_before;

@@ -10,19 +10,14 @@
 #include "robot.h"
 using namespace PlayerCc;
 using namespace std;
-
 Robot::Robot() {
-    PlayerClient roberto("192.168.240.129");
-    Position2dProxy ppo(&roberto);
-    IrProxy iro(&roberto);
-    BumperProxy bumpero(&roberto);
-    robert = &roberto;
-    pp = &ppo;
-    ir = &iro;
-    bumper = &bumpero;
+    robert = new PlayerClient("172.16.187.128");;
+    pp = new Position2dProxy(robert);
+    ir = new IrProxy (robert);
+    bumper = new BumperProxy(robert);
 }
 
-void Robot::read () {
+void Robot::read() {
     robert->Read();
     timespec readsleep = {0, 100000};
     nanosleep(&readsleep, NULL);
@@ -46,18 +41,6 @@ void Robot::moveXcm(int cm) {
     return;
 }
 
-Robot::Robot() {
-    PlayerClient roberto("192.168.240.129");
-    Position2dProxy ppo(&roberto);
-    IrProxy iro(&roberto);
-    BumperProxy bumpero(&roberto);
-    robert = &roberto;
-    pp = &ppo;
-    ir = &iro;
-    bumper = &bumpero;
-
-}
-
 void Robot::turnXradians(double angle) {
     double start = pp->GetYaw();
     double target = start + angle;
@@ -66,7 +49,7 @@ void Robot::turnXradians(double angle) {
         target += 2 * M_PI;
     }
     if (target > M_PI) {
-        target -= 2 * M_PI
+        target -= 2 * M_PI;
     }
     if(angle < 0) {
         pp->SetSpeed(0.0, -0.3);

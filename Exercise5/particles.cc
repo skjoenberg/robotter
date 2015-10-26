@@ -31,6 +31,11 @@ void move_particle (particle &p, double delta_x, double delta_y, double delta_th
     p.x += delta_x;
     p.y += delta_y;
     p.theta += delta_theta;
+    if (p.theta > M_PI) {
+        p.theta -= 2 * M_PI;
+    } else if (p.theta < -M_PI) {
+        p.theta += 2 * M_PI;
+    }
 }
 
 
