@@ -41,7 +41,7 @@
 #define TARGET_X = 150
 #define TARGET_Y = 0
 
-Robot robert();
+//Robot robert();
 
 using namespace std;
 
