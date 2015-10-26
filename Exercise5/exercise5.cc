@@ -256,7 +256,10 @@ int main()
         // }
         add_uncertainty(particles, 10, 0.1);
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> eed42a07634d055409ddf1da32d51a00470dac0a
       // Grab image
       IplImage *im = cam.get_colour ();
       //rgb_im = cam.get_colour ();
@@ -298,7 +301,6 @@ int main()
           // Compute particle weights
           // XXX: You do this
           /* Vægten er givet ved den funktion der står opgaven */
-
           double tmpweight;
           double sum = 0;
           double dist;
@@ -313,26 +315,29 @@ int main()
               // Measure euclidean distance to landmark
               deltax = particles[i].x - box_x;
               deltay = particles[i].y - box_y;
+
+              // Euclidean distance to box
               dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
+
+              // Angle between particle and box
               angletobox = atan(deltay / deltax);
 
+              // If deltax > 0, then the angle needs to be turned by a half circle.
               if (deltax > 0) {
                   angletobox -= M_PI;
               }
-              else if (deltay < 0) {
-                  angletobox -= 2.0 * M_PI;
-              }
 
+              // Difference in angle
               deltaangle = particles[i].theta - angletobox;
 
+              // The angles are between (-pi, pi)
               if (deltaangle > M_PI){
                 deltaangle -= 2 * M_PI;
-
-              }
-              if(deltaangle < -M_PI){
+              } else if (deltaangle < -M_PI) {
                 deltaangle += 2 * M_PI;
               }
 
+              // Debugging
               if (deltaangle > M_PI) {
                   cout << deltaangle << endl;
               }

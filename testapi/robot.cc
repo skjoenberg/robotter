@@ -5,16 +5,16 @@
 #include <algorithm>
 #include <string>
 #include <time.h>
-#include "robot.h"
 #include <libplayerc++/playerc++.h>
 #include "scorpion.h"
+#include "robot.h"
 using namespace std;
+using namespace PlayerCc;
 
 void read () {
     this.robert.read();
     timespec readsleep = {0, 100000};
     nanosleep(&readsleep, NULL);
-}
 
 void Robot::moveXcm(int cm) {
     double meters = (double) cm / 100.;
@@ -32,6 +32,21 @@ void Robot::moveXcm(int cm) {
     }
     this.pp.SetSpeed(0.0, 0.0);
     return;
+=======
+Robot::Robot() {
+    PlayerClient roberto("192.168.240.129");
+    Position2dProxy ppo(&roberto);
+    IrProxy iro(&roberto);
+    BumperProxy bumpero(&roberto);
+    robert = &roberto;
+    pp = &ppo;
+    ir = &iro;
+    bumper = &bumpero;
+}
+
+void Robot::moveXcm(int cm) {
+    cout << "moving" << endl;
+>>>>>>> f83c6b2aaa9fa36de03d83929717d8d40ee7b489
 }
 
 void Robot::turnXradians(double angle) {
