@@ -336,7 +336,7 @@ int main()
                 for(int i = 0; i < particles.size(); i++) {
                     move_particle(particles[i], 0, 0, deltatheta);
                 }
-                add_uncertainty(particles, 5, 0.1);
+                add_uncertainty(particles, 10, 0.1);
 
                 ////////////////
                 // Draw stuff //
