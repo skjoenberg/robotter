@@ -129,6 +129,7 @@ int main()
     cvNamedWindow (map, CV_WINDOW_AUTOSIZE);
     cvNamedWindow (window, CV_WINDOW_AUTOSIZE);
     cvMoveWindow (window, 20, 20);
+    cout << "hey hey!" << endl;
     Robot robert;
 
     // Initialize particles
@@ -167,209 +168,235 @@ int main()
 
     bool search_mode = true;
     // Main loop
-    while (true)
-        {
-            int action = cvWaitKey (10);
-            robert.read();
-            double x_before = robert.pp->GetXPos();
-            double y_before = robert.pp->GetYPos();
+    while (true) {
+        robert.read();
+        double x_before = robert.pp->GetXPos();
+        double y_before = robert.pp->GetYPos();
 
-            // LAV NOGET FLYTTELSE
-            if (search_mode) {
-                for(int k = 0; k < 40; k++) {
-                    double theta_before = robert.pp->GetYaw();
-                    robert.turnXradians(0.17);
-                    IplImage *im = cam.get_colour();
-                    //rgb_im = cam.get_colour ();
+        // LAV NOGET FLYTTELSE
+        if (search_mode) {
+            for(int k = 0; k < 60; k++) {
+                cout << k << endl;
+                double theta_before = robert.pp->GetYaw();
 
-                    // Do landmark detection
-                    double measured_distance, measured_angle;
-                    colour_prop cp;
-                    object::type ID = cam.get_object (im, cp, measured_distance, measured_angle);
-                    cout << "hej" << endl;
-                    if (ID != object::none)
-                        {
-                            printf ("Measured distance: %f\n", measured_distance);
-                            printf ("Measured angle:    %f\n", measured_angle);
-                            printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
+                robert.turnXradians(0.17);
+                timespec hej = {0, 500000};
+                nanosleep(&hej, NULL);
+                IplImage *im = cam.get_colour();
+                //rgb_im = cam.get_colour ();
 
-                            //fisse
-                            if (ID == object::horizontal) {
-                                printf ("Landmark is horizontal\n");
-                            } else if (ID == object::vertical) {
-                                printf ("Landmark is vertical\n");
-                            } else  {
-                                printf ("Unknown landmark type!\n");
-                                continue;
+                // Do landmark detection
+                double measured_distance, measured_angle;
+                colour_prop cp;
+                object::type ID = cam.get_object (im, cp, measured_distance, measured_angle);
+                if (ID != object::none)
+                    {
+                        printf ("Measured distance: %f\n", measured_distance);
+                        printf ("Measured angle:    %f\n", measured_angle);
+                        printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
+
+                        //fisse
+                        if (ID == object::horizontal) {
+                            printf ("Landmark is horizontal\n");
+                        } else if (ID == object::vertical) {
+                            printf ("Landmark is vertical\n");
+                        } else  {
+                            printf ("Unknown landmark type!\n");
+                            continue;
+                        }
+
+                        float target_x, target_y;
+                        if (cp.red > cp.green) {
+                            target_x = 0.;
+                            target_y = 0.;
+                        } else {
+                            target_x = 300.;
+                            target_y = 0.;
+                        }
+
+                        // Compute particle weights
+                        // XXX: You do this
+                        double tmpweight;
+                        double sum = 0;
+                        double dist;
+                        double gaussman = 1. / sqrt(2. * M_PI * pow(SIGMA, 2.));
+                        double angletobox;
+                        double deltaangle;
+                        double distweight;
+                        double angleweight;
+                        double deltax, deltay;
+
+                        // Give particles weights
+                        for (int i = 0; i < particles.size(); i++) {
+                            // Measure euclidean distance to landmark
+                            deltax = particles[i].x - target_x;
+                            deltay = particles[i].y - target_y;
+
+                            // Euclidean distance to box
+                            dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
+
+                            // Angle between particle and box
+                            angletobox = atan(deltay / deltax);
+
+                            // If deltax > 0, then the angle needs to be turned by a half circle.
+                            if (deltax > 0) {
+                                angletobox -= M_PI;
                             }
 
-                            float box_x, box_y;
-                            if (cp.red > cp.green) {
-                                box_x = 0.;
-                                box_y = 0.;
-                            } else {
-                                box_x = 300.;
-                                box_y = 0.;
+                            // Difference in angle
+                            deltaangle = particles[i].theta - angletobox;
+
+                            // The angles are between (-pi, pi)
+                            if (deltaangle > M_PI){
+                                deltaangle -= 2 * M_PI;
+                            } else if (deltaangle < -M_PI) {
+                                deltaangle += 2 * M_PI;
                             }
 
-                            // Compute particle weights
-                            // XXX: You do this
-                            /* Vægten er givet ved den funktion der står opgaven */
+                            // Calculate weight of the current particle
+                            angleweight = gaussman * exp(-((pow(measured_angle - deltaangle, 2.0) / (2.0 * pow(SIGMA_THETA, 2.0)))));
+                            distweight = gaussman * exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)))));
+                            tmpweight = angleweight*distweight;
+
+                            // Add the weight to a sum (used later on to normalize weights)
+                            sum += tmpweight;
+
+                            // Save the weight in a particle array
+                            particles[i].weight = tmpweight;
+                        }
+
+                        // Normalize weights
+                        for (int i = 0; i < particles.size(); i++) {
+                            particles[i].weight = particles[i].weight / sum;
+                        }
+
+                        //                        cout << "VI HAR " << particles.size() << " PARTIKLER MOTHERFUCCKER" << endl;
+                        //                        cout << "counted " << count << " particles" << endl;
+                        //                        std::cout << "cum: " << cum << std::endl;
+                        ////////////////
+                        // Resampling //
+                        ////////////////
+
+                        /* Lav cumsum og rand [0, 1] for at se hvilken partikel du skal duplikere */
+                        std::vector<particle> resamples;
+                        vector<pair<double, int> > cumsum;
+                        double cum = 0;
+                        int count = 0;
+                        for(int i = 0; i < particles.size(); i++) {
+                            if (particles[i].weight > exp(-20)) {
+                                cum += particles[i].weight;
+                                cumsum.push_back(pair<double, int>(cum, i));
+                                count++;
+                            }
+                        }
+                        resamples.clear();
+                        for (int i = 0; i < num_particles; i++) {
+                            int tmpx;
+                            int tmpy;
+                            double tmptheta;
                             double tmpweight;
-                            double sum = 0;
-                            double dist;
-                            double gaussman = 1. / sqrt(2. * M_PI * pow(SIGMA, 2.));
-                            double angletobox;
-                            double deltaangle;
-                            double distweight;
-                            double angleweight;
-                            double deltax, deltay;
+                            float r = randf();
 
-                            for (int i = 0; i < particles.size(); i++) {
-                                // Measure euclidean distance to landmark
-                                deltax = particles[i].x - box_x;
-                                deltay = particles[i].y - box_y;
+                            int j = 0;
 
-                                // Euclidean distance to box
-                                dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
-
-                                // Angle between particle and box
-                                angletobox = atan(deltay / deltax);
-
-                                // If deltax > 0, then the angle needs to be turned by a half circle.
-                                if (deltax > 0) {
-                                    angletobox -= M_PI;
-                                }
-
-                                // Difference in angle
-                                deltaangle = particles[i].theta - angletobox;
-
-                                // The angles are between (-pi, pi)
-                                if (deltaangle > M_PI){
-                                    deltaangle -= 2 * M_PI;
-                                } else if (deltaangle < -M_PI) {
-                                    deltaangle += 2 * M_PI;
-                                }
-
-                                // Debugging
-                                if (deltaangle > M_PI) {
-                                    cout << deltaangle << endl;
-                                }
-                                if (deltaangle < -M_PI) {
-                                    cout << deltaangle << endl;
-                                }
-
-                                // Calculate weight of the current particle
-                                angleweight = gaussman * exp(-((pow(measured_angle - deltaangle, 2.0) / (2.0 * pow(SIGMA_THETA, 2.0)))));
-                                distweight = gaussman * exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)))));
-                                //cout << "angleweight: " <<  angleweight << endl;
-                                //cout << "deltaangle: " <<  deltaangle << endl;
-                                //cout << "angletobox: " <<  angletobox << endl;
-                                //cout << "particles theta: " <<  particles[i].theta << endl;
-                                //cout << "particles x: " <<  particles[i].x << endl;
-                                //cout << "particles y: " <<  particles[i].y << endl << endl;
-                                tmpweight = angleweight*distweight;
-
-                                // Add the weight to a sum (used later on to normalize weights)
-                                sum += tmpweight;
-
-                                // Save the weight in a particle array
-                                particles[i].weight = tmpweight;
-
-                                // ## Debugging! ##
-                                // std::cout << "en weight er = " << tmpweight << std::endl;
-                                // std::cout << "en distance er = " << dist << std::endl;
-                                // std::cout << "measured dist er = " << measured_distance << std::endl;
+                            while((cumsum[j].first < r) && (j < cumsum.size())) {
+                                j++;
                             }
 
-                            for (int i = 0; i < particles.size(); i++) {
-                                particles[i].weight = particles[i].weight / sum;
-                            }
-
-                            cout << "VI HAR " << particles.size() << " PARTIKLER MOTHERFUCCKER" << endl;
-
-                            // Resampling
-                            // XXX: You do this
-                            /* Lav cumsum og rand [0, 1] for at se hvilken partikel du skal duplikere */
-                            std::vector<particle> resamples;
-                            vector<pair<double, int> > cumsum;
-                            double cum = 0;
-                            int count = 0;
-                            for(int i = 0; i < particles.size(); i++) {
-                                if (particles[i].weight > exp(-20)) {
-                                    cum += particles[i].weight;
-                                    cumsum.push_back(pair<double, int>(cum, i));
-                                    count++;
-                                }
-                            }
-
-                            cout << "counted " << count << " particles" << endl;
-                            std::cout << "cum: " << cum << std::endl;
-
-                            resamples.clear();
-                            for (int i = 0; i < num_particles; i++) {
-                                float r = randf();
-                                int j = 0;
-
-                                while(cumsum[j].first < r && j < cumsum.size()) {
-                                    j++;
-                                }
-
-                                int tmpx = particles[cumsum[j].second].x;
-                                int tmpy = particles[cumsum[j].second].y;
-                                double tmptheta = particles[cumsum[j].second].theta;
-                                double tmpweight = particles[cumsum[j].second].weight;
-                                particle tmp(tmpx, tmpy, tmptheta, tmpweight);
-                                resamples.push_back(tmp);
-                            }
+                            tmpx = particles[cumsum[j].second].x;
+                            tmpy = particles[cumsum[j].second].y;
+                            tmptheta = particles[cumsum[j].second].theta;
+                            tmpweight = particles[cumsum[j].second].weight;
+                            particle tmp(tmpx, tmpy, tmptheta, tmpweight);
+                            resamples.push_back(tmp);
 
                             particles.clear();
                             for (int i = 0; i < resamples.size(); i++) {
                                 particles.push_back(resamples[i]);
                             }
-
-                            double deltatheta = robert.pp->GetYaw() - theta_before;
-
-                            for(int i = 0; i < particles.size(); i++) {
-                                move_particle(particles[i], 0, 0, deltatheta);
-                            }
-                            //          sort(particles.begin(), particles.end());
-
-                        } else { // end: if (found_landmark)
-
-                        // No observation - reset weights to uniform distribution
-                        for (int i = 0; i < num_particles; i++) {
-                            particles[i].weight = 1.0/(double)num_particles;
                         }
-                    }  // end: if (not found_landmark)
+                    } else { // end: if (found_landmark)
+                    // No observation - reset weights to uniform distribution
+                    for (int i = 0; i < num_particles; i++) {
+                        particles[i].weight = 1.0/(double)num_particles;
+                    }
                 }
-                search_mode = 0;
-            } else {
+
+
+                    double deltatheta = robert.pp->GetYaw() - theta_before;
+
+                    for(int i = 0; i < particles.size(); i++) {
+                        move_particle(particles[i], 0, 0, deltatheta);
+                    }
+                    add_uncertainty(particles, 1, 0);
+
+                     ////////////////
+                    // Draw stuff //
+                   ////////////////
+                    int action = cvWaitKey (10);
+                    cout << "Print" << endl;
+                    cam.draw_object (im);
+                    // Estimate pose
+                    est_pose = estimate_pose (particles);
+
+                    // Draw the object in the image (for visualisation)
+                    IplImage *im = cam.get_colour();
+
+                    // Visualisation
+                    draw_world (est_pose, particles, world);
+                    cvShowImage (map, world);
+                    cvShowImage (window, im);
+                }  // end: if (not found_landmark)
             }
-            // Draw the object in the image (for visualisation)
-            IplImage *im = cam.get_colour();
-            cout << "lol" << endl;
-            cam.draw_object (im);
-            //          timespec fuckseiib = {2, 0};
-            //          nanosleep(&fuckseiib, NULL);
+            search_mode = false;
+            cout << "Finished searching." << endl;
+        } else {
+            cout << "saa rykker vi!" << endl;
+            int target_x, target_y, deltax, deltay, dist, angletotarget, deltaangle;
+            target_x = 150;
+            target_y = 0;
+            deltax = est_pose.x - target_x;
+            deltay = est_pose.y - target_y;
 
-            // Estimate pose
-            est_pose = estimate_pose (particles);
+            // Euclidean distance to box
+            dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
 
-            // Visualisation
-            draw_world (est_pose, particles, world);
-            cvShowImage (map, world);
-            cvShowImage (window, im);
-            // add_uncertainty(particles, 10, 0.2);
-            // robert.read();
-            // double deltax = robert.pp->GetXPos() - x_before;
-            // double deltay = robert.pp->GetYPos() - y_before;
-            // double deltatheta = robert.pp->GetYaw() - theta_before;
+            // Angle between particle and box
+            angletotarget = atan(deltay / deltax);
 
-            // for(int i = 0; i < particles.size(); i++) {
-            //     move_particle(particles[i], deltax, deltay, deltatheta);
-            // }
-        } // End: while (true)
+            // If deltax > 0, then the angle needs to be turned by a half circle.
+            if (deltax > 0) {
+                angletotarget -= M_PI;
+            }
+
+            // Difference in angle
+            deltaangle = est_pose.theta - angletotarget;
+
+            // The angles are between (-pi, pi)
+            if (deltaangle > M_PI){
+                deltaangle -= 2 * M_PI;
+            } else if (deltaangle < -M_PI) {
+                deltaangle += 2 * M_PI;
+            }
+            cout << deltaangle << endl;
+            cout << dist << endl;
+            robert.turnXradians(-deltaangle);
+            robert.moveXcm(dist);
+            cout << "slut" << endl;
+            while (true) {
+            }
+        }
+
+        // add_uncertainty(particles, 10, 0.2);
+        // robert.read();
+        // double deltax = robert.pp->GetXPos() - x_before;
+        // double deltay = robert.pp->GetYPos() - y_before;
+        // double deltatheta = robert.pp->GetYaw() - theta_before;
+
+        // for(int i = 0; i < particles.size(); i++) {
+        //     move_particle(particles[i], deltax, deltay, deltatheta);
+        // }
+    } // End: while (true)
 
  theend:
     // Stop the robot
