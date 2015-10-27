@@ -117,6 +117,8 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
     cvLine   (im, a, b, CMAGENTA, 2);
 }
 
+bool robot_mode = false;
+
 /*************************\
  *      Main program     *
 \*************************/
@@ -130,6 +132,7 @@ int main()
     cvNamedWindow (window, CV_WINDOW_AUTOSIZE);
     cvMoveWindow (window, 20, 20);
     cout << "hey hey!" << endl;
+
     Robot robert;
 
     // Initialize particles
@@ -169,6 +172,7 @@ int main()
     bool search_mode = true;
     // Main loop
     while (true) {
+
         robert.read();
         double x_before = robert.pp->GetXPos();
         double y_before = robert.pp->GetYPos();
@@ -177,6 +181,7 @@ int main()
         if (search_mode) {
             for(int k = 0; k < 60; k++) {
                 cout << k << endl;
+
                 robert.read();
                 double theta_before = robert.pp->GetYaw();
 
@@ -307,12 +312,13 @@ int main()
                         tmpweight = particles[cumsum[j].second].weight;
                         particle tmp(tmpx, tmpy, tmptheta, tmpweight);
                         resamples.push_back(tmp);
-
-                        particles.clear();
-                        for (int i = 0; i < resamples.size(); i++) {
-                            particles.push_back(resamples[i]);
-                        }
                     }
+
+                    particles.clear();
+                    for (int i = 0; i < resamples.size(); i++) {
+                        particles.push_back(resamples[i]);
+                    }
+
                     cout << "VI HAR " << particles.size() << " PARTIKLER MOTHERFUCCKER" << endl;
                     cout << "counted " << count << " particles" << endl;
                     std::cout << "cum: " << cum << std::endl;
