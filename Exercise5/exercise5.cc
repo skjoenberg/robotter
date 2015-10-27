@@ -133,7 +133,7 @@ int main()
     cvMoveWindow (window, 20, 20);
     cout << "hey hey!" << endl;
 
-    //    Robot robert;
+    Robot robert;
 
     // Initialize particles
     const int num_particles = 10000;
@@ -173,26 +173,26 @@ int main()
     // Main loop
     while (true) {
 
-        //        robert.read();
-        //        double x_before = robert.pp->GetXPos();
-        //        double y_before = robert.pp->GetYPos();
+        robert.read();
+        double x_before = robert.pp->GetXPos();
+        double y_before = robert.pp->GetYPos();
 
         // LAV NOGET FLYTTELSE
         if (search_mode) {
-            for(int k = 0; k < 60; k++) {
+            for(int k = 0; k < 45; k++) {
                 cout << k << endl;
 
-                //                robert.read();
-                //                double theta_before = robert.pp->GetYaw();
-                //                robert.turnXradians(0.17);
+                robert.read();
+                double theta_before = robert.pp->GetYaw();
+                robert.turnXradians(0.17);
 
                 // Move particles (only angle)
-                //                robert.read();
-                //                double deltatheta = robert.pp->GetYaw() - theta_before;
+                robert.read();
+                double deltatheta = robert.pp->GetYaw() - theta_before;
                 for(int i = 0; i < particles.size(); i++) {
-                    move_particle(particles[i], 1, 1, 0.1);
+                    move_particle(particles[i], 0, 0, deltatheta);
                 }
-                add_uncertainty(particles, 1, 0.000000001);
+                add_uncertainty(particles, 0.1, 0.01);
 
                 timespec hej = {0, 500000};
                 nanosleep(&hej, NULL);
@@ -326,15 +326,16 @@ int main()
                     for (int i = 0; i < resamples.size(); i++) {
                         particles.push_back(resamples[i]);
                     }
+                    add_uncertainty(particles, 5, 0.01);
 
                     cout << "VI HAR " << particles.size() << " PARTIKLER MOTHERFUCCKER" << endl;
                     cout << "counted " << count << " particles" << endl;
                     std::cout << "cum: " << cum << std::endl;
                 } else { // end: if (found_landmark)
-                    // // No observation - reset weights to uniform distribution
-                    // for (int i = 0; i < num_particles; i++) {
-                    //     particles[i].weight = 1.0/(double)num_particles;
-                    // }
+                    // No observation - reset weights to uniform distribution
+                    for (int i = 0; i < num_particles; i++) {
+                        particles[i].weight = 1.0/(double)num_particles;
+                    }
                 } // end: if (not found_landmark)
 
                 ////////////////
@@ -354,40 +355,40 @@ int main()
             search_mode = false;
             cout << "Finished searching." << endl;
         } else {
-            // cout << "saa rykker vi!" << endl;
-            // int target_x, target_y, deltax, deltay, dist, angletotarget, deltaangle;
-            // target_x = 150;
-            // target_y = 0;
-            // deltax = est_pose.x - target_x;
-            // deltay = est_pose.y - target_y;
+            cout << "saa rykker vi!" << endl;
+            int target_x, target_y, deltax, deltay, dist, angletotarget, deltaangle;
+            target_x = 150;
+            target_y = 0;
+            deltax = est_pose.x - target_x;
+            deltay = est_pose.y - target_y;
 
-            // // Euclidean distance to box
-            // dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
+            // Euclidean distance to box
+            dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
 
-            // // Angle between particle and box
-            // angletotarget = atan(deltay / deltax);
+            // Angle between particle and box
+            angletotarget = atan(deltay / deltax);
 
-            // // If deltax > 0, then the angle needs to be turned by a half circle.
-            // if (deltax > 0) {
-            //     angletotarget -= M_PI;
-            // }
+            // If deltax > 0, then the angle needs to be turned by a half circle.
+            if (deltax > 0) {
+                angletotarget -= M_PI;
+            }
 
-            // // Difference in angle
-            // deltaangle = est_pose.theta - angletotarget;
+            // Difference in angle
+            deltaangle = est_pose.theta - angletotarget;
 
-            // // The angles are between (-pi, pi)
-            // if (deltaangle > M_PI){
-            //     deltaangle -= 2 * M_PI;
-            // } else if (deltaangle < -M_PI) {
-            //     deltaangle += 2 * M_PI;
-            // }
-            // cout << deltaangle << endl;
-            // cout << dist << endl;
-            // robert.turnXradians(-deltaangle);
-            // robert.moveXcm(dist);
-            // cout << "slut" << endl;
-            // while (true) {
-            // }
+            // The angles are between (-pi, pi)
+            if (deltaangle > M_PI){
+                deltaangle -= 2 * M_PI;
+            } else if (deltaangle < -M_PI) {
+                deltaangle += 2 * M_PI;
+            }
+            cout << deltaangle << endl;
+            cout << dist << endl;
+            robert.turnXradians(deltaangle);
+            robert.moveXcm(dist);
+            cout << "slut" << endl;
+            while (true) {
+            }
         }
 
         // add_uncertainty(particles, 10, 0.2);
