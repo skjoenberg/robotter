@@ -7,9 +7,10 @@
 
 using namespace std;
 
-bool debug = true;
-
 void resample(std::vector<particle> &particles) {
+    // Debugging
+    bool debug = true;
+
     /* Lav cumsum og rand [0, 1] for at se hvilken partikel du skal duplikere */
     std::vector<particle> resamples;
     vector<pair<double, int> > cumsum;

@@ -176,13 +176,15 @@ void weight(vector<particle> &particles, int box_x, int box_y, int measured_angl
 }
 
 
-bool robot_mode = false;
 
 /*************************\
  *      Main program     *
 \*************************/
 int main()
 {
+    // Debugging
+    bool debug = true;
+
     // The GUI
     const char *map = "World map";
     const char *window = "Robot View";
@@ -190,7 +192,7 @@ int main()
     cvNamedWindow (map, CV_WINDOW_AUTOSIZE);
     cvNamedWindow (window, CV_WINDOW_AUTOSIZE);
     cvMoveWindow (window, 20, 20);
-    cout << "hey hey!" << endl;
+    cout << "Starting" << endl;
 
     Robot robert;
 
@@ -324,7 +326,11 @@ int main()
             // Draw stuff //
             ////////////////
             int action = cvWaitKey (1);
-            cout << "Print" << endl;
+
+            if (debug) {
+                cout << "Updating images" << endl;
+            }
+
             cam.draw_object (im);
             // Estimate pose
             est_pose = estimate_pose (particles);
@@ -338,10 +344,15 @@ int main()
             }
         } // end search mode inner loop (cirkel)
 
-        cout << "Finished searching." << endl;
+        if (debug) {
+            cout << "Finished searching." << endl;
+        }
 
         if (!search_mode) {
-            cout << "saa rykker vi!" << endl;
+            if (debug) {
+                cout << "Robotten kører!" << endl;
+            }
+
             int target_x, target_y, deltax, deltay, dist, angletotarget, deltaangle;
             target_x = 150;
             target_y = 0;
@@ -368,14 +379,21 @@ int main()
             } else if (deltaangle < -M_PI) {
                 deltaangle += 2 * M_PI;
             }
-            cout << deltaangle << endl;
-            cout << dist << endl;
+
+            if (debug) {
+                cout << "Turning: " << deltaangle << endl;
+                cout << "Distance: " << dist << endl;
+            }
+
+            // Turning
             robert.turnXradians(deltaangle);
+
+            // Moving forward
             robert.moveXcm(dist);
+
             search_mode = true;
             found_red = false;
             found_green = false;
-
         }
 
         // add_uncertainty(particles, 10, 0.2);

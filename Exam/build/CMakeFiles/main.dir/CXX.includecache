@@ -60,6 +60,18 @@ cxcore.h
 
 /home/sebastian/robot/Exam/random_numbers.h
 
+/home/sebastian/robot/Exam/resampling.cc
+iostream
+-
+stdio.h
+-
+main.h
+/home/sebastian/robot/Exam/main.h
+random_numbers.h
+/home/sebastian/robot/Exam/random_numbers.h
+particles.h
+/home/sebastian/robot/Exam/particles.h
+
 /home/sebastian/robot/Exam/resampling.h
 stdio.h
 -
