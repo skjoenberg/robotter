@@ -120,14 +120,14 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
     cvLine   (im, a, b, CMAGENTA, 2);
 }
 
-void weight(vector<particle>* particles, int box_x, int box_y, int measured_angle, int measured_distance) {
+void weight(vector<particle> &particles, int box_x, int box_y, int measured_angle, int measured_distance) {
     // Give particles weights
     double sum = 0;
-    for (int i = 0; i < particles->size(); i++) {
+    for (int i = 0; i < particles.size(); i++) {
         // Measure euclidean distance to landmark
         double deltax, deltay;
-        deltax = particles->at(i).x - box_x;
-        deltay = particles->at(i).y - box_y;
+        deltax = particles[i].x - box_x;
+        deltay = particles[i].y - box_y;
 
         // Euclidean distance to box
         double dist;
@@ -144,7 +144,7 @@ void weight(vector<particle>* particles, int box_x, int box_y, int measured_angl
 
         // Difference in angle
         double deltaangle;
-        deltaangle = particles->at(i).theta - angletobox;
+        deltaangle = particles[i].theta - angletobox;
 
         // The angles are between (-pi, pi)
         if (deltaangle > M_PI){
@@ -166,12 +166,12 @@ void weight(vector<particle>* particles, int box_x, int box_y, int measured_angl
         sum += tmpweight;
 
         // Save the weight in a particle array
-        particles->at(i).weight = tmpweight;
+        particles[i].weight = tmpweight;
     }
 
     // Normalize weights
-    for (int i = 0; i < particles->size(); i++) {
-        particles->at(i).weight = particles->at(i).weight / sum;
+    for (int i = 0; i < particles.size(); i++) {
+        particles[i].weight = particles[i].weight / sum;
     }
 }
 
@@ -305,10 +305,10 @@ int main()
                 }
 
                 // Give particles a weight
-                weight(&particles, box_x, box_y, measured_angle, measured_distance);
+                weight(particles, box_x, box_y, measured_angle, measured_distance);
 
                 // Resample particles
-                resample(&particles);
+                resample(particles);
 
                 // Tilføj usikkerhed
                 add_uncertainty(particles, 10, 0.2);
