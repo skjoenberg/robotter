@@ -243,6 +243,7 @@ int main()
                 y_before = robert.pp->GetYPos();
                 theta_before = robert.pp->GetYaw();
                 cout << "deltaangle: " << deltaangle << endl;
+                cout << "dist: " << driving_dist << endl;
                 robert.turnXradians(deltaangle);
                 robert.moveXcm(driving_dist);
 
