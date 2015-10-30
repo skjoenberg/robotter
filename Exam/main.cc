@@ -178,8 +178,9 @@ int main()
             cvShowImage (map, world);
             int action = cvWaitKey (10);
 
+            cout << theta_sum << endl;
             //exit searchmode if turned 360 degrees.
-            if (theta_sum > 2 * M_PI + 0.1) {
+            if (abs(theta_sum) > 2 * M_PI + 0.1) {
                 search_mode = false;
             }
         } // end search mode
