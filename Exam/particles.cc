@@ -1,9 +1,10 @@
 #include <vector>
+#include "defines.h"
 #include "particles.h"
 #include "random_numbers.h"
 #include <math.h>
 #include <iostream>
-#include <defines.h>
+
 
 
 using namespace std;
@@ -35,6 +36,7 @@ particle estimate_pose (std::vector<particle> &particles)
     const double theta = atan2 (sin_sum/flen, cos_sum/flen);
     return particle (x, y, theta);
 }
+
 
 void move_particles(std::vector<particle> &particles, double delta_x, double delta_y, double delta_theta) {
     for(int i = 0; i < particles.size(); i++) {

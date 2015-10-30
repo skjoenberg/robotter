@@ -162,7 +162,14 @@ int main()
 
             robert.read();
             delta_theta = robert.pp->GetYaw() - theta_before;
-            move_particles(particles, 0, 0, delta_theta);
+
+            if (delta_theta > M_PI){
+                delta_theta -= 2 * M_PI;
+            } else if (delta_theta < -M_PI) {
+                delta_theta += 2 * M_PI;
+            }
+            move_particles(particles, delta_theta);
+
             theta_sum += abs(delta_theta);
 
             ////////////////
@@ -181,7 +188,7 @@ int main()
             cout << theta_sum << endl;
 
             //exit searchmode if turned 360 degrees.
-            if (abs(theta_sum) > 2 * M_PI + 0.1) {
+            if (abs(theta_sum) > (2 * M_PI + 0.1)) {
                 cout << "arh man jeg så træt af at dreje" << endl;
                 search_mode = false;
                 driving_mode = true;
@@ -202,6 +209,10 @@ int main()
             int target_x, target_y, deltax, deltay, dist, angletotarget, deltaangle;
             target_x = landmarks[next].x;
             target_y = landmarks[next].y;
+            deltax = est_pose.x - target_x;
+            deltay = est_pose.y - target_y;
+
+
             // Euclidean distance to box
             dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
             // Angle between particle and box
@@ -224,6 +235,7 @@ int main()
                 next++;
 
             } else {
+<<<<<<< HEAD
                 double x_before, y_before, theta_before, moved_x, moved_y;
                 robert.read();
                 x_before = robert.pp->GetXPos();
@@ -239,6 +251,11 @@ int main()
                 moved_y = robert.pp->GetYPos() - y_before;
                 turned_theta = robert.pp->GetYaw() - theta_before;
                 move_particles(particles, moved_x, moved_y, turned_theta);
+=======
+                int driving_dist = std::min(dist - 60, 200);
+                robert.turnXradians(deltaangle);
+                robert.moveXcm(driving_dist);
+>>>>>>> 75dbae752c07282fa160ea63c81c3ad1fdf4335e
                 add_uncertainty(particles, 10, 0.2);
             }
             driving_mode = false;

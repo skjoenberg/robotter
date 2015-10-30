@@ -21,6 +21,9 @@ class particle {
         double weight;
 };
 
+/** Our functions **/
+void particles_init(std::vector<particle> &particles);
+void move_particles(std::vector<particle> &particles, double delta_theta);
 
 /**
  * Estimate the pose from particles by computing the average position and orientation over all particles.

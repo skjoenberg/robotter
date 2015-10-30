@@ -57,20 +57,20 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
     // Find largest weight
     const int len = particles.size ();
     double max_weight = particles [0].weight;
-    for (int i = 1; i < len; i++)
+    for (int i = 1; i < len; i++) {
         max_weight = std::max (max_weight, particles [i].weight);
+    }
 
     // Draw particles
-    for (int i = 0; i < len; i++)
-        {
-            const int x = (int)particles[i].x + offset;
-            const int y = (int)particles[i].y + offset;
-            const CvScalar colour = jet (particles[i].weight / max_weight);
-            cvCircle (im, cvPoint (x,y), 2, colour, 2);
-            const CvPoint b = cvPoint ((int)(particles[i].x + 15.0*cos(particles[i].theta))+offset,
-                                       (int)(particles[i].y + 15.0*sin(particles[i].theta))+offset);
-            cvLine   (im, cvPoint (x,y), b, colour, 2);
-        }
+    for (int i = 0; i < len; i++) {
+        const int x = (int)particles[i].x + offset;
+        const int y = (int)particles[i].y + offset;
+        const CvScalar colour = jet (particles[i].weight / max_weight);
+        cvCircle (im, cvPoint (x,y), 2, colour, 2);
+        const CvPoint b = cvPoint ((int)(particles[i].x + 15.0*cos(particles[i].theta))+offset,
+                                   (int)(particles[i].y + 15.0*sin(particles[i].theta))+offset);
+        cvLine   (im, cvPoint (x,y), b, colour, 2);
+    }
 
     // Draw landmarks
     const CvPoint lm0 = cvPoint (landmarks[0].x+offset, landmarks[0].y+offset);
@@ -83,7 +83,8 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
     cvCircle (im, lm3, 5, CYELLOW, 2);
 
     CvFont font;
-    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.5, 0.5);
+    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1, 1);
+
     cvPutText(im, "L1", lm0, &font, CBLACK);
     cvPutText(im, "L2", lm1, &font, CBLACK);
     cvPutText(im, "L3", lm2, &font, CBLACK);
