@@ -36,9 +36,9 @@ particle estimate_pose (std::vector<particle> &particles)
     return particle (x, y, theta);
 }
 
-void move_particles(std::vector<particle> &particles, delta_theta) {
+void move_particles(std::vector<particle> &particles, double delta_x, double delta_y, double delta_theta) {
     for(int i = 0; i < particles.size(); i++) {
-        move_particle(particles[i], 0, 0, delta_theta);
+        move_particle(particles[i], (delta_x * 100), (delta_x * 100), delta_theta);
     }
 }
 
