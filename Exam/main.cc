@@ -82,13 +82,7 @@ int main()
 
     // Initialize particles
     vector<particle> particles(NUM_PARTICLES);
-    for (int i = 0; i < NUM_PARTICLES; i++) {
-        // Random starting points. (x,y) \in [-1000, 1000]^2, theta \in [-pi, pi].
-        particles[i].x = 2000.0*randf() - 1000;
-        particles[i].y = 2000.0*randf() - 1000;
-        particles[i].theta = 2.0*M_PI*randf() - M_PI;
-        particles[i].weight = 1.0/(double)NUM_PARTICLES;
-    }
+    particles_init(particles);
 
     // Estimate position
     particle est_pose = estimate_pose (particles); // The estimate of the robots current pose
@@ -96,34 +90,25 @@ int main()
     // The camera interface
     camera cam;
 
-    // Parameters
-    const CvSize size = cvSize (320, 240);
-    const double odometry_sigma = 1;
-
     // Draw map
     draw_world (est_pose, particles, world);
 
     // Modes
     bool search_mode = true, measure_mode = false;
 
-    // Found landmarks
-    bool found_red = false, found_green = false;
-
-
     int measure_counter;
 
     IplImage *im;
 
-    double theta_before, delta_theta;
+    double theta_before, delta_theta, theta_sum;
 
     robert.pp->ResetOdometry();
 
     // Main loop
     while (true) {
-        // LAV NOGET FLYTTELSE
         robert.pp->SetSpeed(0.0, 0.1);
+        theta_sum = 0;
         while (search_mode) {
-            // Turning
             // Get current angle
             robert.read();
             theta_before = robert.pp->GetYaw();
@@ -143,25 +128,16 @@ int main()
             object::type ID = cam.get_object (im, cp, measured_distance, measured_angle);
 
             if (ID != object::none) {
-                if (debug) {
-                    printf ("Measured distance: %f\n", measured_distance);
-                    printf ("Measured angle:    %f\n", measured_angle);
-                    printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
-                }
-
                 CvPoint box;
                 // Horizontal / vertical
                 if (ID == object::horizontal) {
-                    printf ("Landmark is horizontal\n");
                     box = get_landmark(cp, true);
                 } else if (ID == object::vertical) {
-                    printf ("Landmark is vertical\n");
                     box = get_landmark(cp, false);
                 } else  {
                     printf ("Unknown landmark type!\n");
                     continue;
                 }
-
                 // Resample particles
                 resample(particles, box.x, box.y, measured_angle, measured_distance);
                 add_uncertainty(particles, 10, 0.2);
@@ -175,14 +151,12 @@ int main()
 
             robert.read();
             delta_theta = robert.pp->GetYaw() - theta_before;
-            for(int i = 0; i < particles.size(); i++) {
-                move_particle(particles[i], 0, 0, delta_theta);
-            }
+            move_particles(particles, delta_theta);
+            theta_sum += delta_theta;
 
             ////////////////
             // Draw stuff //
             ////////////////
-            //            cout << "Updating images" << endl;
             cam.draw_object (im);
 
             // Estimate pose
@@ -192,6 +166,11 @@ int main()
             draw_world (est_pose, particles, world);
             cvShowImage (map, world);
             int action = cvWaitKey (10);
+
+            //exit searchmode if turned 360 degrees.
+            if (theta_sum > 2 * M_PI + 0.1) {
+                search_mode = false;
+            }
         } // end search mode inner loop (cirkel)
 
         if (debug) {

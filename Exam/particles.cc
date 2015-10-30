@@ -3,9 +3,20 @@
 #include "random_numbers.h"
 #include <math.h>
 #include <iostream>
+#include <defines.h>
 
 
 using namespace std;
+
+void particles_init(std::vector<particle> &particles) {
+    for (int i = 0; i < NUM_PARTICLES; i++) {
+        // Random starting points. (x,y) \in [-1000, 1000]^2, theta \in [-pi, pi].
+        particles[i].x = 2000.0*randf() - 1000;
+        particles[i].y = 2000.0*randf() - 1000;
+        particles[i].theta = 2.0*M_PI*randf() - M_PI;
+        particles[i].weight = 1.0/(double)NUM_PARTICLES;
+    }
+}
 
 particle estimate_pose (std::vector<particle> &particles)
 {
@@ -23,6 +34,12 @@ particle estimate_pose (std::vector<particle> &particles)
     const double y = y_sum/flen;
     const double theta = atan2 (sin_sum/flen, cos_sum/flen);
     return particle (x, y, theta);
+}
+
+void move_particles(std::vector<particle> &particles, delta_theta) {
+    for(int i = 0; i < particles.size(); i++) {
+        move_particle(particles[i], 0, 0, delta_theta);
+    }
 }
 
 // XXX: You implement this
