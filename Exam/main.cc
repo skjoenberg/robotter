@@ -169,6 +169,12 @@ int main()
                 }
             } // end: if (not found_landmark)
 
+
+            double deltatheta = robert.pp->GetYaw() - theta_before;
+            for(int i = 0; i < particles.size(); i++) {
+                move_particle(particles[i], 0, 0, deltatheta);
+            }
+
             ////////////////
             // Draw stuff //
             ////////////////
@@ -185,10 +191,7 @@ int main()
 
             // Move particles with the delta angle
             robert.read();
-            double deltatheta = robert.pp->GetYaw() - theta_before;
-                for(int i = 0; i < particles.size(); i++) {
-                    move_particle(particles[i], 0, 0, deltatheta);
-                }
+
 
             // if (found_red && found_green) {
             //     search_mode = false;
