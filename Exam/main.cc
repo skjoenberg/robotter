@@ -13,6 +13,7 @@
 #include <libplayerc++/playerc++.h>
 #include "scorpion.h"
 
+#include "defines.h"
 #include "main.h"
 #include "robot.h"
 #include "camera.h"
@@ -39,12 +40,6 @@
 #define KEY_LEFT  65361
 #define KEY_RIGHT 65363
 
-#define SIGMA 20.0
-#define SIGMA_THETA 0.1
-
-#define TARGET_X 150
-#define TARGET_Y 0
-
 using namespace std;
 using namespace PlayerCc;
 
@@ -52,8 +47,7 @@ using namespace PlayerCc;
  * Landmarks.
  * The robot knows the position of 2 landmarks. Their coordinates are in cm.
  */
-#define num_landmarks 2
-const CvPoint landmarks [num_landmarks] = {
+const CvPoint landmarks [NUM_LANDMARKS] = {
     cvPoint (0, 0),
     cvPoint (300, 0),
 };
@@ -62,8 +56,7 @@ const CvPoint landmarks [num_landmarks] = {
  * Colour map for drawing particles. This function determines the colour of a
  * particle from its weight.
  */
-CvScalar jet (const double x)
-{
+CvScalar jet (const double x) {
     const double r = (x >= 3.0/8.0 && x < 5.0/8.0) * (4.0 * x - 3.0/2.0)
         + (x >= 5.0/8.0 && x < 7.0/8.0)
         + (x >= 7.0/8.0) * (-4.0 * x + 9.0/2.0);
@@ -81,8 +74,7 @@ CvScalar jet (const double x)
  * Visualization.
  * This functions draws robots position in the world.
  */
-void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage *im)
-{
+void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage *im) {
     const int offset = 100;
 
     // White background
@@ -120,63 +112,6 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
     cvLine   (im, a, b, CMAGENTA, 2);
 }
 
-void weight(vector<particle> &particles, int box_x, int box_y, int measured_angle, int measured_distance) {
-    // Give particles weights
-    double sum = 0;
-    for (int i = 0; i < particles.size(); i++) {
-        // Measure euclidean distance to landmark
-        double deltax, deltay;
-        deltax = particles[i].x - box_x;
-        deltay = particles[i].y - box_y;
-
-        // Euclidean distance to box
-        double dist;
-        dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
-
-        // Angle between particle and box
-        double angletobox;
-        angletobox = atan(deltay / deltax);
-
-        // If deltax > 0, then the angle needs to be turned by a half circle.
-        if (deltax > 0) {
-            angletobox -= M_PI;
-        }
-
-        // Difference in angle
-        double deltaangle;
-        deltaangle = particles[i].theta - angletobox;
-
-        // The angles are between (-pi, pi)
-        if (deltaangle > M_PI){
-            deltaangle -= 2 * M_PI;
-        } else if (deltaangle < -M_PI) {
-            deltaangle += 2 * M_PI;
-        }
-
-        // Calculate weight of the current particle
-        double gaussman = 1. / sqrt(2. * M_PI * pow(SIGMA, 2.));
-        double angleweight, distweight;
-        angleweight = gaussman * exp(-((pow(measured_angle - deltaangle, 2.0) / (2.0 * pow(SIGMA_THETA, 2.0)))));
-        distweight = gaussman * exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)))));
-
-        double tmpweight;
-        tmpweight = angleweight*distweight;
-
-        // Add the weight to a sum (used later on to normalize weights)
-        sum += tmpweight;
-
-        // Save the weight in a particle array
-        particles[i].weight = tmpweight;
-    }
-
-    // Normalize weights
-    for (int i = 0; i < particles.size(); i++) {
-        particles[i].weight = particles[i].weight / sum;
-    }
-}
-
-
-
 /*************************\
  *      Main program     *
 \*************************/
@@ -192,20 +127,21 @@ int main()
     cvNamedWindow (map, CV_WINDOW_AUTOSIZE);
     cvNamedWindow (window, CV_WINDOW_AUTOSIZE);
     cvMoveWindow (window, 20, 20);
-    cout << "Starting" << endl;
 
+    cout << "Initializing robot" << endl;
     Robot robert;
 
     // Initialize particles
     vector<particle> particles(NUM_PARTICLES);
-    for (int i = 0; i < NUM_PARTICLES; i++)
-        {
-            // Random starting points. (x,y) \in [-1000, 1000]^2, theta \in [-pi, pi].
-            particles[i].x = 2000.0*randf() - 1000;
-            particles[i].y = 2000.0*randf() - 1000;
-            particles[i].theta = 2.0*M_PI*randf() - M_PI;
-            particles[i].weight = 1.0/(double)NUM_PARTICLES;
-        }
+    for (int i = 0; i < NUM_PARTICLES; i++) {
+        // Random starting points. (x,y) \in [-1000, 1000]^2, theta \in [-pi, pi].
+        particles[i].x = 2000.0*randf() - 1000;
+        particles[i].y = 2000.0*randf() - 1000;
+        particles[i].theta = 2.0*M_PI*randf() - M_PI;
+        particles[i].weight = 1.0/(double)NUM_PARTICLES;
+    }
+
+    // Estimate position
     particle est_pose = estimate_pose (particles); // The estimate of the robots current pose
 
     // The camera interface
@@ -215,43 +151,45 @@ int main()
     const CvSize size = cvSize (320, 240);
     const double odometry_sigma = 1;
 
-    // Allocate stuff
-    //IplImage *rgb_im = cvCreateImage (size, IPL_DEPTH_8U, 3);
-
-    // Initialize player (XXX: You do this)
-
-    // Driving parameters
-    double velocity = 15; // cm/sec
-    const double acceleration = 12; // cm/sec^2
-    double angular_velocity = 0.0; // radians/sec
-    const double angular_acceleration = M_PI/2.0; // radians/sec^2
-
     // Draw map
     draw_world (est_pose, particles, world);
 
-    bool search_mode = true;
-    bool measure_mode = false;
+    // Modes
+    bool search_mode = true, measure_mode = false;
+
+    // Found landmarks
     bool found_red = false, found_green = false;
+
+
     int measure_counter;
+
     // Main loop
     while (true) {
+        // Get current position (x, y)
         robert.read();
         double x_before = robert.pp->GetXPos();
         double y_before = robert.pp->GetYPos();
 
         // LAV NOGET FLYTTELSE
         while (search_mode) {
+
+            // Turning
             if (!measure_mode) {
+                // Get current angle
                 robert.read();
                 double theta_before = robert.pp->GetYaw();
-                robert.turnXradians(0.17);
 
-                // Move particles (only angle)
+                // Turn and get new angle
+                robert.turnXradians(0.17);
                 robert.read();
+
+                // Move particles with the delta angle
                 double deltatheta = robert.pp->GetYaw() - theta_before;
                 for(int i = 0; i < particles.size(); i++) {
                     move_particle(particles[i], 0, 0, deltatheta);
                 }
+
+                // Add uncertainty
                 add_uncertainty(particles, 0.1, 0.01);
 
                 timespec hej = {3, 0};
@@ -260,26 +198,30 @@ int main()
             IplImage *im = cam.get_colour();
             //rgb_im = cam.get_colour ();
 
-            // Do landmark detection
+            // Detect landmarks
             double measured_distance, measured_angle;
             colour_prop cp;
             object::type ID = cam.get_object (im, cp, measured_distance, measured_angle);
             if (ID != object::none) {
-
-                printf ("Measured distance: %f\n", measured_distance);
-                printf ("Measured angle:    %f\n", measured_angle);
-                printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
-
-                //fisse
-                if (ID == object::horizontal) {
-                    printf ("Landmark is horizontal\n");
-                } else if (ID == object::vertical) {
-                    printf ("Landmark is vertical\n");
-                } else  {
-                    printf ("Unknown landmark type!\n");
-                    continue;
+                if (debug) {
+                    printf ("Measured distance: %f\n", measured_distance);
+                    printf ("Measured angle:    %f\n", measured_angle);
+                    printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
                 }
 
+                // Horizontal / vertical
+                if (debug) {
+                    if (ID == object::horizontal) {
+                        printf ("Landmark is horizontal\n");
+                    } else if (ID == object::vertical) {
+                        printf ("Landmark is vertical\n");
+                    } else  {
+                        printf ("Unknown landmark type!\n");
+                        continue;
+                    }
+                }
+
+                // Tror det her er underligt
                 if (!measure_mode) {
                     if ((cp.red > cp.green && !found_red) || (cp.green > cp.red && !found_green)) {
                         measure_mode = true;
@@ -297,6 +239,7 @@ int main()
                     }
                 }
 
+                //
                 float box_x, box_y;
                 if (cp.red > cp.green) {
                     box_x = 0.;
@@ -306,13 +249,8 @@ int main()
                     box_y = 0.;
                 }
 
-                // Give particles a weight
-                weight(particles, box_x, box_y, measured_angle, measured_distance);
-
                 // Resample particles
-                resample(particles);
-
-                // Tilføj usikkerhed
+                resample(particles, box_x, box_y, measured_angle, measured_distance);
                 add_uncertainty(particles, 10, 0.2);
 
             } else { // end: if (found_landmark)
@@ -327,11 +265,9 @@ int main()
             ////////////////
             int action = cvWaitKey (1);
 
-            if (debug) {
-                cout << "Updating images" << endl;
-            }
-
+            cout << "Updating images" << endl;
             cam.draw_object (im);
+
             // Estimate pose
             est_pose = estimate_pose (particles);
 
