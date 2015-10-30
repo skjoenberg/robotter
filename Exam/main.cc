@@ -31,8 +31,8 @@ using namespace PlayerCc;
 
 
 // Orientation: true is horisontal, false is vertical
-cvPoint get_landmark(colour_prop cp, bool orientation) {
-    cvPoint ret;
+CvPoint get_landmark(colour_prop cp, bool orientation) {
+    CvPoint ret;
     if (orientation) {
         if (cp.red > cp.green) {
             ret.x = 400;
@@ -78,7 +78,7 @@ int main()
     cvMoveWindow (window, 20, 20);
 
     cout << "Initializing robot" << endl;
-    //    Robot robert;
+    Robot robert;
 
     // Initialize particles
     vector<particle> particles(NUM_PARTICLES);
@@ -145,19 +145,18 @@ int main()
                     printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
                 }
 
-                cvPoint box;
+                CvPoint box;
                 // Horizontal / vertical
-                if (debug) {
-                    if (ID == object::horizontal) {
-                        printf ("Landmark is horizontal\n");
-                        box = get_landmark(cp, true)
-                    } else if (ID == object::vertical) {
-                        printf ("Landmark is vertical\n");
-                        box = get_landmark(cp, false)
-                    } else  {
-                        printf ("Unknown landmark type!\n");
-                        continue;
-                    }
+                if (ID == object::horizontal) {
+                    printf ("Landmark is horizontal\n");
+                    box = get_landmark(cp, true);
+                } else if (ID == object::vertical) {
+                    printf ("Landmark is vertical\n");
+                    box = get_landmark(cp, false);
+                } else  {
+                    printf ("Unknown landmark type!\n");
+                    continue;
+                }
 
                 // Resample particles
                 resample(particles, box.x, box.y, measured_angle, measured_distance);
@@ -211,4 +210,4 @@ int main()
     //cvReleaseImage (&im);
 
     return 0;
-}
+    }
