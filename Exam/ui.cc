@@ -82,12 +82,12 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
     cvCircle (im, lm2, 5, CBLUE, 2);
     cvCircle (im, lm3, 5, CYELLOW, 2);
 
-    //    CvFont font;
-    //    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.5, 0.5);
-    //    cvPutText(im, "L1", lm0, &font, CBLACK);
-    //    cvPutText(im, "L2", lm1, &font, CBLACK);
-    //    cvPutText(im, "L3", lm2, &font, CBLACK);
-    //    cvPutText(im, "L4", lm3, &font, CBLACK);
+    CvFont font;
+    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.5, 0.5);
+    cvPutText(im, "L1", lm0, &font, CBLACK);
+    cvPutText(im, "L2", lm1, &font, CBLACK);
+    cvPutText(im, "L3", lm2, &font, CBLACK);
+    cvPutText(im, "L4", lm3, &font, CBLACK);
 
     // Draw estimated robot pose
     const CvPoint a = cvPoint ((int)est_pose.x+offset, (int)est_pose.y+offset);

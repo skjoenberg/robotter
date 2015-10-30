@@ -48,7 +48,7 @@ int main()
     // The GUI
     const char *map = "World map";
     const char *window = "Robot View";
-    IplImage *world = cvCreateImage (cvSize (500,500), IPL_DEPTH_8U, 3);
+    IplImage *world = cvCreateImage (cvSize (800, 500), IPL_DEPTH_8U, 3);
     cvNamedWindow (map, CV_WINDOW_AUTOSIZE);
     cvNamedWindow (window, CV_WINDOW_AUTOSIZE);
     cvMoveWindow (window, 20, 20);
@@ -88,6 +88,8 @@ int main()
 
     int measure_counter;
 
+    IplImage *im;
+
     // Main loop
     while (true) {
         // Get current position (x, y)
@@ -99,97 +101,99 @@ int main()
         while (search_mode) {
 
             // Turning
-            if (!measure_mode) {
-                // Get current angle
-                //                robert.read();
-                //                double theta_before = robert.pp->GetYaw();
+            // if (!measure_mode) {
+            //     // Get current angle
+            //     //                robert.read();
+            //     //                double theta_before = robert.pp->GetYaw();
 
-                // Turn and get new angle
-                //                robert.turnXradians(0.17);
-                //                robert.read();
+            //     // Turn and get new angle
+            //     //                robert.turnXradians(0.17);
+            //     //                robert.read();
 
-                // Move particles with the delta angle
-                //                double deltatheta = robert.pp->GetYaw() - theta_before;
-                for(int i = 0; i < particles.size(); i++) {
-                    //                    move_particle(particles[i], 0, 0, deltatheta);
-                }
+            //     // Move particles with the delta angle
+            //     //                double deltatheta = robert.pp->GetYaw() - theta_before;
+            //     for(int i = 0; i < particles.size(); i++) {
+            //         //                    move_particle(particles[i], 0, 0, deltatheta);
+            //     }
 
-                // Add uncertainty
-                add_uncertainty(particles, 0.1, 0.01);
+            //     // Add uncertainty
+            //     add_uncertainty(particles, 0.1, 0.01);
 
-                timespec hej = {3, 0};
-                nanosleep(&hej, NULL);
-            }
-            IplImage *im = cam.get_colour();
+            //     timespec hej = {3, 0};
+            //     nanosleep(&hej, NULL);
+            // }
+            im = cam.get_colour();
+            cam.empty();
+            cvShowImage (window, im);
             //rgb_im = cam.get_colour ();
 
             // Detect landmarks
             double measured_distance, measured_angle;
             colour_prop cp;
+            cout << "fra nu..." << endl;
             object::type ID = cam.get_object (im, cp, measured_distance, measured_angle);
-            if (ID != object::none) {
-                if (debug) {
-                    printf ("Measured distance: %f\n", measured_distance);
-                    printf ("Measured angle:    %f\n", measured_angle);
-                    printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
-                }
+            cout << "til nu!" << endl;
+            // if (ID != object::none) {
+            //     if (debug) {
+            //         printf ("Measured distance: %f\n", measured_distance);
+            //         printf ("Measured angle:    %f\n", measured_angle);
+            //         printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
+            //     }
 
-                // Horizontal / vertical
-                if (debug) {
-                    if (ID == object::horizontal) {
-                        printf ("Landmark is horizontal\n");
-                    } else if (ID == object::vertical) {
-                        printf ("Landmark is vertical\n");
-                    } else  {
-                        printf ("Unknown landmark type!\n");
-                        continue;
-                    }
-                }
+            //     // Horizontal / vertical
+            //     if (debug) {
+            //         if (ID == object::horizontal) {
+            //             printf ("Landmark is horizontal\n");
+            //         } else if (ID == object::vertical) {
+            //             printf ("Landmark is vertical\n");
+            //         } else  {
+            //             printf ("Unknown landmark type!\n");
+            //             continue;
+            //         }
+            //     }
 
-                // Tror det her er underligt
-                if (!measure_mode) {
-                    if ((cp.red > cp.green && !found_red) || (cp.green > cp.red && !found_green)) {
-                        measure_mode = true;
-                        measure_counter = 0;
-                    }
-                } else {
-                    measure_counter++;
-                    if (measure_counter > 30) {
-                        if (cp.red > cp.green) {
-                            found_red = true;
-                        } else {
-                            found_green = true;
-                        }
-                        measure_mode = false;
-                    }
-                }
+            //     // Tror det her er underligt
+            //     if (!measure_mode) {
+            //         if ((cp.red > cp.green && !found_red) || (cp.green > cp.red && !found_green)) {
+            //             measure_mode = true;
+            //             measure_counter = 0;
+            //         }
+            //     } else {
+            //         measure_counter++;
+            //         if (measure_counter > 30) {
+            //             if (cp.red > cp.green) {
+            //                 found_red = true;
+            //             } else {
+            //                 found_green = true;
+            //             }
+            //             measure_mode = false;
+            //         }
+            //     }
 
-                //
-                float box_x, box_y;
-                if (cp.red > cp.green) {
-                    box_x = 0.;
-                    box_y = 0.;
-                } else {
-                    box_x = 300.;
-                    box_y = 0.;
-                }
+            //     //
+            //     float box_x, box_y;
+            //     if (cp.red > cp.green) {
+            //         box_x = 0.;
+            //         box_y = 0.;
+            //     } else {
+            //         box_x = 300.;
+            //         box_y = 0.;
+            //     }
 
-                // Resample particles
-                resample(particles, box_x, box_y, measured_angle, measured_distance);
-                add_uncertainty(particles, 10, 0.2);
+            //     // Resample particles
+            //     resample(particles, box_x, box_y, measured_angle, measured_distance);
+            //     add_uncertainty(particles, 10, 0.2);
 
-            } else { // end: if (found_landmark)
-                // No observation - reset weights to uniform distribution
-                for (int i = 0; i < NUM_PARTICLES; i++) {
-                    particles[i].weight = 1.0/(double)NUM_PARTICLES;
-                }
-            } // end: if (not found_landmark)
+            // } else { // end: if (found_landmark)
+            //     // No observation - reset weights to uniform distribution
+            //     for (int i = 0; i < NUM_PARTICLES; i++) {
+            //         particles[i].weight = 1.0/(double)NUM_PARTICLES;
+            //     }
+            // } // end: if (not found_landmark)
 
             ////////////////
             // Draw stuff //
             ////////////////
-            int action = cvWaitKey (1);
-
             cout << "Updating images" << endl;
             cam.draw_object (im);
 
@@ -199,7 +203,7 @@ int main()
             // Visualisation
             draw_world (est_pose, particles, world);
             cvShowImage (map, world);
-            //            cvShowImage (window, im);
+            int action = cvWaitKey (10);
             if (found_red && found_green) {
                 search_mode = false;
             }

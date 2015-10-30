@@ -34,7 +34,8 @@ camera::camera (const int idx)
   cam = cvCreateCameraCapture (idx);
   cvSetCaptureProperty (cam, CV_CAP_PROP_FRAME_WIDTH, imsize.width);
   cvSetCaptureProperty (cam, CV_CAP_PROP_FRAME_HEIGHT, imsize.height);
-  cvSetCaptureProperty (cam, CV_CAP_PROP_BUFFERSIZE, 1);
+  cvSetCaptureProperty (cam, CV_CAP_PROP_FPS, 5.0);
+  std::cout << cvGetCaptureProperty (cam, CV_CAP_PROP_FPS) << std::endl;
 
 
   // Camera parameters from the caibration of the Scorpion camera
@@ -206,4 +207,11 @@ CvPoint2D32f* camera::get_corners (IplImage *im, bool &found, int &corner_count)
                         cvTermCriteria (CV_TERMCRIT_ITER, 3, 0.0));
 
   return corners;
+}
+
+void camera::empty()
+{
+    for (int i = 0; i < 5; i++) {
+        cvGrabFrame(cam);
+    }
 }
