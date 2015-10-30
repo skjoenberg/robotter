@@ -114,7 +114,7 @@ int main()
 
     IplImage *im;
 
-    double theta_before, delta_theta = 1., sum_theta = 0;
+    double theta_before, delta_theta;
 
     robert.pp->ResetOdometry();
 
@@ -126,9 +126,7 @@ int main()
             // Turning
             // Get current angle
             robert.read();
-            if(delta_theta != 0) {
-                theta_before = robert.pp->GetYaw();
-            }
+            theta_before = robert.pp->GetYaw();
 
             // Add uncertainty
             add_uncertainty(particles, 0.1, 0.01);
@@ -178,7 +176,6 @@ int main()
             robert.read();
             delta_theta = robert.pp->GetYaw() - theta_before;
             sum_theta += delta_theta;
-            cout << "YAW " << robert.pp->GetYaw() << endl;
             for(int i = 0; i < particles.size(); i++) {
                 move_particle(particles[i], 0, 0, delta_theta);
             }
