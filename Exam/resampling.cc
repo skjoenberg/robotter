@@ -1,15 +1,68 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "main.h"
+#include "defines.h"
 #include "random_numbers.h"
 #include "particles.h"
 
 using namespace std;
 
-void resample(std::vector<particle> &particles) {
+void resample(vector<particle> &particles, int box_x, int box_y, int measured_angle, int measured_distance) {
     // Debugging
     bool debug = true;
+
+    // Give particles weights
+    double sum = 0;
+    for (int i = 0; i < particles.size(); i++) {
+        // Measure euclidean distance to landmark
+        double deltax, deltay;
+        deltax = particles[i].x - box_x;
+        deltay = particles[i].y - box_y;
+
+        // Euclidean distance to box
+        double dist;
+        dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
+
+        // Angle between particle and box
+        double angletobox;
+        angletobox = atan(deltay / deltax);
+
+        // If deltax > 0, then the angle needs to be turned by a half circle.
+        if (deltax > 0) {
+            angletobox -= M_PI;
+        }
+
+        // Difference in angle
+        double deltaangle;
+        deltaangle = particles[i].theta - angletobox;
+
+        // The angles are between (-pi, pi)
+        if (deltaangle > M_PI){
+            deltaangle -= 2 * M_PI;
+        } else if (deltaangle < -M_PI) {
+            deltaangle += 2 * M_PI;
+        }
+
+        // Calculate weight of the current particle
+        double gaussman = 1. / sqrt(2. * M_PI * pow(SIGMA, 2.));
+        double angleweight, distweight;
+        angleweight = gaussman * exp(-((pow(measured_angle - deltaangle, 2.0) / (2.0 * pow(SIGMA_THETA, 2.0)))));
+        distweight = gaussman * exp(-((pow(measured_distance - dist, 2.0) / (2.0 * pow(SIGMA, 2.0)))));
+
+        double tmpweight;
+        tmpweight = angleweight*distweight;
+
+        // Add the weight to a sum (used later on to normalize weights)
+        sum += tmpweight;
+
+        // Save the weight in a particle array
+        particles[i].weight = tmpweight;
+    }
+
+    // Normalize weights
+    for (int i = 0; i < particles.size(); i++) {
+        particles[i].weight = particles[i].weight / sum;
+    }
 
     /* Lav cumsum og rand [0, 1] for at se hvilken partikel du skal duplikere */
     std::vector<particle> resamples;
