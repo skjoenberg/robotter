@@ -176,6 +176,7 @@ int main()
 
             robert.read();
             delta_theta = robert.pp->GetYaw() - theta_before;
+            cout << "VI FLYTTER PARTIKLERNE MED " << delta_theta << endl;
             for(int i = 0; i < particles.size(); i++) {
                 move_particle(particles[i], 0, 0, delta_theta);
             }
