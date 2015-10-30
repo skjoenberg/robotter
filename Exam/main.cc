@@ -219,9 +219,9 @@ int main()
                 next++;
 
             } else {
-                int driving_dist = min(dist - 60, 200);
+                int driving_dist = std::min(dist - 60, 200);
                 robert.turnXradians(deltaangle);
-                robert.driveXcm(driving_dist);
+                robert.moveXcm(driving_dist);
                 add_uncertainty(particles, 10, 0.2);
             }
             driving_mode = false;
