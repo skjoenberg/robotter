@@ -182,6 +182,8 @@ int main()
             //exit searchmode if turned 360 degrees.
             if (abs(theta_sum) > 2 * M_PI + 0.1) {
                 search_mode = false;
+                driving_mode = true;
+                robert.pp->SetSpeed(0.0, 0.0);
             }
         } // end search mode
         if (debug) {
