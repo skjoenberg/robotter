@@ -30,6 +30,30 @@ using namespace PlayerCc;
  */
 
 
+// Orientation: true is horisontal, false is vertical
+cvPoint get_landmark(colour_prop cp, bool orientation) {
+    cvPoint ret;
+    if (orientation) {
+        if (cp.red > cp.green) {
+            ret.x = 400;
+            ret.y = 0;
+        } else {
+            ret.x = 400;
+            ret.y = 300;
+        }
+    } else {
+        if (cp.red > cp.green) {
+            ret.x = 0;
+            ret.y = 300;
+        } else {
+            ret.x = 0;
+            ret.y = 0;
+        }
+    }
+    return ret;
+}
+
+
 const CvPoint landmarks [NUM_LANDMARKS] = {
     cvPoint (0, 300),
     cvPoint (0, 0),
@@ -121,30 +145,22 @@ int main()
                     printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
                 }
 
+                cvPoint box;
                 // Horizontal / vertical
                 if (debug) {
                     if (ID == object::horizontal) {
                         printf ("Landmark is horizontal\n");
+                        box = get_landmark(cp, true)
                     } else if (ID == object::vertical) {
                         printf ("Landmark is vertical\n");
+                        box = get_landmark(cp, false)
                     } else  {
                         printf ("Unknown landmark type!\n");
                         continue;
                     }
-                }
-
-                //
-                float box_x, box_y;
-                if (cp.red > cp.green) {
-                    box_x = 0.;
-                    box_y = 0.;
-                } else {
-                    box_x = 300.;
-                    box_y = 0.;
-                }
 
                 // Resample particles
-                resample(particles, box_x, box_y, measured_angle, measured_distance);
+                resample(particles, box.x, box.y, measured_angle, measured_distance);
                 add_uncertainty(particles, 10, 0.2);
 
             } else { // end: if (found_landmark)
