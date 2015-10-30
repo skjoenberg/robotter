@@ -162,7 +162,7 @@ int main()
 
             robert.read();
             delta_theta = robert.pp->GetYaw() - theta_before;
-            move_particles(particles, delta_theta);
+            move_particles(particles, 0, 0, delta_theta);
             theta_sum += abs(delta_theta);
 
             ////////////////
@@ -238,6 +238,7 @@ int main()
                 moved_x = robert.pp->GetXPos() - x_before;
                 moved_y = robert.pp->GetYPos() - y_before;
                 turned_theta = robert.pp->GetYaw() - theta_before;
+                move_particles(particles, moved_x, moved_y, turned_theta);
                 add_uncertainty(particles, 10, 0.2);
             }
             driving_mode = false;
