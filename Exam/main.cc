@@ -116,7 +116,7 @@ int main()
 
     double theta_before, delta_theta = 1., sum_theta = 0;
 
-
+    robert.pp.resetOdometry();
 
     // Main loop
     while (true) {
