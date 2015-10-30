@@ -1,9 +1,10 @@
 #include <vector>
+#include "defines.h"
 #include "particles.h"
 #include "random_numbers.h"
 #include <math.h>
 #include <iostream>
-#include <defines.h>
+
 
 
 using namespace std;
@@ -36,7 +37,7 @@ particle estimate_pose (std::vector<particle> &particles)
     return particle (x, y, theta);
 }
 
-void move_particles(std::vector<particle> &particles, delta_theta) {
+void move_particles(std::vector<particle> &particles, double delta_theta) {
     for(int i = 0; i < particles.size(); i++) {
         move_particle(particles[i], 0, 0, delta_theta);
     }
