@@ -163,7 +163,7 @@ int main()
             robert.read();
             delta_theta = robert.pp->GetYaw() - theta_before;
             move_particles(particles, delta_theta);
-            theta_sum += delta_theta;
+            theta_sum += abs(delta_theta);
 
             ////////////////
             // Draw stuff //
