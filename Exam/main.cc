@@ -61,6 +61,8 @@ const CvPoint landmarks [NUM_LANDMARKS] = {
     cvPoint (400, 0)
 };
 
+int seen[NUM_LANDMARKS];
+
 /*************************\
  *      Main program     *
 \*************************/
@@ -94,7 +96,7 @@ int main()
     draw_world (est_pose, particles, world);
 
     // Modes
-    bool search_mode = true, measure_mode = false;
+    bool search_mode = true, driving_mode = false;
 
     int measure_counter;
 
@@ -104,10 +106,15 @@ int main()
 
     robert.pp->ResetOdometry();
 
+    int next = 0;
+
     // Main loop
     while (true) {
         robert.pp->SetSpeed(0.0, 0.1);
         theta_sum = 0;
+        for (int i = 0; i < NUM_LANDMARKS; i++) {
+            seen[i] = 0;
+        }
         while (search_mode) {
             // Get current angle
             robert.read();
@@ -141,7 +148,11 @@ int main()
                 // Resample particles
                 resample(particles, box.x, box.y, measured_angle, measured_distance);
                 add_uncertainty(particles, 10, 0.2);
-
+                for (int i = 0; i < NUM_LANDMARKS; i++) {
+                    if (landmarks[i].x == box.x && landmarks[i].y == box.y) {
+                        seen[i] = 1;
+                    }
+                }
             } else { // end: if (found_landmark)
                 // No observation - reset weights to uniform distribution
                 for (int i = 0; i < NUM_PARTICLES; i++) {
@@ -171,11 +182,54 @@ int main()
             if (theta_sum > 2 * M_PI + 0.1) {
                 search_mode = false;
             }
-        } // end search mode inner loop (cirkel)
-
+        } // end search mode
         if (debug) {
             cout << "Finished searching." << endl;
         }
+        int sum_seen = 0;
+        for (int i = 0; i < NUM_LANDMARKS; i++) {
+            sum_seen += seen[i];
+        }
+        if (sum_seen > 1) {
+            driving_mode = true;
+        }
+        while(driving_mode) {
+            int target_x, target_y, deltax, deltay, dist, angletotarget, deltaangle;
+            target_x = landmarks[next].x;
+            target_y = landmarks[next].y;
+            // Euclidean distance to box
+            dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
+            // Angle between particle and box
+            angletotarget = atan(deltay / deltax);
+            // If deltax > 0, then the angle needs to be turned by a half circle.
+            if (deltax > 0) {
+                angletotarget -= M_PI;
+            }
+            // Difference in angle
+            deltaangle = est_pose.theta - angletotarget;
+            // The angles are between (-pi, pi)
+            if (deltaangle > M_PI){
+                deltaangle -= 2 * M_PI;
+            } else if (deltaangle < -M_PI) {
+                deltaangle += 2 * M_PI;
+            }
+
+            if (dist < 60) {
+                cout << "hurra vi har mødt landmark " << next << endl;
+                next++;
+
+            } else {
+                int driving_dist = min(dist - 60, 200);
+                robert.turnXradians(deltaangle);
+                robert.driveXcm(driving_dist);
+                add_uncertainty(particles, 10, 0.2);
+            }
+            driving_mode = false;
+            search_mode = true;
+
+        } // End Driving mode
+
+
     } // End: while (true)
 
  theend:
