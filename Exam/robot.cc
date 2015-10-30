@@ -15,6 +15,9 @@ Robot::Robot() {
     pp = new Position2dProxy(robert);
     ir = new IrProxy (robert);
     bumper = new BumperProxy(robert);
+    robert->SetDataMode(PLAYER_DATAMODE_PULL);
+    robert->SetReplaceRule(true, PLAYER_MSGTYPE_DATA, -1);
+
 }
 
 void Robot::read() {
