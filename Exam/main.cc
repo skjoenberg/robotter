@@ -114,7 +114,8 @@ int main()
 
     IplImage *im;
 
-    double theta_before, delta_theta = 1.;
+    double theta_before, delta_theta = 1., sum_theta = 0;
+
 
 
     // Main loop
@@ -176,7 +177,8 @@ int main()
 
             robert.read();
             delta_theta = robert.pp->GetYaw() - theta_before;
-            cout << "VI FLYTTER PARTIKLERNE MED " << delta_theta << endl;
+            sum_theta += delta_theta;
+            cout << "VI FLYTTER PARTIKLERNE MED " << sum_theta << endl;
             for(int i = 0; i < particles.size(); i++) {
                 move_particle(particles[i], 0, 0, delta_theta);
             }
