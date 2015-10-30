@@ -179,8 +179,10 @@ int main()
             int action = cvWaitKey (10);
 
             cout << theta_sum << endl;
+
             //exit searchmode if turned 360 degrees.
             if (abs(theta_sum) > (2 * M_PI + 0.1)) {
+                cout << "arh man jeg så træt af at dreje" << endl;
                 search_mode = false;
                 driving_mode = true;
                 robert.pp->SetSpeed(0.0, 0.0);
