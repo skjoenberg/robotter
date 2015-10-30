@@ -42,6 +42,14 @@ SET(DUMMY_MAIN
   main.cc
 )
 
+#ignore warnings
+set_source_files_properties(
+  ${main.cc}
+  ${particles.cc}
+  ${ui.cc}
+  COMPILE_FLAGS "-w"
+)
+
 add_executable(main ${DUMMY_MAIN} ${SRCS} ${HEADERS})
 target_link_libraries(main playerc++)
 target_link_libraries(main ${OpenCV_LIBS})
