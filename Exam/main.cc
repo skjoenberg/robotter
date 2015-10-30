@@ -168,7 +168,7 @@ int main()
             } else if (delta_theta < -M_PI) {
                 delta_theta += 2 * M_PI;
             }
-            move_particles(particles, delta_theta);
+            move_particles(particles,0,0, -delta_theta);
 
             theta_sum += abs(delta_theta);
 
@@ -206,7 +206,9 @@ int main()
         //     driving_mode = true;
         // }
         while(driving_mode) {
-            int target_x, target_y, deltax, deltay, dist, angletotarget, deltaangle;
+            int target_x, target_y, deltax, deltay, dist;
+            double angletotarget, deltaangle;
+
             target_x = landmarks[next].x;
             target_y = landmarks[next].y;
             deltax = est_pose.x - target_x;
@@ -235,27 +237,20 @@ int main()
                 next++;
 
             } else {
-<<<<<<< HEAD
-                double x_before, y_before, theta_before, moved_x, moved_y;
+                double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
                 robert.read();
                 x_before = robert.pp->GetXPos();
                 y_before = robert.pp->GetYPos();
                 theta_before = robert.pp->GetYaw();
-
-                int driving_dist = min(dist - 60, 200);
+                cout << "deltaangle: " << deltaangle << endl;
                 robert.turnXradians(deltaangle);
-                robert.driveXcm(driving_dist);
+                robert.moveXcm(driving_dist);
 
                 robert.read();
                 moved_x = robert.pp->GetXPos() - x_before;
                 moved_y = robert.pp->GetYPos() - y_before;
                 turned_theta = robert.pp->GetYaw() - theta_before;
                 move_particles(particles, moved_x, moved_y, turned_theta);
-=======
-                int driving_dist = std::min(dist - 60, 200);
-                robert.turnXradians(deltaangle);
-                robert.moveXcm(driving_dist);
->>>>>>> 75dbae752c07282fa160ea63c81c3ad1fdf4335e
                 add_uncertainty(particles, 10, 0.2);
             }
             driving_mode = false;
