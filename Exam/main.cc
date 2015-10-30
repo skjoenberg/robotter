@@ -175,7 +175,6 @@ int main()
 
             robert.read();
             delta_theta = robert.pp->GetYaw() - theta_before;
-            sum_theta += delta_theta;
             for(int i = 0; i < particles.size(); i++) {
                 move_particle(particles[i], 0, 0, delta_theta);
             }
