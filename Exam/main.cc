@@ -184,7 +184,7 @@ int main()
             ////////////////
             // Draw stuff //
             ////////////////
-            cout << "Updating images" << endl;
+            //            cout << "Updating images" << endl;
             cam.draw_object (im);
 
             // Estimate pose
