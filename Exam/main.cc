@@ -92,36 +92,17 @@ int main()
 
     // Main loop
     while (true) {
-        // Get current position (x, y)
-        //        robert.read();
-        //        double x_before = robert.pp->GetXPos();
-        //        double y_before = robert.pp->GetYPos();
-
         // LAV NOGET FLYTTELSE
+        robert.pp->SetSpeed(0.0, 0.1);
         while (search_mode) {
-
             // Turning
-            // if (!measure_mode) {
-            //     // Get current angle
-            //     //                robert.read();
-            //     //                double theta_before = robert.pp->GetYaw();
+            // Get current angle
+            robert.read();
+            double theta_before = robert.pp->GetYaw();
 
-            //     // Turn and get new angle
-            //     //                robert.turnXradians(0.17);
-            //     //                robert.read();
+            // Add uncertainty
+            add_uncertainty(particles, 0.1, 0.01);
 
-            //     // Move particles with the delta angle
-            //     //                double deltatheta = robert.pp->GetYaw() - theta_before;
-            //     for(int i = 0; i < particles.size(); i++) {
-            //         //                    move_particle(particles[i], 0, 0, deltatheta);
-            //     }
-
-            //     // Add uncertainty
-            //     add_uncertainty(particles, 0.1, 0.01);
-
-            //     timespec hej = {3, 0};
-            //     nanosleep(&hej, NULL);
-            // }
             im = cam.get_colour();
             cam.empty();
             cvShowImage (window, im);
@@ -130,66 +111,48 @@ int main()
             // Detect landmarks
             double measured_distance, measured_angle;
             colour_prop cp;
-            cout << "fra nu..." << endl;
+
             object::type ID = cam.get_object (im, cp, measured_distance, measured_angle);
-            cout << "til nu!" << endl;
-            // if (ID != object::none) {
-            //     if (debug) {
-            //         printf ("Measured distance: %f\n", measured_distance);
-            //         printf ("Measured angle:    %f\n", measured_angle);
-            //         printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
-            //     }
 
-            //     // Horizontal / vertical
-            //     if (debug) {
-            //         if (ID == object::horizontal) {
-            //             printf ("Landmark is horizontal\n");
-            //         } else if (ID == object::vertical) {
-            //             printf ("Landmark is vertical\n");
-            //         } else  {
-            //             printf ("Unknown landmark type!\n");
-            //             continue;
-            //         }
-            //     }
+            if (ID != object::none) {
+                if (debug) {
+                    printf ("Measured distance: %f\n", measured_distance);
+                    printf ("Measured angle:    %f\n", measured_angle);
+                    printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
+                }
 
-            //     // Tror det her er underligt
-            //     if (!measure_mode) {
-            //         if ((cp.red > cp.green && !found_red) || (cp.green > cp.red && !found_green)) {
-            //             measure_mode = true;
-            //             measure_counter = 0;
-            //         }
-            //     } else {
-            //         measure_counter++;
-            //         if (measure_counter > 30) {
-            //             if (cp.red > cp.green) {
-            //                 found_red = true;
-            //             } else {
-            //                 found_green = true;
-            //             }
-            //             measure_mode = false;
-            //         }
-            //     }
+                // Horizontal / vertical
+                if (debug) {
+                    if (ID == object::horizontal) {
+                        printf ("Landmark is horizontal\n");
+                    } else if (ID == object::vertical) {
+                        printf ("Landmark is vertical\n");
+                    } else  {
+                        printf ("Unknown landmark type!\n");
+                        continue;
+                    }
+                }
 
-            //     //
-            //     float box_x, box_y;
-            //     if (cp.red > cp.green) {
-            //         box_x = 0.;
-            //         box_y = 0.;
-            //     } else {
-            //         box_x = 300.;
-            //         box_y = 0.;
-            //     }
+                //
+                float box_x, box_y;
+                if (cp.red > cp.green) {
+                    box_x = 0.;
+                    box_y = 0.;
+                } else {
+                    box_x = 300.;
+                    box_y = 0.;
+                }
 
-            //     // Resample particles
-            //     resample(particles, box_x, box_y, measured_angle, measured_distance);
-            //     add_uncertainty(particles, 10, 0.2);
+                // Resample particles
+                resample(particles, box_x, box_y, measured_angle, measured_distance);
+                add_uncertainty(particles, 10, 0.2);
 
-            // } else { // end: if (found_landmark)
-            //     // No observation - reset weights to uniform distribution
-            //     for (int i = 0; i < NUM_PARTICLES; i++) {
-            //         particles[i].weight = 1.0/(double)NUM_PARTICLES;
-            //     }
-            // } // end: if (not found_landmark)
+            } else { // end: if (found_landmark)
+                // No observation - reset weights to uniform distribution
+                for (int i = 0; i < NUM_PARTICLES; i++) {
+                    particles[i].weight = 1.0/(double)NUM_PARTICLES;
+                }
+            } // end: if (not found_landmark)
 
             ////////////////
             // Draw stuff //
@@ -204,72 +167,23 @@ int main()
             draw_world (est_pose, particles, world);
             cvShowImage (map, world);
             int action = cvWaitKey (10);
-            if (found_red && found_green) {
-                search_mode = false;
-            }
+
+            // Move particles with the delta angle
+            robert.read();
+            double deltatheta = robert.pp->GetYaw() - theta_before;
+                for(int i = 0; i < particles.size(); i++) {
+                    move_particle(particles[i], 0, 0, deltatheta);
+                }
+
+            // if (found_red && found_green) {
+            //     search_mode = false;
+            // }
+
         } // end search mode inner loop (cirkel)
 
         if (debug) {
             cout << "Finished searching." << endl;
         }
-
-        if (!search_mode) {
-            if (debug) {
-                cout << "Robotten kører!" << endl;
-            }
-
-            int target_x, target_y, deltax, deltay, dist, angletotarget, deltaangle;
-            target_x = 150;
-            target_y = 0;
-            deltax = est_pose.x - target_x;
-            deltay = est_pose.y - target_y;
-
-            // Euclidean distance to box
-            dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
-
-            // Angle between particle and box
-            angletotarget = atan(deltay / deltax);
-
-            // If deltax > 0, then the angle needs to be turned by a half circle.
-            if (deltax > 0) {
-                angletotarget -= M_PI;
-            }
-
-            // Difference in angle
-            deltaangle = est_pose.theta - angletotarget;
-
-            // The angles are between (-pi, pi)
-            if (deltaangle > M_PI){
-                deltaangle -= 2 * M_PI;
-            } else if (deltaangle < -M_PI) {
-                deltaangle += 2 * M_PI;
-            }
-
-            if (debug) {
-                cout << "Turning: " << deltaangle << endl;
-                cout << "Distance: " << dist << endl;
-            }
-
-            // Turning
-            //            robert.turnXradians(deltaangle);
-
-            // Moving forward
-            //            robert.moveXcm(dist);
-
-            search_mode = true;
-            found_red = false;
-            found_green = false;
-        }
-
-        // add_uncertainty(particles, 10, 0.2);
-        // robert.read();
-        // double deltax = robert.pp->GetXPos() - x_before;
-        // double deltay = robert.pp->GetYPos() - y_before;
-        // double deltatheta = robert.pp->GetYaw() - theta_before;
-
-        // for(int i = 0; i < particles.size(); i++) {
-        //     move_particle(particles[i], deltax, deltay, deltatheta);
-        // }
     } // End: while (true)
 
  theend:
