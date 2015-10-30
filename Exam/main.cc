@@ -28,9 +28,13 @@ using namespace PlayerCc;
  * Landmarks.
  * The robot knows the position of 2 landmarks. Their coordinates are in cm.
  */
+
+
 const CvPoint landmarks [NUM_LANDMARKS] = {
+    cvPoint (0, 300),
     cvPoint (0, 0),
-    cvPoint (300, 0),
+    cvPoint (400, 300),
+    cvPoint (400, 0)
 };
 
 /*************************\
@@ -130,6 +134,19 @@ int main()
                     printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
                 }
 
+<<<<<<< HEAD
+                printf ("Measured distance: %f\n", measured_distance);
+                printf ("Measured angle:    %f\n", measured_angle);
+                printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
+
+                if (ID == object::horizontal) {
+                    printf ("Landmark is horizontal\n");
+                } else if (ID == object::vertical) {
+                    printf ("Landmark is vertical\n");
+                } else  {
+                    printf ("Unknown landmark type!\n");
+                    continue;
+=======
                 // Horizontal / vertical
                 if (debug) {
                     if (ID == object::horizontal) {
@@ -140,6 +157,7 @@ int main()
                         printf ("Unknown landmark type!\n");
                         continue;
                     }
+>>>>>>> 642bf0ee9c673f80a7f7978979e8f0908f96485e
                 }
 
                 // Tror det her er underligt
