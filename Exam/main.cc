@@ -52,10 +52,12 @@ using namespace PlayerCc;
  * Landmarks.
  * The robot knows the position of 2 landmarks. Their coordinates are in cm.
  */
-#define num_landmarks 2
+#define num_landmarks 4
 const CvPoint landmarks [num_landmarks] = {
+    cvPoint (0, 300),
     cvPoint (0, 0),
-    cvPoint (300, 0),
+    cvPoint (400, 300),
+    cvPoint (400, 0)
 };
 
 /*
@@ -270,7 +272,6 @@ int main()
                 printf ("Measured angle:    %f\n", measured_angle);
                 printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
 
-                //fisse
                 if (ID == object::horizontal) {
                     printf ("Landmark is horizontal\n");
                 } else if (ID == object::vertical) {
