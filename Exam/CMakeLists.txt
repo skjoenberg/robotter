@@ -21,6 +21,18 @@ add_executable(camera_calibrator camera_calibrator.cc)
 target_link_libraries(camera_calibrator ${OpenCV_LIBS})
 
 
+#ignore warnings
+#set_source_files_properties(
+#  ${main.cc}
+#  ${particles.cc}
+#  ${ui.cc}
+#  COMPILE_FLAGS "-w"
+#)
+
+SET(GCC_IGNORE_W "-w")
+
+SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_IGNORE_W}" )
+
 SET(SRCS
   camera.cc
   particles.cc
@@ -41,6 +53,7 @@ SET(HEADERS
 SET(DUMMY_MAIN
   main.cc
 )
+
 
 add_executable(main ${DUMMY_MAIN} ${SRCS} ${HEADERS})
 target_link_libraries(main playerc++)
