@@ -2,6 +2,7 @@
 #include "cxcore.h"
 #include "highgui.h"
 #include "particles.h"
+#include "defines.h"
 /*
  * Some colors
  */
@@ -22,7 +23,7 @@ const CvPoint landmarks [NUM_LANDMARKS] = {
     cvPoint (0, 300),
     cvPoint (0, 0),
     cvPoint (400, 300),
-    cvPoint (400, 0)
+    cvPoint (400, 0),
 };
 
 /*
@@ -47,7 +48,7 @@ CvScalar jet (const double x) {
  * Visualization.
  * This functions draws robots position in the world.
  */
-void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage *im, CvPoint &landmarks) {
+void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage *im) {
     const int offset = 100;
 
     // White background
@@ -80,10 +81,13 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
     cvCircle (im, lm1, 5, CGREEN, 2);
     cvCircle (im, lm2, 5, CBLUE, 2);
     cvCircle (im, lm3, 5, CYELLOW, 2);
-    cvPutText(im, "L1", lm0, FONT_HERSHEY_SIMPLEX, 12);
-    cvPutText(im, "L2", lm1, FONT_HERSHEY_SIMPLEX, 12);
-    cvPutText(im, "L3", lm2, FONT_HERSHEY_SIMPLEX, 12);
-    cvPutText(im, "L4", lm3, FONT_HERSHEY_SIMPLEX, 12);
+
+    //    CvFont font;
+    //    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.5, 0.5);
+    //    cvPutText(im, "L1", lm0, &font, CBLACK);
+    //    cvPutText(im, "L2", lm1, &font, CBLACK);
+    //    cvPutText(im, "L3", lm2, &font, CBLACK);
+    //    cvPutText(im, "L4", lm3, &font, CBLACK);
 
     // Draw estimated robot pose
     const CvPoint a = cvPoint ((int)est_pose.x+offset, (int)est_pose.y+offset);

@@ -54,7 +54,7 @@ int main()
     cvMoveWindow (window, 20, 20);
 
     cout << "Initializing robot" << endl;
-    Robot robert;
+    //    Robot robert;
 
     // Initialize particles
     vector<particle> particles(NUM_PARTICLES);
@@ -91,9 +91,9 @@ int main()
     // Main loop
     while (true) {
         // Get current position (x, y)
-        robert.read();
-        double x_before = robert.pp->GetXPos();
-        double y_before = robert.pp->GetYPos();
+        //        robert.read();
+        //        double x_before = robert.pp->GetXPos();
+        //        double y_before = robert.pp->GetYPos();
 
         // LAV NOGET FLYTTELSE
         while (search_mode) {
@@ -101,17 +101,17 @@ int main()
             // Turning
             if (!measure_mode) {
                 // Get current angle
-                robert.read();
-                double theta_before = robert.pp->GetYaw();
+                //                robert.read();
+                //                double theta_before = robert.pp->GetYaw();
 
                 // Turn and get new angle
-                robert.turnXradians(0.17);
-                robert.read();
+                //                robert.turnXradians(0.17);
+                //                robert.read();
 
                 // Move particles with the delta angle
-                double deltatheta = robert.pp->GetYaw() - theta_before;
+                //                double deltatheta = robert.pp->GetYaw() - theta_before;
                 for(int i = 0; i < particles.size(); i++) {
-                    move_particle(particles[i], 0, 0, deltatheta);
+                    //                    move_particle(particles[i], 0, 0, deltatheta);
                 }
 
                 // Add uncertainty
@@ -134,19 +134,6 @@ int main()
                     printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
                 }
 
-<<<<<<< HEAD
-                printf ("Measured distance: %f\n", measured_distance);
-                printf ("Measured angle:    %f\n", measured_angle);
-                printf ("Colour probabilities: %.3f %.3f %.3f\n", cp.red, cp.green, cp.blue);
-
-                if (ID == object::horizontal) {
-                    printf ("Landmark is horizontal\n");
-                } else if (ID == object::vertical) {
-                    printf ("Landmark is vertical\n");
-                } else  {
-                    printf ("Unknown landmark type!\n");
-                    continue;
-=======
                 // Horizontal / vertical
                 if (debug) {
                     if (ID == object::horizontal) {
@@ -157,7 +144,6 @@ int main()
                         printf ("Unknown landmark type!\n");
                         continue;
                     }
->>>>>>> 642bf0ee9c673f80a7f7978979e8f0908f96485e
                 }
 
                 // Tror det her er underligt
@@ -261,10 +247,10 @@ int main()
             }
 
             // Turning
-            robert.turnXradians(deltaangle);
+            //            robert.turnXradians(deltaangle);
 
             // Moving forward
-            robert.moveXcm(dist);
+            //            robert.moveXcm(dist);
 
             search_mode = true;
             found_red = false;
