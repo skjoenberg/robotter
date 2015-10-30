@@ -169,7 +169,7 @@ int main()
                 }
             } // end: if (not found_landmark)
 
-
+            robert.read();
             double deltatheta = robert.pp->GetYaw() - theta_before;
             cout << "VI FLYTTER PARTIKLERNE MED " << deltatheta << endl;
             for(int i = 0; i < particles.size(); i++) {
