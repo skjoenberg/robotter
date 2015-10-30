@@ -15,6 +15,17 @@
 #define CBLACK   CV_RGB(0, 0, 0)
 
 /*
+ * Landmarks.
+ * The robot knows the position of 2 landmarks. Their coordinates are in cm.
+ */
+const CvPoint landmarks [NUM_LANDMARKS] = {
+    cvPoint (0, 300),
+    cvPoint (0, 0),
+    cvPoint (400, 300),
+    cvPoint (400, 0)
+};
+
+/*
  * Colour map for drawing particles. This function determines the colour of a
  * particle from its weight.
  */
@@ -63,8 +74,16 @@ void draw_world (particle &est_pose, std::vector<particle> &particles, IplImage 
     // Draw landmarks
     const CvPoint lm0 = cvPoint (landmarks[0].x+offset, landmarks[0].y+offset);
     const CvPoint lm1 = cvPoint (landmarks[1].x+offset, landmarks[1].y+offset);
+    const CvPoint lm2 = cvPoint (landmarks[2].x+offset, landmarks[2].y+offset);
+    const CvPoint lm3 = cvPoint (landmarks[3].x+offset, landmarks[3].y+offset);
     cvCircle (im, lm0, 5, CRED, 2);
     cvCircle (im, lm1, 5, CGREEN, 2);
+    cvCircle (im, lm2, 5, CBLUE, 2);
+    cvCircle (im, lm3, 5, CYELLOW, 2);
+    cvPutText(im, "L1", lm0, FONT_HERSHEY_SIMPLEX, 12);
+    cvPutText(im, "L2", lm1, FONT_HERSHEY_SIMPLEX, 12);
+    cvPutText(im, "L3", lm2, FONT_HERSHEY_SIMPLEX, 12);
+    cvPutText(im, "L4", lm3, FONT_HERSHEY_SIMPLEX, 12);
 
     // Draw estimated robot pose
     const CvPoint a = cvPoint ((int)est_pose.x+offset, (int)est_pose.y+offset);
