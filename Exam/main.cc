@@ -110,12 +110,12 @@ int main()
 
     // Main loop
     while (true) {
-        robert.pp->SetSpeed(0.0, 0.1);
         theta_sum = 0;
         for (int i = 0; i < NUM_LANDMARKS; i++) {
             seen[i] = 0;
         }
         while (search_mode) {
+            robert.pp->SetSpeed(0.0, 0.1);
             // Get current angle
             robert.read();
             theta_before = robert.pp->GetYaw();
@@ -191,13 +191,13 @@ int main()
         if (debug) {
             cout << "Finished searching." << endl;
         }
-        int sum_seen = 0;
-        for (int i = 0; i < NUM_LANDMARKS; i++) {
-            sum_seen += seen[i];
-        }
-        if (sum_seen > 1) {
-            driving_mode = true;
-        }
+        // int sum_seen = 0;
+        // for (int i = 0; i < NUM_LANDMARKS; i++) {
+        //     sum_seen += seen[i];
+        // }
+        // if (sum_seen > 1) {
+        //     driving_mode = true;
+        // }
         while(driving_mode) {
             int target_x, target_y, deltax, deltay, dist, angletotarget, deltaangle;
             target_x = landmarks[next].x;
