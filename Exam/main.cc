@@ -162,6 +162,11 @@ int main()
 
             robert.read();
             delta_theta = robert.pp->GetYaw() - theta_before;
+            if (delta_theta > M_PI){
+                delta_theta -= 2 * M_PI;
+            } else if (delta_theta < -M_PI) {
+                delta_theta += 2 * M_PI;
+            }
             move_particles(particles, delta_theta);
             theta_sum += abs(delta_theta);
 
@@ -202,6 +207,10 @@ int main()
             int target_x, target_y, deltax, deltay, dist, angletotarget, deltaangle;
             target_x = landmarks[next].x;
             target_y = landmarks[next].y;
+            deltax = est_pose.x - target_x;
+            deltay = est_pose.y - target_y;
+
+
             // Euclidean distance to box
             dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
             // Angle between particle and box
