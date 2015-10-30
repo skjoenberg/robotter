@@ -114,6 +114,9 @@ int main()
 
     IplImage *im;
 
+    double theta_before, delta_theta = 1.;
+
+
     // Main loop
     while (true) {
         // LAV NOGET FLYTTELSE
@@ -122,7 +125,9 @@ int main()
             // Turning
             // Get current angle
             robert.read();
-            double theta_before = robert.pp->GetYaw();
+            if(delta_theta != 0) {
+                theta_before = robert.pp->GetYaw();
+            }
 
             // Add uncertainty
             add_uncertainty(particles, 0.1, 0.01);
@@ -170,7 +175,7 @@ int main()
             } // end: if (not found_landmark)
 
             robert.read();
-            double deltatheta = robert.pp->GetYaw() - theta_before;
+            delta_theta = robert.pp->GetYaw() - theta_before;
             cout << "VI FLYTTER PARTIKLERNE MED " << deltatheta << endl;
             for(int i = 0; i < particles.size(); i++) {
                 move_particle(particles[i], 0, 0, deltatheta);
@@ -189,15 +194,6 @@ int main()
             draw_world (est_pose, particles, world);
             cvShowImage (map, world);
             int action = cvWaitKey (10);
-
-            // Move particles with the delta angle
-            robert.read();
-
-
-            // if (found_red && found_green) {
-            //     search_mode = false;
-            // }
-
         } // end search mode inner loop (cirkel)
 
         if (debug) {
