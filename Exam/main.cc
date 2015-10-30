@@ -224,9 +224,20 @@ int main()
                 next++;
 
             } else {
+                double x_before, y_before, theta_before, moved_x, moved_y;
+                robert.read();
+                x_before = robert.pp->GetXPos();
+                y_before = robert.pp->GetYPos();
+                theta_before = robert.pp->GetYaw();
+
                 int driving_dist = min(dist - 60, 200);
                 robert.turnXradians(deltaangle);
                 robert.driveXcm(driving_dist);
+
+                robert.read();
+                moved_x = robert.pp->GetXPos() - x_before;
+                moved_y = robert.pp->GetYPos() - y_before;
+                turned_theta = robert.pp->GetYaw() - theta_before;
                 add_uncertainty(particles, 10, 0.2);
             }
             driving_mode = false;
