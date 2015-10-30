@@ -222,6 +222,7 @@ int main()
                 int driving_dist = min(dist - 60, 200);
                 robert.turnXradians(deltaangle);
                 robert.driveXcm(driving_dist);
+                add_uncertainty(particles, 10, 0.2);
             }
             driving_mode = false;
             search_mode = true;
