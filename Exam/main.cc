@@ -214,6 +214,8 @@ int main()
             deltax = est_pose.x - target_x;
             deltay = est_pose.y - target_y;
 
+            cout << "robert estimerer at han står i x: " << est_pose.x << " y: " << est_pose.y << endl;
+            cout << "target er x: " << target_x << " y: " << target_y << endl;
 
             // Euclidean distance to box
             dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
