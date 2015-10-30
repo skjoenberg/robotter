@@ -114,8 +114,9 @@ int main()
 
     IplImage *im;
 
-    double theta_before, delta_theta = 1.;
+    double theta_before, delta_theta = 1., sum_theta = 0;
 
+    robert.pp->ResetOdometry();
 
     // Main loop
     while (true) {
@@ -176,6 +177,8 @@ int main()
 
             robert.read();
             delta_theta = robert.pp->GetYaw() - theta_before;
+            sum_theta += delta_theta;
+            cout << "YAW " << robert.pp->GetYaw() << endl;
             for(int i = 0; i < particles.size(); i++) {
                 move_particle(particles[i], 0, 0, delta_theta);
             }
@@ -183,7 +186,7 @@ int main()
             ////////////////
             // Draw stuff //
             ////////////////
-            cout << "Updating images" << endl;
+            //            cout << "Updating images" << endl;
             cam.draw_object (im);
 
             // Estimate pose
