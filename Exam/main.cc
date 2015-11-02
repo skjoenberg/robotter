@@ -115,7 +115,7 @@ int main()
     robert.pp->ResetOdometry();
 
     // Used for landmark routes
-    int next = 0;
+    int next = 2;
 
     cout << landmarks[0].x << " " << landmarks[0].y << endl;
     cout << landmarks[1].x << " " << landmarks[1].y << endl;
