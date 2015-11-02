@@ -340,13 +340,13 @@ int main()
             // Draw particles
             draw_particles(cam, im, world, map, particles, est_pose);
 
-            // Switch to search mode
-            cout << "Search mode engaged" << endl;
+            // Switch to driving mode
+            cout << "Driving mode engaged" << endl;
             if (obstacle == 1) {
                 // Obstacle found. Stay in obstacle mode
                 obstacle_mode = false;
-                driving_mode = false;
-                search_mode = true;
+                driving_mode = true;
+                search_mode = false;
             }
         } // End obstacle mode
         while (test_mode) {
