@@ -325,7 +325,7 @@ int main()
             int obstacle;
             // Move away from obstacle
             robert.turnObstacle();
-            obstacle = robert.moveXcm(30);
+            obstacle = robert.moveXcm(55);
 
             // Get new position from odometry and update particles
             robert.read();
