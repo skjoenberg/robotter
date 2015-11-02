@@ -29,6 +29,15 @@ using namespace PlayerCc;
  * The robot knows the position of 2 landmarks. Their coordinates are in cm.
  */
 
+// Draw particles on map
+void draw_particles(camera &cam, IplImage *im, IplImage *world, const char *map, vector<particle> &particles, particle &est_pose) {
+            cam.draw_object (im);
+
+            // Visualisation
+            draw_world (est_pose, particles, world);
+            cvShowImage (map, world);
+            int action = cvWaitKey (10);
+}
 
 // Orientation: true is horisontal, false is vertical
 CvPoint get_landmark(colour_prop cp, bool orientation) {
@@ -53,7 +62,7 @@ CvPoint get_landmark(colour_prop cp, bool orientation) {
     return ret;
 }
 
-
+// Landmarks
 const CvPoint landmarks [NUM_LANDMARKS] = {
     cvPoint (0, 300),
     cvPoint (0, 0),
@@ -101,9 +110,8 @@ int main()
     // Modes
     bool search_mode = true, driving_mode = false , obstacle_mode = false;
 
-
-    int measure_counter;
     double theta_before, delta_theta, theta_sum;
+
     robert.pp->ResetOdometry();
 
     // Used for landmark routes
@@ -120,7 +128,9 @@ int main()
         for (int i = 0; i < NUM_LANDMARKS; i++) {
             seen[i] = 0;
         }
+
         while (search_mode) {
+            cout << "Search mode engaged" << endl;
             robert.pp->SetSpeed(0.0, 0.1);
             // Get current angle
             robert.read();
@@ -151,6 +161,7 @@ int main()
                     printf ("Unknown landmark type!\n");
                     continue;
                 }
+
                 // Resample particles
                 resample(particles, box.x, box.y, measured_angle, measured_distance);
                 add_uncertainty(particles, 10, 0.2);
@@ -174,22 +185,15 @@ int main()
             } else if (delta_theta < -M_PI) {
                 delta_theta += 2 * M_PI;
             }
-            move_particles(particles,0,0, -delta_theta * 1.25);
 
+            move_particles(particles,0,0, -delta_theta * THETA_MULTIPLIER);
             theta_sum += abs(delta_theta);
 
-            ////////////////
-            // Draw stuff //
-            ////////////////
-            cam.draw_object (im);
-
-            // Estimate pose
+            // Estimate position
             est_pose = estimate_pose (particles);
 
-            // Visualisation
-            draw_world (est_pose, particles, world);
-            cvShowImage (map, world);
-            int action = cvWaitKey (10);
+            // Draw particles
+            draw_particles(cam, im, world, map, particles, est_pose);
 
             //            cout << theta_sum << endl;
 
@@ -197,21 +201,14 @@ int main()
             if (abs(theta_sum) > (2 * M_PI + 0.1)) {
                 cout << "arh man jeg så træt af at dreje" << endl;
                 search_mode = false;
+                obstacle_mode = false;
                 driving_mode = true;
                 robert.pp->SetSpeed(0.0, 0.0);
             }
         } // end search mode
-        if (debug) {
-            cout << "Finished searching." << endl;
-        }
-        // int sum_seen = 0;
-        // for (int i = 0; i < NUM_LANDMARKS; i++) {
-        //     sum_seen += seen[i];
-        // }
-        // if (sum_seen > 1) {
-        //     driving_mode = true;
-        // }
+
         while(driving_mode) {
+            cout << "Driving mode engaged" << endl;
             int target_x, target_y, deltax, deltay, dist;
             double angletotarget, deltaangle;
 
@@ -223,8 +220,11 @@ int main()
             // Euclidean distance to box
             dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
 
+            // Check if the robot is close enough to the landmark
             if (dist < 100) {
                 cout << "Jeg har nu mødt landmark nr. " << (next+1) << endl;
+
+                // Update next landmark
                 if (next < NUM_LANDMARKS) {
                     next++;
                 } else {
@@ -233,6 +233,8 @@ int main()
                 }
 
                 cout << "Jeg kører nu efter landmark nr. " << (next+1) << endl;
+
+                // Change target to next landmark
                 target_x = landmarks[next].x;
                 target_y = landmarks[next].y;
                 deltax = est_pose.x - target_x;
@@ -242,12 +244,15 @@ int main()
 
             // Angle between particle and box
             angletotarget = atan(deltay / deltax);
+
             // If deltax > 0, then the angle needs to be turned by a half circle.
             if (deltax > 0) {
                 angletotarget -= M_PI;
             }
+
             // Difference in angle
             deltaangle = est_pose.theta - angletotarget;
+
             // The angles are between (-pi, pi)
             if (deltaangle > M_PI){
                 deltaangle -= 2 * M_PI;
@@ -257,28 +262,44 @@ int main()
 
             double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
             int obstacle;
+
             robert.read();
             x_before = robert.pp->GetXPos();
             y_before = robert.pp->GetYPos();
             theta_before = robert.pp->GetYaw();
+
             cout << "deltaangle: " << deltaangle << endl;
             cout << "dist: " << dist << endl;
-            driving_dist = std::min((dist-60-20-30), 200);
+
+            int magic = -60-20-30;
+            driving_dist = std::min((dist+magic), 200);
             cout << "driving_dist: " << driving_dist << endl;
+
+            // Turn and drive
             robert.turnXradians(deltaangle);
             obstacle = robert.moveXcm(driving_dist);
+
+            // Update particles by odometry
             robert.read();
             moved_x = robert.pp->GetXPos() - x_before;
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
-            move_particles(particles, moved_x, moved_y, -turned_theta * 1.25);
+            move_particles(particles, moved_x, moved_y, -turned_theta * THETA_MULTIPLIER);
             add_uncertainty(particles, 10, 0.2);
+
+            // Estimate position
+            est_pose = estimate_pose (particles);
+
+            // Draw particles
+            draw_particles(cam, im, world, map, particles, est_pose);
+
             if(obstacle == -1){
+                // Obstacle found. Stay in obstacle mode
                 obstacle_mode = true;
                 driving_mode = false;
                 search_mode = false;
-            }
-            else{
+            } else{
+                // Switch to search mode
                 obstacle_mode = false;
                 driving_mode = false;
                 search_mode = true;
@@ -286,25 +307,39 @@ int main()
         } // End Driving mode
 
         while(obstacle_mode){
+            cout << "Obstacle mode engaged" << endl;
+
+            // Variables
             double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
+
+            // Get position from odometry
             robert.read();
             x_before = robert.pp->GetXPos();
             y_before = robert.pp->GetYPos();
             theta_before = robert.pp->GetYaw();
-            
+
+            // Move away from obstacle
             robert.turnObstacle();
             robert.moveXcm(30);
-            robert.read()
+
+            // Get new position from odometry and update particles
+            robert.read();
             moved_x = robert.pp->GetXPos() - x_before;
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
             add_uncertainty(particles, 10, 0.2);
+
+            // Estimate position
+            est_pose = estimate_pose (particles);
+
+            // Draw particles
+            draw_particles(cam, im, world, map, particles, est_pose);
+
+            // Switch to search mode
             obstacle_mode = false;
             driving_mode = false;
             search_mode = true;
         } // End obstacle mode
-
-
     } // End: while (true)
 
  theend:

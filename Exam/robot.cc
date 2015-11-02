@@ -8,16 +8,17 @@
 #include <libplayerc++/playerc++.h>
 #include "scorpion.h"
 #include "robot.h"
+#include "defines.h"
+
 using namespace PlayerCc;
 using namespace std;
 Robot::Robot() {
-    robert = new PlayerClient("172.16.187.128");;
+    robert = new PlayerClient("172.16.187.128");
     pp = new Position2dProxy(robert);
     ir = new IrProxy (robert);
     bumper = new BumperProxy(robert);
     robert->SetDataMode(PLAYER_DATAMODE_PULL);
     robert->SetReplaceRule(true, PLAYER_MSGTYPE_DATA, -1);
-
 }
 
 void Robot::read() {
@@ -27,17 +28,21 @@ void Robot::read() {
 }
 
 
-bool obsFront() {
-    return (ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) ||
-        (ir->GetRange(SCORPION_IR_TE_NNW) < MIN_DISTANCE) ||
-        (ir->GetRange(SCORPION_IR_TW_NNE) < MIN_DISTANCE);
+bool Robot::obsFront() {
+    read();
+    // cout << "N:   " << ir->GetRange(SCORPION_IR_BN_N) << endl;
+    // cout << "NNE: " << ir->GetRange(SCORPION_IR_TE_NNE) << endl;
+    // cout << "NNW: " << ir->GetRange(SCORPION_IR_TW_NNW) << endl;
+
+    return ((ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) ||
+            (ir->GetRange(SCORPION_IR_TE_NNW) < MIN_DISTANCE) ||
+            (ir->GetRange(SCORPION_IR_TW_NNE) < MIN_DISTANCE));
 }
 
 
-void turnObstacle(){
-    pp->SetSpeed(0.0 , 0,3);
+void Robot::turnObstacle(){
+    pp->SetSpeed(0.0 , 0.2);
     while(obsFront()){
-        read();
     }
     pp->SetSpeed(0.0, 0.0);
 }
@@ -48,10 +53,11 @@ int Robot::moveXcm(int cm) {
     double starty = pp->GetYPos();
     double dist = 0;
     double currentx, currenty;
+
     while(dist < meters) {
-        pp->SetSpeed(0.3, 0.0);
+        pp->SetSpeed(0.2, 0.0);
         read();
-        if(obsFront){
+        if(obsFront()) {
             return -1;
         }
         currentx = pp->GetXPos();
