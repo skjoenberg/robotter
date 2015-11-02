@@ -26,22 +26,40 @@ void Robot::read() {
     nanosleep(&readsleep, NULL);
 }
 
-void Robot::moveXcm(int cm) {
+
+bool obsFront() {
+    return (ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) ||
+        (ir->GetRange(SCORPION_IR_TE_NNW) < MIN_DISTANCE) ||
+        (ir->GetRange(SCORPION_IR_TW_NNE) < MIN_DISTANCE);
+}
+
+
+void turnObstacle(){
+    pp->SetSpeed(0.0 , 0,3);
+    while(obsFront()){
+        read();
+    }
+    pp->SetSpeed(0.0, 0.0);
+}
+int Robot::moveXcm(int cm) {
     double meters = (double) cm / 100.;
     read();
     double startx = pp->GetXPos();
     double starty = pp->GetYPos();
     double dist = 0;
     double currentx, currenty;
-    pp->SetSpeed(0.3, 0.0);
     while(dist < meters) {
+        pp->SetSpeed(0.3, 0.0);
         read();
+        if(obsFront){
+            return -1;
+        }
         currentx = pp->GetXPos();
         currenty = pp->GetYPos();
         dist = sqrt(pow(currentx - startx, 2.)+pow(currenty - starty, 2.));
     }
     pp->SetSpeed(0.0, 0.0);
-    return;
+    return 1;
 }
 
 void Robot::turnXradians(double angle) {

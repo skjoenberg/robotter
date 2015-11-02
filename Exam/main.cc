@@ -99,7 +99,7 @@ int main()
     IplImage *im;
 
     // Modes
-    bool search_mode = true, driving_mode = false;
+    bool search_mode = true, driving_mode = false , obstacle_mode = false;
 
 
     int measure_counter;
@@ -256,6 +256,7 @@ int main()
             }
 
             double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
+            int obstacle;
             robert.read();
             x_before = robert.pp->GetXPos();
             y_before = robert.pp->GetYPos();
@@ -265,19 +266,43 @@ int main()
             driving_dist = std::min((dist-60-20-30), 200);
             cout << "driving_dist: " << driving_dist << endl;
             robert.turnXradians(deltaangle);
-            robert.moveXcm(driving_dist);
-
+            obstacle = robert.moveXcm(driving_dist);
             robert.read();
             moved_x = robert.pp->GetXPos() - x_before;
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
             move_particles(particles, moved_x, moved_y, -turned_theta * 1.25);
             add_uncertainty(particles, 10, 0.2);
+            if(obstacle == -1){
+                obstacle_mode = true;
+                driving_mode = false;
+                search_mode = false;
+            }
+            else{
+                obstacle_mode = false;
+                driving_mode = false;
+                search_mode = true;
+            }
+        } // End Driving mode
 
+        while(obstacle_mode){
+            double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
+            robert.read();
+            x_before = robert.pp->GetXPos();
+            y_before = robert.pp->GetYPos();
+            theta_before = robert.pp->GetYaw();
+            
+            robert.turnObstacle();
+            robert.moveXcm(30);
+            robert.read()
+            moved_x = robert.pp->GetXPos() - x_before;
+            moved_y = robert.pp->GetYPos() - y_before;
+            turned_theta = robert.pp->GetYaw() - theta_before;
+            add_uncertainty(particles, 10, 0.2);
+            obstacle_mode = false;
             driving_mode = false;
             search_mode = true;
-
-        } // End Driving mode
+        } // End obstacle mode
 
 
     } // End: while (true)

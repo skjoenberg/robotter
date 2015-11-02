@@ -16,6 +16,8 @@ class Robot {
     Robot();
 
     void read();
-    void moveXcm(int cm);
+    void turnObstacle();
+    bool obsFront();
+    int moveXcm(int cm);
     void turnXradians(double angle);
 };
