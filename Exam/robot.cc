@@ -54,7 +54,7 @@ bool Robot::obsRight() {
 void Robot::turnObstacle(){
     double speed = 0.2;
     bool left = false;
-    if (obsleft) {
+    if (obsLeft()) {
         speed = -speed;
         left = true;
     }
