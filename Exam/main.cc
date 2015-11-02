@@ -332,6 +332,7 @@ int main()
             moved_x = robert.pp->GetXPos() - x_before;
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
+            move_particles(particles, moved_x, moved_y, turned_theta);
             add_uncertainty(particles, 10, 0.2);
 
             // Estimate position
