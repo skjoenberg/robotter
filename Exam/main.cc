@@ -108,7 +108,7 @@ int main()
     IplImage *im;
 
     // Modes
-    bool search_mode = false, driving_mode = false , obstacle_mode = false, test_mode = true;
+    bool search_mode = true, driving_mode = false , obstacle_mode = false, test_mode = true;
 
     double theta_before, delta_theta, theta_sum;
 
@@ -203,6 +203,10 @@ int main()
                 obstacle_mode = false;
                 driving_mode = true;
                 robert.pp->SetSpeed(0.0, 0.0);
+            }
+            if (test_mode) {
+                robert.pp->SetSpeed(0.0, 0.0);
+                search_mode = false;
             }
         } // end search mode
 
