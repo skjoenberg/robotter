@@ -22,6 +22,15 @@ void resample(vector<particle> &particles, int box_x, int box_y, int measured_an
         // Euclidean distance to box
         double dist;
         dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
+        if (dist == 0) {
+            cout << "ALARM ALARM ALARM ALARM" << endl;
+            cout << "ALARM ALARM ALARM ALARM" << endl;
+            cout << "ALARM ALARM ALARM ALARM" << endl;
+            cout << "ALARM ALARM ALARM ALARM" << endl;
+            cout << "ALARM ALARM ALARM ALARM" << endl;
+            cout << "ALARM ALARM ALARM ALARM" << endl;
+
+        }
 
         // Angle between particle and box
         double angletobox;
