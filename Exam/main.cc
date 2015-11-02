@@ -108,7 +108,7 @@ int main()
     IplImage *im;
 
     // Modes
-    bool search_mode = true, driving_mode = false , obstacle_mode = false;
+    bool search_mode = false, driving_mode = false , obstacle_mode = false, test_mode = true;
 
     double theta_before, delta_theta, theta_sum;
 
@@ -345,6 +345,17 @@ int main()
                 search_mode = true;
             }
         } // End obstacle mode
+        while (test_mode) {
+            int obstacle = 0;
+            obstacle = robert.moveXcm(100);
+            if (obstacle == -1) {
+                obstacle_mode = true;
+                test_mode = false;
+                search_mode = false;
+                driving_mode = false;
+            }
+
+        } // end test mode
     } // End: while (true)
 
  theend:

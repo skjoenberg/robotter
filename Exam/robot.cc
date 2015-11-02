@@ -27,7 +27,6 @@ void Robot::read() {
     nanosleep(&readsleep, NULL);
 }
 
-
 bool Robot::obsFront() {
     read();
     cout << "N:   " << ir->GetRange(SCORPION_IR_BN_N) << endl;
@@ -51,8 +50,19 @@ bool obsRight() {
 
 
 void Robot::turnObstacle(){
-    pp->SetSpeed(0.0 , 0.2);
-    while(obsFront()){
+    double speed = 0.2;
+    bool left = false;
+    if (obsleft) {
+        speed = -speed;
+        left = true;
+    }
+    pp->SetSpeed(0.0 , speed);
+    if (left) {
+        while(obsFront() || obsLeft()){
+        }
+    } else {
+        while(obsFront() || obsRight()){
+        }
     }
     pp->SetSpeed(0.0, 0.0);
 }
