@@ -95,18 +95,24 @@ int main()
     // Draw map
     draw_world (est_pose, particles, world);
 
+    // Image stuff
+    IplImage *im;
+
     // Modes
     bool search_mode = true, driving_mode = false;
 
+
     int measure_counter;
-
-    IplImage *im;
-
     double theta_before, delta_theta, theta_sum;
-
     robert.pp->ResetOdometry();
 
+    // Used for landmark routes
     int next = 0;
+
+    cout << landmarks[0].x << " " << landmarks[0].y << endl;
+    cout << landmarks[1].x << " " << landmarks[1].y << endl;
+    cout << landmarks[2].x << " " << landmarks[2].y << endl;
+    cout << landmarks[3].x << " " << landmarks[3].y << endl;
 
     // Main loop
     while (true) {
@@ -168,7 +174,7 @@ int main()
             } else if (delta_theta < -M_PI) {
                 delta_theta += 2 * M_PI;
             }
-            move_particles(particles,0,0, -delta_theta);
+            move_particles(particles,0,0, -delta_theta * 1.25);
 
             theta_sum += abs(delta_theta);
 
@@ -185,7 +191,7 @@ int main()
             cvShowImage (map, world);
             int action = cvWaitKey (10);
 
-            cout << theta_sum << endl;
+            //            cout << theta_sum << endl;
 
             //exit searchmode if turned 360 degrees.
             if (abs(theta_sum) > (2 * M_PI + 0.1)) {
@@ -214,11 +220,20 @@ int main()
             deltax = est_pose.x - target_x;
             deltay = est_pose.y - target_y;
 
-            cout << "robert estimerer at han står i x: " << est_pose.x << " y: " << est_pose.y << endl;
-            cout << "target er x: " << target_x << " y: " << target_y << endl;
-
             // Euclidean distance to box
             dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
+
+            if (dist < 100) {
+                cout << "hurra vi har mødt landmark " << (next+1) << endl;
+                next++;
+                cout << "vi kører nu efter landmark" << (next+1) << endl;
+                target_x = landmarks[next].x;
+                target_y = landmarks[next].y;
+                deltax = est_pose.x - target_x;
+                deltay = est_pose.y - target_y;
+                dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
+            }
+
             // Angle between particle and box
             angletotarget = atan(deltay / deltax);
             // If deltax > 0, then the angle needs to be turned by a half circle.
@@ -234,28 +249,25 @@ int main()
                 deltaangle += 2 * M_PI;
             }
 
-            if (dist < 60) {
-                cout << "hurra vi har mødt landmark " << next << endl;
-                next++;
+            double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
+            robert.read();
+            x_before = robert.pp->GetXPos();
+            y_before = robert.pp->GetYPos();
+            theta_before = robert.pp->GetYaw();
+            cout << "deltaangle: " << deltaangle << endl;
+            cout << "dist: " << dist << endl;
+            driving_dist = std::min((dist-60-20-30), 200);
+            cout << "driving_dist: " << driving_dist << endl;
+            robert.turnXradians(deltaangle);
+            robert.moveXcm(driving_dist);
 
-            } else {
-                double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
-                robert.read();
-                x_before = robert.pp->GetXPos();
-                y_before = robert.pp->GetYPos();
-                theta_before = robert.pp->GetYaw();
-                cout << "deltaangle: " << deltaangle << endl;
-                cout << "dist: " << driving_dist << endl;
-                robert.turnXradians(deltaangle);
-                robert.moveXcm(driving_dist);
+            robert.read();
+            moved_x = robert.pp->GetXPos() - x_before;
+            moved_y = robert.pp->GetYPos() - y_before;
+            turned_theta = robert.pp->GetYaw() - theta_before;
+            move_particles(particles, moved_x, moved_y, turned_theta * 1.25);
+            add_uncertainty(particles, 10, 0.2);
 
-                robert.read();
-                moved_x = robert.pp->GetXPos() - x_before;
-                moved_y = robert.pp->GetYPos() - y_before;
-                turned_theta = robert.pp->GetYaw() - theta_before;
-                move_particles(particles, moved_x, moved_y, turned_theta);
-                add_uncertainty(particles, 10, 0.2);
-            }
             driving_mode = false;
             search_mode = true;
 

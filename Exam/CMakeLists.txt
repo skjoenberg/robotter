@@ -30,8 +30,9 @@ target_link_libraries(camera_calibrator ${OpenCV_LIBS})
 #)
 
 SET(GCC_IGNORE_W "-w")
+SET(GCC_DEBUG_G "-g")
 
-SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_IGNORE_W}" )
+SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_IGNORE_W} ${GCC_DEBUG_G}" )
 
 SET(SRCS
   camera.cc
@@ -39,6 +40,7 @@ SET(SRCS
   random_numbers.cc
   resampling.cc
   robot.cc
+  ui.cc
 )
 
 SET(HEADERS
@@ -48,6 +50,7 @@ SET(HEADERS
   random_numbers.h
   resampling.h
   robot.h
+  ui.h
 )
 
 SET(DUMMY_MAIN
