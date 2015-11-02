@@ -338,7 +338,7 @@ int main()
 
             // Switch to search mode
             cout << "Search mode engaged" << endl;
-            if(obstacle != -1) {
+            if (obstacle == 1) {
                 // Obstacle found. Stay in obstacle mode
                 obstacle_mode = false;
                 driving_mode = false;
