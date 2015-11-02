@@ -224,9 +224,15 @@ int main()
             dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
 
             if (dist < 100) {
-                cout << "hurra vi har mødt landmark " << (next+1) << endl;
-                next++;
-                cout << "vi kører nu efter landmark" << (next+1) << endl;
+                cout << "Jeg har nu mødt landmark nr. " << (next+1) << endl;
+                if (next < NUM_LANDMARKS) {
+                    next++;
+                } else {
+                    cout << "Mester, min opgave her er færdig. Jeg må nu forlade dig. Jeg har kone og børn i cyberspace.\n Farvel Mester, jeg vil savne dig. :'(" << endl;
+                    break;
+                }
+
+                cout << "Jeg kører nu efter landmark nr. " << (next+1) << endl;
                 target_x = landmarks[next].x;
                 target_y = landmarks[next].y;
                 deltax = est_pose.x - target_x;
@@ -265,7 +271,7 @@ int main()
             moved_x = robert.pp->GetXPos() - x_before;
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
-            move_particles(particles, moved_x, moved_y, turned_theta * 1.25);
+            move_particles(particles, moved_x, moved_y, -turned_theta * 1.25);
             add_uncertainty(particles, 10, 0.2);
 
             driving_mode = false;

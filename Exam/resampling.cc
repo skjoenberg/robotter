@@ -83,7 +83,7 @@ void resample(vector<particle> &particles, int box_x, int box_y, int measured_an
 
         int j = 0;
 
-        while((cumsum[j].first < r) && (j < cumsum.size())) {
+        while((j < cumsum.size()) && (cumsum[j].first < r)) {
             j++;
         }
 
