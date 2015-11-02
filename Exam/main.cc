@@ -108,7 +108,7 @@ int main()
     IplImage *im;
 
     // Modes
-    bool search_mode = true, driving_mode = false , obstacle_mode = false, test_mode = true;
+    bool search_mode = true, driving_mode = false , obstacle_mode = false, test_mode = false;
 
     double theta_before, delta_theta, theta_sum;
 
