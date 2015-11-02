@@ -9,7 +9,7 @@ using namespace std;
 
 void resample(vector<particle> &particles, int box_x, int box_y, int measured_angle, int measured_distance) {
     // Debugging
-    bool debug = true;
+    bool debug = false;
 
     // Give particles weights
     double sum = 0;

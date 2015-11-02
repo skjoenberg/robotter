@@ -130,7 +130,6 @@ int main()
         }
 
         while (search_mode) {
-            cout << "Search mode engaged" << endl;
             robert.pp->SetSpeed(0.0, 0.1);
             // Get current angle
             robert.read();
@@ -271,7 +270,7 @@ int main()
             cout << "deltaangle: " << deltaangle << endl;
             cout << "dist: " << dist << endl;
 
-            int magic = -60-20-30;
+            int magic = -100;
             driving_dist = std::min((dist+magic), 200);
             cout << "driving_dist: " << driving_dist << endl;
 
@@ -300,6 +299,7 @@ int main()
                 search_mode = false;
             } else{
                 // Switch to search mode
+                cout << "Search mode engaged" << endl;
                 obstacle_mode = false;
                 driving_mode = false;
                 search_mode = true;
@@ -318,9 +318,10 @@ int main()
             y_before = robert.pp->GetYPos();
             theta_before = robert.pp->GetYaw();
 
+            int obstacle;
             // Move away from obstacle
             robert.turnObstacle();
-            robert.moveXcm(30);
+            obstacle = robert.moveXcm(30);
 
             // Get new position from odometry and update particles
             robert.read();
@@ -336,9 +337,13 @@ int main()
             draw_particles(cam, im, world, map, particles, est_pose);
 
             // Switch to search mode
-            obstacle_mode = false;
-            driving_mode = false;
-            search_mode = true;
+            cout << "Search mode engaged" << endl;
+            if(obstacle != -1) {
+                // Obstacle found. Stay in obstacle mode
+                obstacle_mode = false;
+                driving_mode = false;
+                search_mode = true;
+            }
         } // End obstacle mode
     } // End: while (true)
 

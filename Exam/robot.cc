@@ -30,9 +30,9 @@ void Robot::read() {
 
 bool Robot::obsFront() {
     read();
-    // cout << "N:   " << ir->GetRange(SCORPION_IR_BN_N) << endl;
-    // cout << "NNE: " << ir->GetRange(SCORPION_IR_TE_NNE) << endl;
-    // cout << "NNW: " << ir->GetRange(SCORPION_IR_TW_NNW) << endl;
+    cout << "N:   " << ir->GetRange(SCORPION_IR_BN_N) << endl;
+    cout << "NNE: " << ir->GetRange(SCORPION_IR_TE_NNE) << endl;
+    cout << "NNW: " << ir->GetRange(SCORPION_IR_TW_NNW) << endl;
 
     return ((ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) ||
             (ir->GetRange(SCORPION_IR_TE_NNW) < MIN_DISTANCE) ||
@@ -46,6 +46,7 @@ void Robot::turnObstacle(){
     }
     pp->SetSpeed(0.0, 0.0);
 }
+
 int Robot::moveXcm(int cm) {
     double meters = (double) cm / 100.;
     read();
@@ -58,13 +59,14 @@ int Robot::moveXcm(int cm) {
         pp->SetSpeed(0.2, 0.0);
         read();
         if(obsFront()) {
+            pp->SetSpeed(0.0, 0.0);
             return -1;
         }
         currentx = pp->GetXPos();
         currenty = pp->GetYPos();
         dist = sqrt(pow(currentx - startx, 2.)+pow(currenty - starty, 2.));
     }
-    pp->SetSpeed(0.0, 0.0);
+        pp->SetSpeed(0.0, 0.0);
     return 1;
 }
 
