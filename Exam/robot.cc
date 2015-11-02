@@ -38,12 +38,14 @@ bool Robot::obsFront() {
             (ir->GetRange(SCORPION_IR_TW_NNE) < MIN_DISTANCE));
 }
 
-bool obsLeft() {
+bool Robot::obsLeft() {
+    read();
     return (ir->GetRange(SCORPION_IR_BN_NW) < (MIN_DISTANCE-0.1) ||
             ir->GetRange(SCORPION_IR_TW_NNW) < (MIN_DISTANCE-0.1));
 }
 
-bool obsRight() {
+bool Robot::obsRight() {
+    read();
     return (ir->GetRange(SCORPION_IR_BN_NE) < (MIN_DISTANCE-0.1) ||
             ir->GetRange(SCORPION_IR_TE_NNE) < (MIN_DISTANCE-0.1));
 }
