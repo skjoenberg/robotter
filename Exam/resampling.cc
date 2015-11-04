@@ -86,7 +86,7 @@ void resample(vector<particle> &particles, int box_x, int box_y, int measured_an
             count++;
         }
     }
-    if (cumsum.size() > 0) {
+    if (cumsum.size()) {
         for (int i = 0; i < NUM_PARTICLES; i++) {
             float r = randf();
 
