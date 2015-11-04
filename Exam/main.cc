@@ -283,7 +283,7 @@ s        for (int i = 0; i < NUM_LANDMARKS; i++) {
 
             // Turn and drive
             robert.turnXradians(deltaangle);
-            obstacle = robert.moveXcm(driving_dist);
+            obstacle = robert.moveXcm(driving_dist, 0.2);
 
             // Update particles by odometry
             robert.read();
@@ -328,7 +328,7 @@ s        for (int i = 0; i < NUM_LANDMARKS; i++) {
             int obstacle;
             // Move away from obstacle
             robert.turnObstacle();
-            obstacle = robert.moveXcm(55);
+            obstacle = robert.moveXcm(55, 0.1);
 
             // Get new position from odometry and update particles
             robert.read();
@@ -362,7 +362,7 @@ s        for (int i = 0; i < NUM_LANDMARKS; i++) {
         } // End obstacle mode
         while (test_mode) {
             int obstacle = 0;
-            obstacle = robert.moveXcm(100);
+            obstacle = robert.moveXcm(100, 0.2);
             if (obstacle == -1) {
                 obstacle_mode = true;
                 test_mode = false;

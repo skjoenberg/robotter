@@ -20,6 +20,6 @@ class Robot {
     bool obsFront();
     bool obsRight();
     bool obsLeft();
-    int moveXcm(int cm);
+    int moveXcm(int cm, double speed);
     void turnXradians(double angle);
 };

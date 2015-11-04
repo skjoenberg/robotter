@@ -69,7 +69,7 @@ void Robot::turnObstacle(){
     pp->SetSpeed(0.0, 0.0);
 }
 
-int Robot::moveXcm(int cm) {
+int Robot::moveXcm(int cm, double speed) {
     double meters = (double) cm / 100.;
     read();
     double startx = pp->GetXPos();
@@ -78,7 +78,7 @@ int Robot::moveXcm(int cm) {
     double currentx, currenty;
 
     while(dist < meters) {
-        pp->SetSpeed(0.2, 0.0);
+        pp->SetSpeed(speed, 0.0);
         read();
         if(obsFront()) {
             pp->SetSpeed(0.0, 0.0);
