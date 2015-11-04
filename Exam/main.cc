@@ -212,8 +212,8 @@ int main()
                 cout << "arh man jeg så træt af at dreje" << endl;
                 search_mode = false;
                 obstacle_mode = false;
-                driving_mode = false;
-                test_mode = true;
+                driving_mode = true;
+                test_mode = false;
                 robert.pp->SetSpeed(0.0, 0.0);
             }
             if (test_mode) {
