@@ -244,7 +244,7 @@ int main()
                     next++;
                 } else {
                     cout << "Mester, min opgave her er færdig. Jeg må nu forlade dig. Jeg har kone og børn i cyberspace.\n Farvel Mester, jeg vil savne dig. :'(" << endl;
-                    goto theend;
+                    //                    goto theend;
                 }
 
                 cout << "Jeg kører nu efter landmark nr. " << (next+1) << endl;
