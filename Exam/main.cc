@@ -63,19 +63,19 @@ CvPoint get_landmark(colour_prop cp, bool orientation) {
 }
 
 // Landmarks
-const CvPoint landmarks [NUM_LANDMARKS] = {
-    cvPoint (0, 300),
-    cvPoint (0, 0),
-    cvPoint (400, 300),
-    cvPoint (400, 0)
-};
-
 // const CvPoint landmarks [NUM_LANDMARKS] = {
-//     cvPoint (400, 0),
-//     cvPoint (400, 300),
-//     cvPoint (0, 0),
 //     cvPoint (0, 300),
+//     cvPoint (0, 0),
+//     cvPoint (400, 300),
+//     cvPoint (400, 0)
 // };
+
+const CvPoint landmarks [NUM_LANDMARKS] = {
+    cvPoint (400, 0),
+    cvPoint (400, 300),
+    cvPoint (0, 0),
+    cvPoint (0, 300),
+};
 
 int seen[NUM_LANDMARKS];
 
@@ -137,7 +137,7 @@ int main()
         }
 
         while (search_mode) {
-            robert.pp->SetSpeed(0.0, 0.15);
+            robert.pp->SetSpeed(0.0, 0.12);
             obs_counter = 0;
             // Get current angle
             robert.read();
@@ -299,7 +299,7 @@ int main()
             moved_x = robert.pp->GetXPos() - x_before;
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
-            move_particles(particles, -moved_x, -moved_y, -turned_theta * THETA_MULTIPLIER);
+            move_particles(particles, moved_x, moved_y, -turned_theta * THETA_MULTIPLIER);
             add_uncertainty(particles, 10, 0.2);
 
             // Estimate position
@@ -344,7 +344,7 @@ int main()
             moved_x = robert.pp->GetXPos() - x_before;
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
-            move_particles(particles, -moved_x, -moved_y, -turned_theta * THETA_MULTIPLIER);
+            move_particles(particles, moved_x, moved_y, -turned_theta * THETA_MULTIPLIER);
             add_uncertainty(particles, 10, 0.2);
 
             // Estimate position
