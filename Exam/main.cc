@@ -399,7 +399,7 @@ int main()
 
             search_mode = true;
             test_mode = false;
-            }
+
         } // end test mode
     } // End: while (true)
 
@@ -412,4 +412,4 @@ int main()
     //cvReleaseImage (&im);
 
     return 0;
-    }
+}
