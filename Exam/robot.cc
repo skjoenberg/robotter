@@ -80,7 +80,7 @@ int Robot::moveXcm(int cm, double speed) {
     while(dist < meters) {
         pp->SetSpeed(speed, 0.0);
         read();
-        if(obsFront()) {
+        if(obsFront() || obsRight() || obsLeft()) {
             pp->SetSpeed(0.0, 0.0);
             return -1;
         }
