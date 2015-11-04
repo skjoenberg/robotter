@@ -346,7 +346,6 @@ s        for (int i = 0; i < NUM_LANDMARKS; i++) {
 
             // Switch to driving mode
             cout << "Driving mode engaged" << endl;
-
             if(obs_counter > 3){
                 obstacle_mode = false;
                 driving_mode = false;
