@@ -86,31 +86,33 @@ void resample(vector<particle> &particles, int box_x, int box_y, int measured_an
             count++;
         }
     }
+    if (cumsum.size() > 0) {
+        for (int i = 0; i < NUM_PARTICLES; i++) {
+            float r = randf();
 
-    for (int i = 0; i < NUM_PARTICLES; i++) {
-        float r = randf();
+            int j = 0;
 
-        int j = 0;
+            while((j < cumsum.size()) && (cumsum[j].first < r)) {
+                j++;
+            }
 
-        while((j < cumsum.size()) && (cumsum[j].first < r)) {
-            j++;
+            int current_x, current_y;
+            current_x = particles[cumsum[j].second].x;
+            current_y = particles[cumsum[j].second].y;
+
+            double current_theta, current_weight;
+            current_theta  = particles[cumsum[j].second].theta;
+            current_weight = particles[cumsum[j].second].weight;
+
+            particle current_particle(current_x, current_y, current_theta, current_weight);
+            resamples.push_back(current_particle);
         }
 
-        int current_x, current_y;
-        current_x = particles[cumsum[j].second].x;
-        current_y = particles[cumsum[j].second].y;
 
-        double current_theta, current_weight;
-        current_theta  = particles[cumsum[j].second].theta;
-        current_weight = particles[cumsum[j].second].weight;
-
-        particle current_particle(current_x, current_y, current_theta, current_weight);
-        resamples.push_back(current_particle);
-    }
-
-    particles.clear();
-    for (int i = 0; i < resamples.size(); i++) {
-        particles.push_back(resamples[i]);
+        particles.clear();
+        for (int i = 0; i < resamples.size(); i++) {
+            particles.push_back(resamples[i]);
+        }
     }
 
     // Debugging

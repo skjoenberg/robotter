@@ -29,9 +29,9 @@ void Robot::read() {
 
 bool Robot::obsFront() {
     read();
-    cout << "N:   " << ir->GetRange(SCORPION_IR_BN_N) << endl;
-    cout << "NNE: " << ir->GetRange(SCORPION_IR_TE_NNE) << endl;
-    cout << "NNW: " << ir->GetRange(SCORPION_IR_TW_NNW) << endl;
+    // cout << "N:   " << ir->GetRange(SCORPION_IR_BN_N) << endl;
+    // cout << "NNE: " << ir->GetRange(SCORPION_IR_TE_NNE) << endl;
+    // cout << "NNW: " << ir->GetRange(SCORPION_IR_TW_NNW) << endl;
 
     return ((ir->GetRange(SCORPION_IR_BN_N) < MIN_DISTANCE) ||
             (ir->GetRange(SCORPION_IR_TE_NNW) < MIN_DISTANCE) ||

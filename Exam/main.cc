@@ -63,19 +63,19 @@ CvPoint get_landmark(colour_prop cp, bool orientation) {
 }
 
 // Landmarks
-// const CvPoint landmarks [NUM_LANDMARKS] = {
-//     cvPoint (0, 300),
-//     cvPoint (0, 0),
-//     cvPoint (400, 300),
-//     cvPoint (400, 0)
-// };
-
 const CvPoint landmarks [NUM_LANDMARKS] = {
-    cvPoint (400, 0),
-    cvPoint (400, 300),
-    cvPoint (0, 0),
     cvPoint (0, 300),
+    cvPoint (0, 0),
+    cvPoint (400, 300),
+    cvPoint (400, 0)
 };
+
+// const CvPoint landmarks [NUM_LANDMARKS] = {
+//     cvPoint (400, 0),
+//     cvPoint (400, 300),
+//     cvPoint (0, 0),
+//     cvPoint (0, 300),
+// };
 
 int seen[NUM_LANDMARKS];
 
@@ -323,7 +323,7 @@ int main()
 
         while(obstacle_mode){
             cout << "Obstacle mode engaged" << endl;
-            cout << "our landmark is next: " << next << endl;
+            cout << "our landmark is next: " << (next+1) << endl;
             // Variables
             double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
             obs_counter++;
@@ -343,7 +343,7 @@ int main()
             moved_x = robert.pp->GetXPos() - x_before;
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
-            move_particles(particles, moved_x, moved_y, turned_theta);
+            move_particles(particles, moved_x, moved_y, -turned_theta * THETA_MULTIPLIER);
             add_uncertainty(particles, 10, 0.2);
 
             // Estimate position
@@ -353,8 +353,8 @@ int main()
             draw_particles(cam, im, world, map, particles, est_pose);
 
             // Switch to driving mode
-            cout << "Driving mode engaged" << endl;
-            if(obs_counter > 3){
+
+            if(obs_counter > 2){
                 obstacle_mode = false;
                 driving_mode = false;
                 search_mode = true;
@@ -362,11 +362,13 @@ int main()
             }
             if (obstacle == 1) {
                 // Obstacle found. Stay in obstacle mode
+                cout << "Driving mode engaged" << endl;
                 obstacle_mode = false;
                 driving_mode = true;
                 search_mode = false;
             }
         } // End obstacle mode
+
         while (test_mode) {
             int obstacle = 0;
             obstacle = robert.moveXcm(100, 0.2);
