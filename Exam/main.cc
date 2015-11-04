@@ -125,7 +125,7 @@ int main()
     // Main loop
     while (true) {
         theta_sum = 0;
-        for (int i = 0; i < NUM_LANDMARKS; i++) {
+s        for (int i = 0; i < NUM_LANDMARKS; i++) {
             seen[i] = 0;
         }
 
@@ -283,7 +283,7 @@ int main()
 
             // Turn and drive
             robert.turnXradians(deltaangle);
-            obstacle = robert.moveXcm(driving_dist);
+            obstacle = robert.moveXcm(driving_dist, 0.2);
 
             // Update particles by odometry
             robert.read();
@@ -328,7 +328,7 @@ int main()
             int obstacle;
             // Move away from obstacle
             robert.turnObstacle();
-            obstacle = robert.moveXcm(55);
+            obstacle = robert.moveXcm(55, 0.1);
 
             // Get new position from odometry and update particles
             robert.read();
@@ -346,22 +346,22 @@ int main()
 
             // Switch to driving mode
             cout << "Driving mode engaged" << endl;
-            if (obstacle == 1) {
-                // Obstacle found. Stay in obstacle mode
-                obstacle_mode = false;
-                driving_mode = true;
-                search_mode = false;
-            }
             if(obs_counter > 3){
                 obstacle_mode = false;
                 driving_mode = false;
                 search_mode = true;
                 obs_counter = 0;
             }
+            if (obstacle == 1) {
+                // Obstacle found. Stay in obstacle mode
+                obstacle_mode = false;
+                driving_mode = true;
+                search_mode = false;
+            }
         } // End obstacle mode
         while (test_mode) {
             int obstacle = 0;
-            obstacle = robert.moveXcm(100);
+            obstacle = robert.moveXcm(100, 0.2);
             if (obstacle == -1) {
                 obstacle_mode = true;
                 test_mode = false;
