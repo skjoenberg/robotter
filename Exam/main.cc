@@ -346,7 +346,7 @@ int main()
 
             // Switch to driving mode
             cout << "Driving mode engaged" << endl;
-            if(obs_counter > 3){
+            if(obs_counter > 2){
                 obstacle_mode = false;
                 driving_mode = false;
                 search_mode = true;
