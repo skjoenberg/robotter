@@ -212,7 +212,8 @@ int main()
                 cout << "arh man jeg så træt af at dreje" << endl;
                 search_mode = false;
                 obstacle_mode = false;
-                driving_mode = true;
+                driving_mode = false;
+                test_mode = true;
                 robert.pp->SetSpeed(0.0, 0.0);
             }
             if (test_mode) {
@@ -370,15 +371,35 @@ int main()
         } // End obstacle mode
 
         while (test_mode) {
-            int obstacle = 0;
-            obstacle = robert.moveXcm(100, 0.2);
-            if (obstacle == -1) {
-                obstacle_mode = true;
-                test_mode = false;
-                search_mode = false;
-                driving_mode = false;
-            }
+            cout << "test mode engaged" << endl;
+            // Variables
+            double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
 
+            // Get position from odometry
+            robert.read();
+            x_before = robert.pp->GetXPos();
+            y_before = robert.pp->GetYPos();
+            theta_before = robert.pp->GetYaw();
+
+            robert.moveXcm(100, 0.2);
+
+            // Get new position from odometry and update particles
+            robert.read();
+            moved_x = robert.pp->GetXPos() - x_before;
+            moved_y = robert.pp->GetYPos() - y_before;
+            turned_theta = robert.pp->GetYaw() - theta_before;
+            move_particles(particles, -moved_x, -moved_y, -turned_theta * THETA_MULTIPLIER);
+
+            // Estimate position
+            est_pose = estimate_pose (particles);
+            // Draw particles
+            draw_particles(cam, im, world, map, particles, est_pose);
+
+            // Switch to driving mode
+
+            search_mode = true;
+            test_mode = false;
+            }
         } // end test mode
     } // End: while (true)
 
