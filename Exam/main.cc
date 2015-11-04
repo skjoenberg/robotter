@@ -346,17 +346,17 @@ int main()
 
             // Switch to driving mode
             cout << "Driving mode engaged" << endl;
-            if (obstacle == 1) {
-                // Obstacle found. Stay in obstacle mode
-                obstacle_mode = false;
-                driving_mode = true;
-                search_mode = false;
-            }
             if(obs_counter > 3){
                 obstacle_mode = false;
                 driving_mode = false;
                 search_mode = true;
                 obs_counter = 0;
+            }
+            if (obstacle == 1) {
+                // Obstacle found. Stay in obstacle mode
+                obstacle_mode = false;
+                driving_mode = true;
+                search_mode = false;
             }
         } // End obstacle mode
         while (test_mode) {
