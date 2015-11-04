@@ -111,7 +111,7 @@ int main()
     bool search_mode = true, driving_mode = false , obstacle_mode = false, test_mode = false;
 
     double theta_before, delta_theta, theta_sum;
-
+    int obs_counter = 0;
     robert.pp->ResetOdometry();
 
     // Used for landmark routes
@@ -130,7 +130,7 @@ s        for (int i = 0; i < NUM_LANDMARKS; i++) {
         }
 
         while (search_mode) {
-            robert.pp->SetSpeed(0.0, 0.1);
+            robert.pp->SetSpeed(0.0, 0.2);
             // Get current angle
             robert.read();
             theta_before = robert.pp->GetYaw();
@@ -148,6 +148,9 @@ s        for (int i = 0; i < NUM_LANDMARKS; i++) {
             colour_prop cp;
 
             object::type ID = cam.get_object (im, cp, measured_distance, measured_angle);
+
+            // Farve om natten
+            cp.red -= 0.1;
 
             if (ID != object::none) {
                 CvPoint box;
@@ -232,7 +235,7 @@ s        for (int i = 0; i < NUM_LANDMARKS; i++) {
                     next++;
                 } else {
                     cout << "Mester, min opgave her er færdig. Jeg må nu forlade dig. Jeg har kone og børn i cyberspace.\n Farvel Mester, jeg vil savne dig. :'(" << endl;
-                    break;
+                    goto theend;
                 }
 
                 cout << "Jeg kører nu efter landmark nr. " << (next+1) << endl;
@@ -348,6 +351,12 @@ s        for (int i = 0; i < NUM_LANDMARKS; i++) {
                 obstacle_mode = false;
                 driving_mode = true;
                 search_mode = false;
+            }
+            if(obs_counter > 3){
+                obstacle_mode = false;
+                driving_mode = false;
+                search_mode = true;
+                obs_counter = 0;
             }
         } // End obstacle mode
         while (test_mode) {
