@@ -125,7 +125,7 @@ int main()
     // Main loop
     while (true) {
         theta_sum = 0;
-        for (int i = 0; i < NUM_LANDMARKS; i++) {
+s        for (int i = 0; i < NUM_LANDMARKS; i++) {
             seen[i] = 0;
         }
 
@@ -344,7 +344,7 @@ int main()
             // Switch to driving mode
             cout << "Driving mode engaged" << endl;
             if (obstacle == 1) {
-                // Obstacle found. Stay in obstacle mode
+                // Obstacle found. Go to driving mode
                 obstacle_mode = false;
                 driving_mode = true;
                 search_mode = false;
