@@ -392,8 +392,13 @@ int main()
             turned_theta = robert.pp->GetYaw() - theta_before;
             cout << "x after: " << robert.pp->GetXPos() << endl;
             cout << "y after: " << robert.pp->GetYPos() << endl;
-            move_particles(particles, -moved_x, -moved_y, -turned_theta * THETA_MULTIPLIER);
+            cout << "x moved: " << moved_x << endl;
+            cout << "y moved: " << moved_y << endl;
 
+            est_pose = estimate_pose (particles);
+            cout << "estimated position before: (" << est_pose.x << ", " << est_pose.y << ")" << endl;
+            move_particles(particles, -moved_x, -moved_y, -turned_theta * THETA_MULTIPLIER);
+            cout << "estimated position after: (" << est_pose.x << ", " << est_pose.y << ")" << endl;
             // Estimate position
             est_pose = estimate_pose (particles);
             // Draw particles
