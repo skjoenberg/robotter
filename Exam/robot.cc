@@ -23,7 +23,7 @@ Robot::Robot() {
 
 void Robot::read() {
     robert->Read();
-    timespec readsleep = {0, 200000};
+    timespec readsleep = {0, 500000};
     nanosleep(&readsleep, NULL);
 }
 

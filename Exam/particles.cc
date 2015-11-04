@@ -47,14 +47,17 @@ void move_particles(std::vector<particle> &particles, double delta_x, double del
 // XXX: You implement this
 void move_particle (particle &p, double delta_x, double delta_y, double delta_theta)
 {
-    p.x += delta_x;
-    p.y += delta_y;
     p.theta += delta_theta;
     if (p.theta > M_PI) {
         p.theta -= 2 * M_PI;
     } else if (p.theta < -M_PI) {
         p.theta += 2 * M_PI;
     }
+    double move_x, move_y;
+    move_x = delta_x * cos(p.theta);
+    move_y = delta_y * sin(p.theta);
+    p.x += move_x;
+    p.y += move_y;
 }
 
 

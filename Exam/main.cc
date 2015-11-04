@@ -63,19 +63,19 @@ CvPoint get_landmark(colour_prop cp, bool orientation) {
 }
 
 // Landmarks
-const CvPoint landmarks [NUM_LANDMARKS] = {
-    cvPoint (0, 300),
-    cvPoint (0, 0),
-    cvPoint (400, 300),
-    cvPoint (400, 0)
-};
-
 // const CvPoint landmarks [NUM_LANDMARKS] = {
-//     cvPoint (400, 0),
-//     cvPoint (400, 300),
-//     cvPoint (0, 0),
 //     cvPoint (0, 300),
+//     cvPoint (0, 0),
+//     cvPoint (400, 300),
+//     cvPoint (400, 0)
 // };
+
+const CvPoint landmarks [NUM_LANDMARKS] = {
+    cvPoint (400, 0),
+    cvPoint (400, 300),
+    cvPoint (0, 0),
+    cvPoint (0, 300),
+};
 
 int seen[NUM_LANDMARKS];
 
@@ -136,7 +136,7 @@ int main()
         }
 
         while (search_mode) {
-            robert.pp->SetSpeed(0.0, 0.15);
+            robert.pp->SetSpeed(0.0, 0.12);
             obs_counter = 0;
             // Get current angle
             robert.read();
@@ -212,6 +212,7 @@ int main()
                 search_mode = false;
                 obstacle_mode = false;
                 driving_mode = true;
+                test_mode = false;
                 robert.pp->SetSpeed(0.0, 0.0);
             }
             if (test_mode) {
@@ -242,7 +243,7 @@ int main()
                     next++;
                 } else {
                     cout << "Mester, min opgave her er færdig. Jeg må nu forlade dig. Jeg har kone og børn i cyberspace.\n Farvel Mester, jeg vil savne dig. :'(" << endl;
-                    goto theend;
+                    //                    goto theend;
                 }
 
                 cout << "Jeg kører nu efter landmark nr. " << (next+1) << endl;
@@ -297,7 +298,7 @@ int main()
             moved_x = robert.pp->GetXPos() - x_before;
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
-            move_particles(particles, -moved_x, -moved_y, -turned_theta * THETA_MULTIPLIER);
+            move_particles(particles, abs(moved_x), abs(moved_y), -turned_theta * THETA_MULTIPLIER);
             add_uncertainty(particles, 10, 0.2);
 
             // Estimate position
@@ -341,7 +342,7 @@ int main()
             moved_x = robert.pp->GetXPos() - x_before;
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
-            move_particles(particles, -moved_x, -moved_y, -turned_theta * THETA_MULTIPLIER);
+            move_particles(particles, abs(moved_x), abs(moved_y), -turned_theta * THETA_MULTIPLIER);
             add_uncertainty(particles, 10, 0.2);
 
             // Estimate position
@@ -362,14 +363,44 @@ int main()
         } // End obstacle mode
 
         while (test_mode) {
-            int obstacle = 0;
-            obstacle = robert.moveXcm(100, 0.2);
-            if (obstacle == -1) {
-                obstacle_mode = true;
-                test_mode = false;
-                search_mode = false;
-                driving_mode = false;
-            }
+            cout << "test mode engaged" << endl;
+            // Variables
+            double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
+
+            // Get position from odometry
+            robert.read();
+            x_before = robert.pp->GetXPos();
+            y_before = robert.pp->GetYPos();
+            theta_before = robert.pp->GetYaw();
+            cout << "x before: " << x_before << endl;
+            cout << "y before: " << y_before << endl;
+
+            robert.moveXcm(100, 0.2);
+
+            // Get new position from odometry and update particles
+            robert.read();
+            moved_x = robert.pp->GetXPos() - x_before;
+            moved_y = robert.pp->GetYPos() - y_before;
+            turned_theta = robert.pp->GetYaw() - theta_before;
+            cout << "x after: " << robert.pp->GetXPos() << endl;
+            cout << "y after: " << robert.pp->GetYPos() << endl;
+            cout << "x moved: " << moved_x << endl;
+            cout << "y moved: " << moved_y << endl;
+
+            est_pose = estimate_pose (particles);
+            cout << "estimated position before: (" << est_pose.x << ", " << est_pose.y << ")" << endl;
+            move_particles(particles, abs(moved_x), abs(moved_y), -turned_theta * THETA_MULTIPLIER);
+            est_pose = estimate_pose (particles);
+            cout << "estimated position after: (" << est_pose.x << ", " << est_pose.y << ")" << endl;
+            // Estimate position
+            est_pose = estimate_pose (particles);
+            // Draw particles
+            draw_particles(cam, im, world, map, particles, est_pose);
+
+            // Switch to driving mode
+
+            search_mode = true;
+            test_mode = false;
 
         } // end test mode
     } // End: while (true)
@@ -383,4 +414,4 @@ int main()
     //cvReleaseImage (&im);
 
     return 0;
-    }
+}
