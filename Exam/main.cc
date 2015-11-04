@@ -24,6 +24,8 @@
 using namespace std;
 using namespace PlayerCc;
 
+int drive_dist = 200;
+
 /*
  * Landmarks.
  * The robot knows the position of 2 landmarks. Their coordinates are in cm.
@@ -136,6 +138,7 @@ int main()
         }
 
         while (search_mode) {
+            drive_dist = 200;
             robert.pp->SetSpeed(0.0, 0.12);
             // Get current angle
             robert.read();
@@ -311,11 +314,12 @@ int main()
             // Draw particles
             draw_particles(cam, im, world, map, particles, est_pose);
 
-            if(obstacle == -1 && dist > 80){
+            if(obstacle == -1 && dist > 80 && drive_dist > 100) {
                 // Obstacle found. Stay in obstacle mode
                 obstacle_mode = true;
                 driving_mode = false;
                 search_mode = false;
+                drive_dist -= 20;
             } else{
                 // Switch to search mode
                 cout << "Search mode engaged" << endl;
