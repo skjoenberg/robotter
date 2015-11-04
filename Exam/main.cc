@@ -111,7 +111,7 @@ int main()
     bool search_mode = true, driving_mode = false , obstacle_mode = false, test_mode = false;
 
     double theta_before, delta_theta, theta_sum;
-
+    int obs_counter;
     robert.pp->ResetOdometry();
 
     // Used for landmark routes
@@ -351,6 +351,11 @@ int main()
                 obstacle_mode = false;
                 driving_mode = true;
                 search_mode = false;
+            }
+            if(obs_counter > 3){
+                obstacle_mode = false;
+                driving_mode = false;
+                search_mode = true;
             }
         } // End obstacle mode
         while (test_mode) {
