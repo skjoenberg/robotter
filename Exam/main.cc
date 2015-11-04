@@ -323,7 +323,7 @@ int main()
 
         while(obstacle_mode){
             cout << "Obstacle mode engaged" << endl;
-
+            cout << "our landmark is next: " << next << endl;
             // Variables
             double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
             obs_counter++;
