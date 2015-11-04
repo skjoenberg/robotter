@@ -118,7 +118,6 @@ int main()
     bool search_mode = true, driving_mode = false , obstacle_mode = false, test_mode = false;
 
     double theta_before, delta_theta, theta_sum;
-    int obs_counter = 0;
     robert.pp->ResetOdometry();
 
     // Used for landmark routes
@@ -332,7 +331,6 @@ int main()
             cout << "our landmark is next: " << (next+1) << endl;
             // Variables
             double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
-            obs_counter++;
             // Get position from odometry
             robert.read();
             x_before = robert.pp->GetXPos();
@@ -360,12 +358,6 @@ int main()
 
             // Switch to driving mode
 
-            if(obs_counter > 2){
-                obstacle_mode = false;
-                driving_mode = false;
-                search_mode = true;
-                obs_counter = 0;
-            }
             if (obstacle == 1) {
                 // Obstacle found. Stay in obstacle mode
                 cout << "Driving mode engaged" << endl;
