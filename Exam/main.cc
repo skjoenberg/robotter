@@ -130,6 +130,7 @@ int main()
         }
 
         while (search_mode) {
+            obs_counter = 0;
             robert.pp->SetSpeed(0.0, 0.2);
             // Get current angle
             robert.read();
@@ -318,7 +319,7 @@ int main()
 
             // Variables
             double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
-
+            obs_counter++;
             // Get position from odometry
             robert.read();
             x_before = robert.pp->GetXPos();
