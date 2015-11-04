@@ -380,6 +380,8 @@ int main()
             x_before = robert.pp->GetXPos();
             y_before = robert.pp->GetYPos();
             theta_before = robert.pp->GetYaw();
+            cout << "x before: " << x_before << endl;
+            cout << "y before: " << y_before << endl;
 
             robert.moveXcm(100, 0.2);
 
@@ -388,6 +390,8 @@ int main()
             moved_x = robert.pp->GetXPos() - x_before;
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
+            cout << "x after: " << robert.pp->GetXPos() << endl;
+            cout << "y after: " << robert.pp->GetYPos() << endl;
             move_particles(particles, -moved_x, -moved_y, -turned_theta * THETA_MULTIPLIER);
 
             // Estimate position
