@@ -356,6 +356,7 @@ int main()
                 obstacle_mode = false;
                 driving_mode = false;
                 search_mode = true;
+                obs_counter = 0;
             }
         } // End obstacle mode
         while (test_mode) {
