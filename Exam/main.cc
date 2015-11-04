@@ -304,11 +304,16 @@ int main()
 
             // Estimate position
             est_pose = estimate_pose (particles);
+            deltax = est_pose.x - target_x;
+            deltay = est_pose.y - target_y;
+
+            // Euclidean distance to box
+            dist = sqrt(pow(deltax, 2.0) + pow(deltay, 2.0));
 
             // Draw particles
             draw_particles(cam, im, world, map, particles, est_pose);
 
-            if(obstacle == -1){
+            if(obstacle == -1 && dist > 80){
                 // Obstacle found. Stay in obstacle mode
                 obstacle_mode = true;
                 driving_mode = false;
