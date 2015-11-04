@@ -130,7 +130,7 @@ int main()
         }
 
         while (search_mode) {
-            robert.pp->SetSpeed(0.0, 0.1);
+            robert.pp->SetSpeed(0.0, 0.2);
             // Get current angle
             robert.read();
             theta_before = robert.pp->GetYaw();
@@ -148,6 +148,9 @@ int main()
             colour_prop cp;
 
             object::type ID = cam.get_object (im, cp, measured_distance, measured_angle);
+
+            // Farve om natten
+            cp.red -= 0.1;
 
             if (ID != object::none) {
                 CvPoint box;
@@ -232,7 +235,7 @@ int main()
                     next++;
                 } else {
                     cout << "Mester, min opgave her er færdig. Jeg må nu forlade dig. Jeg har kone og børn i cyberspace.\n Farvel Mester, jeg vil savne dig. :'(" << endl;
-                    break;
+                    goto theend;
                 }
 
                 cout << "Jeg kører nu efter landmark nr. " << (next+1) << endl;
