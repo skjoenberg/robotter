@@ -54,8 +54,8 @@ void move_particle (particle &p, double delta_x, double delta_y, double delta_th
         p.theta += 2 * M_PI;
     }
     double move_x, move_y;
-    move_x = delta_x * fcos(p.theta);
-    move_y = delta_y * fcos(p.theta);
+    move_x = delta_x * cos(p.theta);
+    move_y = delta_y * sin(p.theta);
     p.x += move_x;
     p.y += move_y;
 }
