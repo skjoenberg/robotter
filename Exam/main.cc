@@ -130,7 +130,7 @@ int main()
         }
 
         while (search_mode) {
-            robert.pp->SetSpeed(0.0, 0.2);
+            robert.pp->SetSpeed(0.0, 0.15);
             // Get current angle
             robert.read();
             theta_before = robert.pp->GetYaw();
