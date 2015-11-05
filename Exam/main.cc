@@ -369,12 +369,13 @@ int main()
 
             // Switch to driving mode
 
-            if (obstacle == 1 ) {
+            if (obstacle == 1 && dist > 80 && drive_dist > 100) {
                 // Obstacle found. Stay in obstacle mode
                 cout << "Driving mode engaged" << endl;
                 obstacle_mode = false;
                 driving_mode = true;
                 search_mode = false;
+                drive_dist -= 20;
             }
         } // End obstacle mode
 
