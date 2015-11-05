@@ -3,6 +3,10 @@
 #include "particles.h"
 #include "random_numbers.h"
 #include <math.h>
+#include <cmath>
+#include "cv.h"
+#include "cxcore.h"
+#include "highgui.h"
 #include <iostream>
 
 

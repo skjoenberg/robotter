@@ -65,19 +65,19 @@ CvPoint get_landmark(colour_prop cp, bool orientation) {
 }
 
 // Landmarks
-// const CvPoint landmarks [NUM_LANDMARKS] = {
-//     cvPoint (0, 300),
-//     cvPoint (0, 0),
-//     cvPoint (400, 300),
-//     cvPoint (400, 0)
-// };
-
 const CvPoint landmarks [NUM_LANDMARKS] = {
-    cvPoint (400, 0),
-    cvPoint (400, 300),
-    cvPoint (0, 0),
     cvPoint (0, 300),
+    cvPoint (0, 0),
+    cvPoint (400, 300),
+    cvPoint (400, 0)
 };
+
+// const CvPoint landmarks [NUM_LANDMARKS] = {
+//     cvPoint (400, 0),
+//     cvPoint (400, 300),
+//     cvPoint (0, 0),
+//     cvPoint (0, 300),
+// };
 
 int seen[NUM_LANDMARKS];
 
@@ -140,7 +140,6 @@ int main()
         while (search_mode) {
             drive_dist = 200;
             robert.pp->SetSpeed(0.0, 0.12);
-            obs_counter = 0;
             // Get current angle
             robert.read();
             theta_before = robert.pp->GetYaw();
