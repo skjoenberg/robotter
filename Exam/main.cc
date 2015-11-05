@@ -353,7 +353,7 @@ int main()
             move_particles(particles, abs(moved_x), abs(moved_y), -turned_theta * THETA_MULTIPLIER);
             add_uncertainty(particles, 10, 0.2);
 
-            double target_x, target_y, deltax, deltay;
+            double target_x, target_y, deltax, deltay, dist;
             target_x = landmarks[next].x;
             target_y = landmarks[next].y;
 
