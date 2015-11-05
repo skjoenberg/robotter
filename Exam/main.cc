@@ -288,7 +288,7 @@ int main()
             cout << "dist: " << dist << endl;
 
             int magic = -100;
-            driving_dist = std::min((dist+magic), 200);
+            driving_dist = std::min((dist+magic), drive_dist);
             cout << "driving_dist: " << driving_dist << endl;
 
             // Turn and drive
@@ -331,7 +331,7 @@ int main()
 
         while(obstacle_mode){
             cout << "Obstacle mode engaged" << endl;
-            cout << "our landmark is next: " << (next+1) << endl;
+            cout << "Our landmark is next: " << (next+1) << endl;
             // Variables
             double x_before, y_before, theta_before, moved_x, moved_y, driving_dist, turned_theta;
             // Get position from odometry
@@ -369,7 +369,7 @@ int main()
 
             // Switch to driving mode
 
-            if (obstacle == 1 && dist > 80 && drive_dist > 100) {
+            if (obstacle == 1 || dist < 80 || drive_dist < 100) {
                 // Obstacle found. Stay in obstacle mode
                 cout << "Driving mode engaged" << endl;
                 obstacle_mode = false;
