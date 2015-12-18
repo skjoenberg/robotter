@@ -25,6 +25,7 @@ using namespace std;
 using namespace PlayerCc;
 
 int drive_dist = 200;
+bool first_landmark = true;
 
 /*
  * Landmarks.
@@ -34,6 +35,8 @@ int drive_dist = 200;
 // Draw particles on map
 void draw_particles(camera &cam, IplImage *im, IplImage *world, const char *map, vector<particle> &particles, particle &est_pose) {
             cam.draw_object (im);
+
+            int j;
 
             // Visualisation
             draw_world (est_pose, particles, world);
@@ -133,9 +136,6 @@ int main()
     // Main loop
     while (true) {
         theta_sum = 0;
-        for (int i = 0; i < NUM_LANDMARKS; i++) {
-            seen[i] = 0;
-        }
 
         while (search_mode) {
             drive_dist = 200;
@@ -175,7 +175,17 @@ int main()
 
                 // Resample particles
                 resample(particles, box.x, box.y, measured_angle, measured_distance);
-                add_uncertainty(particles, 10, 0.2);
+                if (first_landmark)  {
+                    for (int k=0; k < 5; k++) {
+                        add_uncertainty(particles, 10, 0.2);
+                    }
+                    first_landmark = false;
+                } else {
+                    add_uncertainty(particles, 5, 0.1);
+                }
+
+
+
                 for (int i = 0; i < NUM_LANDMARKS; i++) {
                     if (landmarks[i].x == box.x && landmarks[i].y == box.y) {
                         seen[i] = 1;
@@ -245,7 +255,7 @@ int main()
                     next++;
                 } else {
                     cout << "Mester, min opgave her er færdig. Jeg må nu forlade dig. Jeg har kone og børn i cyberspace.\n Farvel Mester, jeg vil savne dig. :'(" << endl;
-                    //                    goto theend;
+                    goto theend;
                 }
 
                 cout << "Jeg kører nu efter landmark nr. " << (next+1) << endl;
@@ -270,7 +280,7 @@ int main()
             deltaangle = est_pose.theta - angletotarget;
 
             // The angles are between (-pi, pi)
-            if (deltaangle > M_PI){
+            if (deltaangle > M_PI) {
                 deltaangle -= 2 * M_PI;
             } else if (deltaangle < -M_PI) {
                 deltaangle += 2 * M_PI;
@@ -301,7 +311,7 @@ int main()
             moved_y = robert.pp->GetYPos() - y_before;
             turned_theta = robert.pp->GetYaw() - theta_before;
             move_particles(particles, abs(moved_x), abs(moved_y), -turned_theta * THETA_MULTIPLIER);
-            add_uncertainty(particles, 10, 0.2);
+            add_uncertainty(particles, 5, 0.1);
 
             // Estimate position
             est_pose = estimate_pose (particles);
@@ -368,14 +378,13 @@ int main()
             draw_particles(cam, im, world, map, particles, est_pose);
 
             // Switch to driving mode
-
+            drive_dist -= 20;
             if (obstacle == 1 || dist < 80 || drive_dist < 100) {
                 // Obstacle found. Stay in obstacle mode
                 cout << "Driving mode engaged" << endl;
                 obstacle_mode = false;
                 driving_mode = true;
                 search_mode = false;
-                drive_dist -= 20;
             }
         } // End obstacle mode
 
